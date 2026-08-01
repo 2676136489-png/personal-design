@@ -1,4 +1,7 @@
 node_modules/
 dist/
 screenshots/
+.vite/
+.vite-out.log
+.vite-error.log
 .DS_Store
