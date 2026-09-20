@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import {
   achievements,
+  asset,
   campus,
   capabilities,
   heroFacts,
@@ -516,7 +517,7 @@ function AboutSection() {
       <div className="about-grid">
         <div className="about-profile" data-reveal>
           <div className="about-avatar">
-            <img src="/media/avatar-lky.webp" alt={profile.name} />
+            <img src={asset('/media/avatar-lky.webp')} alt={profile.name} />
           </div>
           <h3>{profile.name}</h3>
           <p className="about-role">{profile.status}</p>
