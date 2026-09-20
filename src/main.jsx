@@ -2,252 +2,53 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   ArrowDown,
+  ArrowLeft,
   ArrowRight,
   ArrowUpRight,
-  BadgeCheck,
+  Award,
   BookOpen,
-  BrainCircuit,
-  BriefcaseBusiness,
   Check,
+  ChevronDown,
   ChevronRight,
-  Clock3,
-  Code2,
-  Command,
   Copy,
-  Cpu,
   Github,
-  Grid2X2,
-  Layers3,
+  GraduationCap,
   Mail,
   MapPin,
+  Menu,
   Moon,
-  Palette,
   Phone,
   Search,
-  Share2,
-  Sparkles,
   Sun,
-  SwatchBook,
   Trophy,
-  UserRound,
-  WandSparkles,
   X,
-  Zap,
 } from 'lucide-react';
+import {
+  achievements,
+  campus,
+  capabilities,
+  heroFacts,
+  mailServices,
+  navItems,
+  profile,
+  projects,
+  timeline,
+} from './data.js';
+import { goToSection, navigate, useRoute } from './router.js';
 import './styles.css';
 
-const profile = {
-  name: '卢柯宇',
-  initials: 'LKY',
-  roles: ['视觉设计', 'AI 设计', '品牌系统'],
-  phone: '13752881722',
-  email: 'luky2124@mails.jlu.edu.cn',
-  city: '重庆',
-  education: '吉林大学 · 计算机科学与技术',
-};
-
-let bodyOverlayLockCount = 0;
-
-function acquireBodyOverlayLock() {
-  bodyOverlayLockCount += 1;
-  document.body.setAttribute('data-overlay-open', 'true');
-}
-
-function releaseBodyOverlayLock() {
-  bodyOverlayLockCount = Math.max(0, bodyOverlayLockCount - 1);
-  if (bodyOverlayLockCount === 0) {
-    document.body.removeAttribute('data-overlay-open');
-  }
-}
-
-const stats = [
-  { label: '本科阶段', value: '2024-2028' },
-  { label: '专业排名', value: '前 30%' },
-  { label: '核心项目', value: '5 个项目' },
-  { label: '英语能力', value: 'CET-4' },
-];
-
-const projects = [
-  {
-    id: 'station',
-    title: '菜鸟驿站管理系统',
-    shortTitle: '驿站系统',
-    category: '系统设计',
-    filter: 'system',
-    tag: 'C Language / System Design',
-    period: '2024.09 - 2024.12',
-    image: '/media/project-station.png',
-    description:
-      '独立开发校园快递站管理系统，构建管理员与顾客双角色架构，完成数据结构规划、文件 IO 持久化与核心业务流程。',
-    challenge:
-      '快递、用户、费用与库存状态彼此关联，需要在命令行环境中保持清晰的角色边界和可追踪的数据流。',
-    solution:
-      '以管理员与顾客两条任务链拆分功能，通过结构体组织业务数据，并用文件读写保存关键状态，让查询、计费与预警形成完整闭环。',
-    points: ['智能计费模型', '多维度快件查询', '库存预警与通知', '用户权限管理'],
-    color: 'cyan',
-  },
-  {
-    id: 'campus-circle',
-    title: '校园圈子 Campus Circle',
-    shortTitle: '校园圈子',
-    category: '全栈应用',
-    filter: 'web',
-    tag: 'PHP / MySQL / Campus Social',
-    period: '2026.07',
-    image: '/media/project-campus.png',
-    github: 'https://github.com/2676136489-png/campus',
-    description:
-      '面向高校学生的实名社交平台，完整实现学生注册审核、个人资料、动态发布、点赞评论与管理员后台。',
-    challenge:
-      '课程项目需要同时处理实名身份、学生与管理员双角色、社交数据关联和图片上传，并让未审核、已通过与停用状态拥有明确边界。',
-    solution:
-      '以 PHP 与 MySQL 搭建用户、学生、动态、评论和点赞数据模型，通过 Session、CSRF 令牌、密码哈希、输出转义与上传校验串起安全的完整业务流程。',
-    points: ['实名注册与管理员审核', '动态发布 / 点赞 / 评论', '角色与状态权限', 'CSRF 与上传防护'],
-    color: 'blue',
-  },
-  {
-    id: 'wiki-plugin',
-    title: 'iGEM Glass Wiki Plugin',
-    shortTitle: 'Wiki 插件',
-    category: 'Web 组件',
-    filter: 'web',
-    tag: 'HTML / CSS / JavaScript',
-    period: '2026.07',
-    image: '/media/project-wiki.png',
-    github: 'https://github.com/2676136489-png/wiki-plugin',
-    description:
-      '面向 iGEM 团队的多页面 Wiki 模板，以静态优先架构组织竞赛内容，并提供一套可复用的玻璃界面与交互插件。',
-    challenge:
-      '竞赛 Wiki 页面数量多、证据密度高，还要兼顾评审浏览顺序、跨页面一致性、移动端体验与静态仓库部署约束。',
-    solution:
-      '用共享设计系统统一导航、卡片与内容结构，将命令面板、悬浮 Dock、证据筛选、术语提示和滚动叙事等能力拆成可复用模块，并保留可选 PHP partial。',
-    points: ['多页面信息架构', '可复用交互插件', '主题与响应式导航', '静态优先部署'],
-    color: 'mint',
-  },
-  {
-    id: 'dashboard',
-    title: 'Express Flow Interface',
-    shortTitle: '运营界面',
-    category: '界面概念',
-    filter: 'interface',
-    tag: 'UX Concept / Data Panel',
-    period: 'Concept',
-    image: '/media/project-dashboard.png',
-    description:
-      '将快递业务拆解为可视化工作台：单号状态、费用参数、库存风险与用户生命周期在同一界面中被快速扫描。',
-    challenge:
-      '业务信息密度高，若只做数据堆叠，使用者很难快速发现异常并判断下一步操作。',
-    solution:
-      '用任务优先级组织仪表盘，将即时状态、趋势与异常提醒分层呈现，让高频操作靠近信息发生的位置。',
-    points: ['运营看板', '参数化计费', '异常提醒', '低学习成本'],
-    color: 'violet',
-  },
-  {
-    id: 'identity',
-    title: 'Campus Service Identity',
-    shortTitle: '校园品牌',
-    category: '品牌视觉',
-    filter: 'visual',
-    tag: 'Brand Direction / AI Visual',
-    period: 'Exploration',
-    image: '/media/project-identity.png',
-    description:
-      '围绕校园服务场景建立理性、清晰、可信赖的视觉方向，用克制的色彩、网格和信息层级表达科技感。',
-    challenge:
-      '校园服务既要有年轻感，也要保持公共服务所需的清晰、可靠与可扩展性。',
-    solution:
-      '以网格为骨架统一版式，用有限的高识别色连接图形、界面与传播物料，并探索 AI 辅助的视觉延展。',
-    points: ['品牌语气', '信息架构', '视觉系统', 'AI 辅助延展'],
-    color: 'coral',
-  },
-];
-
-const capabilities = [
-  {
-    icon: BrainCircuit,
-    title: 'AI 辅助设计',
-    index: '01',
-    className: 'capability-card--wide',
-    text: '把模糊需求拆成结构化提示词、视觉方向与可执行模块，加快从想法到原型的验证。',
-    tags: ['提示词结构', '概念发散', '快速原型'],
-  },
-  {
-    icon: Layers3,
-    title: '视觉系统',
-    index: '02',
-    className: 'capability-card--standard',
-    text: '关注信息层级、版式秩序与品牌一致性，让视觉不只好看，也能持续扩展。',
-    tags: ['信息架构', '品牌语气'],
-  },
-  {
-    icon: Cpu,
-    title: '技术理解力',
-    index: '03',
-    className: 'capability-card--standard',
-    text: '计算机科学背景让我更理解数据、状态和开发边界，设计方案更接近真实实现。',
-    tags: ['HTML / CSS', 'C / C++'],
-  },
-  {
-    icon: BriefcaseBusiness,
-    title: '组织与推进',
-    index: '04',
-    className: 'capability-card--wide',
-    text: '在班级组织与项目实践中持续训练沟通、任务拆解和协作推进，把共识转化为具体行动。',
-    tags: ['沟通协调', '任务拆解', '团队协作'],
-  },
-];
-
-const timeline = [
-  {
-    time: '现在',
-    title: 'AI × Design 持续探索',
-    text: '将生成式工具、视觉设计与前端实现连接成更完整的创作工作流。',
-  },
-  {
-    time: '2024',
-    title: '菜鸟驿站管理系统',
-    text: '独立完成 C 语言系统项目，从数据结构到核心业务流程完整实践。',
-  },
-  {
-    time: '2024-2028',
-    title: '吉林大学',
-    text: '计算机科学与技术本科在读，建立工程思维与系统化解决问题的基础。',
-  },
-];
-
-const filters = [
-  { id: 'all', label: '全部作品' },
-  { id: 'system', label: '系统设计' },
-  { id: 'web', label: 'Web 开发' },
-  { id: 'interface', label: '界面概念' },
-  { id: 'visual', label: '品牌视觉' },
-];
-
-const palettes = [
-  { id: 'aurora', label: '极光', colors: ['#5b8cff', '#63e6be', '#ff7eb6'] },
-  { id: 'cobalt', label: '深海', colors: ['#3a86ff', '#49dcb1', '#ffd166'] },
-  { id: 'coral', label: '日落', colors: ['#ff6b6b', '#ffb86b', '#7c83ff'] },
-];
-
-const navItems = [
-  { id: 'profile', label: '关于' },
-  { id: 'projects', label: '作品' },
-  { id: 'strengths', label: '能力' },
-  { id: 'lab', label: '实验室' },
-  { id: 'contact', label: '联系' },
-];
+const SECTION_IDS = ['top', 'work', 'skills', 'about', 'contact'];
 
 function copyToClipboard(text) {
   if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
-
-  const textArea = document.createElement('textarea');
-  textArea.value = text;
-  textArea.style.position = 'fixed';
-  textArea.style.opacity = '0';
-  document.body.appendChild(textArea);
-  textArea.select();
+  const el = document.createElement('textarea');
+  el.value = text;
+  el.style.position = 'fixed';
+  el.style.opacity = '0';
+  document.body.appendChild(el);
+  el.select();
   document.execCommand('copy');
-  textArea.remove();
+  el.remove();
   return Promise.resolve();
 }
 
@@ -255,11 +56,10 @@ function trapTabInDialog(event, container) {
   if (event.key !== 'Tab' || !container) return;
   const focusable = Array.from(
     container.querySelectorAll(
-      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
     ),
-  ).filter((element) => element.getClientRects().length > 0);
-  if (focusable.length === 0) return;
-
+  ).filter((el) => el.getClientRects().length > 0);
+  if (!focusable.length) return;
   const first = focusable[0];
   const last = focusable[focusable.length - 1];
   if (event.shiftKey && document.activeElement === first) {
@@ -271,84 +71,14 @@ function trapTabInDialog(event, container) {
   }
 }
 
-function useShanghaiTime() {
-  const [time, setTime] = useState(() => new Date());
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setTime(new Date()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  return new Intl.DateTimeFormat('zh-CN', {
-    timeZone: 'Asia/Shanghai',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).format(time);
-}
-
-function usePagePosition(progressRef) {
-  const [state, setState] = useState({ active: 'top', scrolled: false });
-  const stateRef = useRef(state);
-
-  useEffect(() => {
-    let animationFrame = 0;
-
-    const update = () => {
-      const scrollTop = window.scrollY;
-      const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
-      const ids = ['top', 'profile', 'projects', 'strengths', 'lab', 'contact'];
-      let active = 'top';
-
-      ids.forEach((id) => {
-        const section = document.getElementById(id);
-        if (section && section.getBoundingClientRect().top <= 180) active = id;
-      });
-
-      const progress = Math.min(scrollTop / maxScroll, 1);
-      if (progressRef.current) {
-        progressRef.current.style.transform = `scaleX(${progress})`;
-      }
-
-      const nextState = { active, scrolled: scrollTop > 24 };
-      if (
-        nextState.active !== stateRef.current.active ||
-        nextState.scrolled !== stateRef.current.scrolled
-      ) {
-        stateRef.current = nextState;
-        setState(nextState);
-      }
-    };
-
-    const requestUpdate = () => {
-      window.cancelAnimationFrame(animationFrame);
-      animationFrame = window.requestAnimationFrame(update);
-    };
-
-    update();
-    window.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate);
-
-    return () => {
-      window.cancelAnimationFrame(animationFrame);
-      window.removeEventListener('scroll', requestUpdate);
-      window.removeEventListener('resize', requestUpdate);
-    };
-  }, []);
-
-  return state;
-}
-
-function useReveal(dependency) {
+function useReveal(deps = []) {
   useEffect(() => {
     const targets = Array.from(document.querySelectorAll('[data-reveal]:not([data-visible])'));
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (reduceMotion || !('IntersectionObserver' in window)) {
-      targets.forEach((target) => target.setAttribute('data-visible', 'true'));
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window)) {
+      targets.forEach((t) => t.setAttribute('data-visible', 'true'));
       return undefined;
     }
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -357,740 +87,474 @@ function useReveal(dependency) {
           observer.unobserve(entry.target);
         });
       },
-      { rootMargin: '0px 0px -10% 0px', threshold: 0.1 },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.06 },
     );
-
-    targets.forEach((target) => observer.observe(target));
+    targets.forEach((t) => observer.observe(t));
     return () => observer.disconnect();
-  }, [dependency]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
 }
 
-function AmbientScene() {
-  return (
-    <div className="ambient-scene" aria-hidden="true">
-      <span className="ambient-plane ambient-plane--one" />
-      <span className="ambient-plane ambient-plane--two" />
-      <span className="ambient-plane ambient-plane--three" />
-      <span className="ambient-grid" />
-    </div>
-  );
-}
+/* ============ 顶部导航 ============ */
 
-function SectionLabel({ icon: Icon, children }) {
-  return (
-    <div className="section-label">
-      <Icon size={16} strokeWidth={2.2} />
-      <span>{children}</span>
-    </div>
-  );
-}
+function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-const IconButton = React.forwardRef(function IconButton(
-  { label, children, className = '', ...props },
-  ref,
-) {
-  return (
-    <button
-      ref={ref}
-      className={`icon-button ${className}`}
-      type="button"
-      aria-label={label}
-      title={label}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-});
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-function Navigation({ active, scrolled, theme, progressRef, onThemeChange, onCommandOpen }) {
-  return (
-    <>
-      <div className="scroll-progress" aria-hidden="true">
-        <span ref={progressRef} />
-      </div>
-      <header className="site-header" data-scrolled={scrolled}>
-        <nav className="nav-shell liquid-glass" aria-label="主导航">
-          <a className="brand-mark" href="#top" aria-label="卢柯宇作品集首页">
-            <span>{profile.initials}</span>
-            <small>Portfolio</small>
-          </a>
+  useEffect(() => setMenuOpen(false), [path]);
 
-          <div className="nav-links" aria-label="页面章节">
-            {navItems.map((item) => (
-              <a key={item.id} href={`#${item.id}`} data-active={active === item.id}>
-                {item.label}
-              </a>
-            ))}
-          </div>
-
-          <div className="nav-actions">
-            <button
-              className="command-trigger"
-              type="button"
-              aria-label="打开快速导航"
-              onClick={onCommandOpen}
-            >
-              <Command size={16} />
-              <span>快速导航</span>
-              <kbd>Ctrl K</kbd>
-            </button>
-            <IconButton
-              label={theme === 'light' ? '切换深色模式' : '切换浅色模式'}
-              onClick={onThemeChange}
-            >
-              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-            </IconButton>
-          </div>
-        </nav>
-      </header>
-
-      <nav className="mobile-dock liquid-glass" aria-label="移动端导航">
-        <a href="#top" data-active={active === 'top'} aria-label="首页">
-          <UserRound size={19} />
-          <span>首页</span>
-        </a>
-        <a href="#projects" data-active={active === 'projects'} aria-label="作品">
-          <Grid2X2 size={19} />
-          <span>作品</span>
-        </a>
-        <a href="#strengths" data-active={active === 'strengths'} aria-label="能力">
-          <Sparkles size={19} />
-          <span>能力</span>
-        </a>
-        <a href="#contact" data-active={active === 'contact'} aria-label="联系">
-          <Mail size={19} />
-          <span>联系</span>
-        </a>
-      </nav>
-    </>
-  );
-}
-
-function Hero({ onCopyEmail }) {
-  const time = useShanghaiTime();
-
-  return (
-    <section id="top" className="hero-section">
-      <div className="hero-inner">
-        <div className="hero-copy" data-reveal>
-          <div className="availability-pill liquid-glass">
-            <span className="status-dot" />
-            <span>正在探索 AI × Design</span>
-          </div>
-          <p className="hero-eyebrow">Visual Designer · Creative Technologist</p>
-          <h1>
-            卢柯宇
-            <span>让复杂信息，拥有清晰而鲜活的形状。</span>
-          </h1>
-          <p className="hero-lede">
-            吉林大学计算机科学与技术本科在读。连接视觉设计、品牌系统与技术实现，
-            把想法推进成可理解、可使用、可记住的体验。
-          </p>
-          <div className="hero-actions">
-            <a className="button button--primary" href="#projects">
-              浏览精选作品
-              <ArrowDown size={18} />
-            </a>
-            <button className="button button--glass" type="button" onClick={onCopyEmail}>
-              <Copy size={17} />
-              复制邮箱
-            </button>
-          </div>
-          <div className="hero-facts" aria-label="个人概况">
-            {stats.slice(0, 3).map((item) => (
-              <div key={item.label}>
-                <strong>{item.value}</strong>
-                <span>{item.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="portrait-stage" data-reveal>
-          <div className="portrait-halo" aria-hidden="true" />
-          <div className="portrait-window liquid-glass">
-            <div className="window-chrome">
-              <span />
-              <span />
-              <span />
-              <small>lky.profile</small>
-            </div>
-            <img src="/media/avatar-lky.png" alt="卢柯宇的个人视觉形象" />
-          </div>
-          <div className="floating-chip floating-chip--role liquid-glass">
-            <WandSparkles size={18} />
-            <div>
-              <span>Creative focus</span>
-              <strong>视觉 × AI × 品牌</strong>
-            </div>
-          </div>
-          <div className="floating-chip floating-chip--time liquid-glass">
-            <Clock3 size={18} />
-            <div>
-              <span>中国标准时间</span>
-              <strong>{time}</strong>
-            </div>
-          </div>
-          <div className="floating-chip floating-chip--place liquid-glass">
-            <MapPin size={18} />
-            <div>
-              <span>Base</span>
-              <strong>{profile.city}</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <a className="scroll-cue" href="#profile" aria-label="继续了解">
-        <span>继续探索</span>
-        <ArrowDown size={16} />
-      </a>
-    </section>
-  );
-}
-
-function SignalStrip() {
-  return (
-    <div className="signal-strip" aria-label="设计能力关键词">
-      <div className="signal-track">
-        {['视觉叙事', 'AI 工作流', '品牌系统', '界面设计', '信息架构', '前端实现'].map((item) => (
-          <span key={item}>
-            <Sparkles size={14} />
-            {item}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ProfileSection() {
-  return (
-    <section id="profile" className="section section--profile">
-      <div className="section-heading" data-reveal>
-        <div>
-          <SectionLabel icon={UserRound}>About / 个人档案</SectionLabel>
-          <h2>理性做骨架，感性做表达。</h2>
-        </div>
-        <p>
-          我喜欢把设计当作一种组织方式：先理解问题，再决定什么应该被看见、被感受，以及如何真正落地。
-        </p>
-      </div>
-
-      <div className="profile-grid">
-        <div className="profile-statement liquid-glass" data-reveal>
-          <div className="profile-monogram">LKY</div>
-          <blockquote>
-            “设计不是最后一层装饰，
-            <br />
-            而是让系统变得可理解。”
-          </blockquote>
-          <div className="profile-contact-list">
-            <a href={`mailto:${profile.email}`}>
-              <Mail size={17} />
-              <span>{profile.email}</span>
-              <ArrowUpRight size={15} />
-            </a>
-            <a href={`tel:${profile.phone}`}>
-              <Phone size={17} />
-              <span>{profile.phone}</span>
-              <ArrowUpRight size={15} />
-            </a>
-            <div>
-              <BookOpen size={17} />
-              <span>{profile.education}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="timeline-panel" data-reveal>
-          <div className="timeline-header">
-            <span>Journey</span>
-            <small>从工程基础走向复合创作</small>
-          </div>
-          <div className="timeline-list">
-            {timeline.map((item, index) => (
-              <article className="timeline-item" key={item.time}>
-                <div className="timeline-marker">
-                  <span>{String(index + 1).padStart(2, '0')}</span>
-                </div>
-                <time>{item.time}</time>
-                <div>
-                  <h3>{item.title}</h3>
-                  <p>{item.text}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-const PROJECT_POINTER_RESPONSE = 0.3;
-const PROJECT_POINTER_DAMPING_RATIO = 1;
-const PROJECT_POINTER_OMEGA = (2 * Math.PI) / PROJECT_POINTER_RESPONSE;
-const PROJECT_POINTER_STIFFNESS = PROJECT_POINTER_OMEGA * PROJECT_POINTER_OMEGA;
-const PROJECT_POINTER_DAMPING = 2 * PROJECT_POINTER_DAMPING_RATIO * PROJECT_POINTER_OMEGA;
-const PROJECT_POINTER_EPSILON = 0.0005;
-const PROJECT_POINTER_ROTATION = 2.4;
-
-function ProjectCard({ project, featured, onOpen }) {
-  const surfaceRef = useRef(null);
-  const glintRef = useRef(null);
-  const animationFrameRef = useRef(0);
-  const pointerActiveRef = useRef(false);
-  const reducedMotionQueryRef = useRef(null);
-  const springRef = useRef({
-    currentX: 0.5,
-    currentY: 0.5,
-    targetX: 0.5,
-    targetY: 0.5,
-    velocityX: 0,
-    velocityY: 0,
-    lastTime: 0,
-    rect: null,
-  });
-
-  const isPointerMotionReduced = () => {
-    reducedMotionQueryRef.current ??= window.matchMedia('(prefers-reduced-motion: reduce)');
-    return (
-      reducedMotionQueryRef.current.matches ||
-      document.documentElement.dataset.motion === 'off'
-    );
-  };
-
-  const renderPointerState = () => {
-    const surface = surfaceRef.current;
-    const glint = glintRef.current;
-    const spring = springRef.current;
-    if (!surface || !glint || !spring.rect) return;
-
-    const rotateX = (0.5 - spring.currentY) * PROJECT_POINTER_ROTATION;
-    const rotateY = (spring.currentX - 0.5) * PROJECT_POINTER_ROTATION;
-    const x = spring.currentX * spring.rect.width - 110;
-    const y = spring.currentY * spring.rect.height - 110;
-
-    surface.style.transform = `perspective(1100px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-    glint.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-  };
-
-  const clearPointerWillChange = () => {
-    surfaceRef.current?.style.removeProperty('will-change');
-    glintRef.current?.style.removeProperty('will-change');
-  };
-
-  const animatePointer = (time) => {
-    const spring = springRef.current;
-    const dt = spring.lastTime
-      ? Math.min((time - spring.lastTime) / 1000, 1 / 30)
-      : 1 / 60;
-    spring.lastTime = time;
-
-    spring.velocityX +=
-      (-PROJECT_POINTER_STIFFNESS * (spring.currentX - spring.targetX) -
-        PROJECT_POINTER_DAMPING * spring.velocityX) *
-      dt;
-    spring.currentX += spring.velocityX * dt;
-    spring.velocityY +=
-      (-PROJECT_POINTER_STIFFNESS * (spring.currentY - spring.targetY) -
-        PROJECT_POINTER_DAMPING * spring.velocityY) *
-      dt;
-    spring.currentY += spring.velocityY * dt;
-
-    const settled =
-      Math.abs(spring.currentX - spring.targetX) < PROJECT_POINTER_EPSILON &&
-      Math.abs(spring.currentY - spring.targetY) < PROJECT_POINTER_EPSILON &&
-      Math.abs(spring.velocityX) < PROJECT_POINTER_EPSILON &&
-      Math.abs(spring.velocityY) < PROJECT_POINTER_EPSILON;
-
-    if (settled) {
-      spring.currentX = spring.targetX;
-      spring.currentY = spring.targetY;
-      spring.velocityX = 0;
-      spring.velocityY = 0;
-      spring.lastTime = 0;
-      animationFrameRef.current = 0;
-      renderPointerState();
-      if (!pointerActiveRef.current) clearPointerWillChange();
+  const handleNav = (event, item) => {
+    const isHome = item.href === '#/' || item.href.startsWith('#/#');
+    if (item.href === '#/') {
+      event.preventDefault();
+      navigate('/');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-
-    renderPointerState();
-    animationFrameRef.current = window.requestAnimationFrame(animatePointer);
-  };
-
-  const ensurePointerAnimation = () => {
-    if (animationFrameRef.current) return;
-    springRef.current.lastTime = 0;
-    animationFrameRef.current = window.requestAnimationFrame(animatePointer);
-  };
-
-  const settlePointerImmediately = () => {
-    window.cancelAnimationFrame(animationFrameRef.current);
-    animationFrameRef.current = 0;
-    Object.assign(springRef.current, {
-      currentX: 0.5,
-      currentY: 0.5,
-      targetX: 0.5,
-      targetY: 0.5,
-      velocityX: 0,
-      velocityY: 0,
-      lastTime: 0,
-    });
-    renderPointerState();
-    clearPointerWillChange();
-  };
-
-  const updatePointerTarget = (event) => {
-    const spring = springRef.current;
-    if (!spring.rect) return;
-    spring.targetX = Math.min(Math.max((event.clientX - spring.rect.left) / spring.rect.width, 0), 1);
-    spring.targetY = Math.min(Math.max((event.clientY - spring.rect.top) / spring.rect.height, 0), 1);
-    ensurePointerAnimation();
-  };
-
-  const handlePointerEnter = (event) => {
-    const surface = surfaceRef.current;
-    const glint = glintRef.current;
-    if (event.pointerType === 'touch' || !surface || !glint) return;
-    pointerActiveRef.current = true;
-    springRef.current.rect = surfaceRef.current.getBoundingClientRect();
-    if (isPointerMotionReduced()) {
-      settlePointerImmediately();
+    if (item.href.startsWith('#/#')) {
+      event.preventDefault();
+      goToSection(item.href.replace('#/#', ''));
       return;
     }
-    surface.style.willChange = 'transform';
-    glint.style.willChange = 'transform, opacity';
-    updatePointerTarget(event);
+    if (isHome) return;
   };
-
-  const handlePointerMove = (event) => {
-    if (event.pointerType === 'touch') return;
-    if (isPointerMotionReduced()) {
-      settlePointerImmediately();
-      return;
-    }
-    updatePointerTarget(event);
-  };
-
-  const handlePointerLeave = (event) => {
-    if (event.pointerType === 'touch') return;
-    pointerActiveRef.current = false;
-    if (isPointerMotionReduced()) {
-      settlePointerImmediately();
-      return;
-    }
-    springRef.current.targetX = 0.5;
-    springRef.current.targetY = 0.5;
-    ensurePointerAnimation();
-  };
-
-  useEffect(
-    () => () => {
-      window.cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = 0;
-      pointerActiveRef.current = false;
-      clearPointerWillChange();
-    },
-    [],
-  );
 
   return (
-    <article
-      className={`project-card project-card--${project.color}${featured ? ' project-card--featured' : ''}`}
-      data-reveal
-      onPointerEnter={handlePointerEnter}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-    >
-      <button
-        ref={surfaceRef}
-        type="button"
-        className="project-card-button"
-        onClick={() => onOpen(project)}
-      >
-        <span ref={glintRef} className="project-glint" aria-hidden="true" />
-        <div className="project-media">
-          <img
-            src={project.image}
-            alt={`${project.title}项目封面`}
-            style={project.imagePosition ? { objectPosition: project.imagePosition } : undefined}
-          />
-          <span className="project-category liquid-glass">{project.category}</span>
-          <span className="project-open-icon" aria-hidden="true">
-            <ArrowUpRight size={20} />
-          </span>
-        </div>
-        <div className="project-body">
-          <div className="project-meta">
-            <span>{project.tag}</span>
-            <time>{project.period}</time>
-          </div>
-          <h3>{project.title}</h3>
-          <p>{project.description}</p>
-          <div className="project-footer">
-            <div className="tag-list">
-              {project.points.slice(0, featured ? 4 : 2).map((point) => (
-                <span key={point}>{point}</span>
-              ))}
-            </div>
-            <span className="view-project">
-              查看详情
-              <ChevronRight size={16} />
-            </span>
-          </div>
-        </div>
-      </button>
-    </article>
-  );
-}
+    <header className="global-nav" data-scrolled={scrolled}>
+      <div className="nav-inner">
+        <a
+          className="nav-brand"
+          href="#/"
+          onClick={(e) => handleNav(e, { href: '#/' })}
+          aria-label={`${profile.name}作品集首页`}
+        >
+          {profile.name}
+          <span>作品集</span>
+        </a>
 
-function ProjectsSection({ onProjectOpen, filter, onFilterChange }) {
-  const visibleProjects = useMemo(
-    () => projects.filter((project) => filter === 'all' || project.filter === filter),
-    [filter],
-  );
-
-  return (
-    <section id="projects" className="section section--projects">
-      <div className="section-heading section-heading--projects" data-reveal>
-        <div>
-          <SectionLabel icon={BriefcaseBusiness}>Selected work / 精选作品</SectionLabel>
-          <h2>从系统逻辑，到视觉表达。</h2>
-        </div>
-        <p>五个项目，覆盖系统开发、Web 应用、界面概念与品牌视觉，共用一套从问题到体验的完整方法。</p>
-      </div>
-
-      <div className="filter-bar" data-reveal>
-        <div className="segmented-control" role="group" aria-label="筛选项目类型">
-          {filters.map((item) => (
-            <button
+        <nav className="nav-menu" aria-label="主导航">
+          {navItems.map((item) => (
+            <a
               key={item.id}
-              type="button"
-              aria-pressed={filter === item.id}
-              data-active={filter === item.id}
-              onClick={() => onFilterChange(item.id)}
+              href={item.href}
+              data-active={item.id === path}
+              onClick={(e) => handleNav(e, item)}
             >
               {item.label}
+            </a>
+          ))}
+        </nav>
+
+        <div className="nav-tools">
+          <button className="nav-icon" type="button" aria-label="搜索与快捷操作" onClick={onCommandOpen}>
+            <Search size={16} />
+          </button>
+          <button
+            className="nav-icon"
+            type="button"
+            aria-label={theme === 'light' ? '切换到深色外观' : '切换到浅色外观'}
+            onClick={onThemeChange}
+          >
+            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+          </button>
+          <button
+            className="nav-icon nav-icon--menu"
+            type="button"
+            aria-label="打开导航菜单"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            {menuOpen ? <X size={17} /> : <Menu size={17} />}
+          </button>
+        </div>
+      </div>
+
+      {menuOpen ? (
+        <div className="nav-drawer">
+          {navItems.map((item) => (
+            <a key={item.id} href={item.href} onClick={(e) => handleNav(e, item)}>
+              {item.label}
+              <ChevronRight size={16} />
+            </a>
+          ))}
+        </div>
+      ) : null}
+    </header>
+  );
+}
+
+/* ============ 邮件下拉 ============ */
+
+function MailButton({ className = 'btn btn--solid' }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDocDown = (e) => {
+      if (!wrapRef.current?.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('mousedown', onDocDown);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDocDown);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const pick = (service) => {
+    setOpen(false);
+    const url = service.build(profile.email);
+    if (service.id === 'foxmail') {
+      window.location.href = url;
+      return;
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  return (
+    <div className="mail-picker" ref={wrapRef}>
+      <button
+        className={className}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <Mail size={16} />
+        发送邮件
+        <ChevronDown size={15} className="mail-picker-caret" data-open={open} />
+      </button>
+
+      {open ? (
+        <div className="mail-menu" role="menu">
+          <p className="mail-menu-title">选择你的邮箱</p>
+          {mailServices.map((s) => (
+            <button key={s.id} type="button" role="menuitem" onClick={() => pick(s)}>
+              <span>
+                <strong>{s.name}</strong>
+                <small>{s.hint}</small>
+              </span>
+              <ArrowUpRight size={15} />
             </button>
           ))}
         </div>
-        <span className="project-count">
-          <Grid2X2 size={16} />
-          {visibleProjects.length} 个项目
-        </span>
+      ) : null}
+    </div>
+  );
+}
+
+/* ============ 页脚 ============ */
+
+function SiteFooter({ onCopyEmail }) {
+  return (
+    <footer className="site-footer">
+      <div className="footer-grid">
+        <div>
+          <h4>联系方式</h4>
+          <a href={`mailto:${profile.email}`}>{profile.email}</a>
+          <a href={`tel:${profile.phone}`}>
+            <Phone size={13} />
+            {profile.phone}
+          </a>
+          <button className="footer-mail" type="button" onClick={onCopyEmail}>
+            复制邮箱地址
+          </button>
+        </div>
+        <div>
+          <h4>站点导航</h4>
+          {navItems.map((item) => (
+            <a key={item.id} href={item.href}>
+              {item.label}
+            </a>
+          ))}
+        </div>
+        <div>
+          <h4>其他</h4>
+          <a href={profile.github} target="_blank" rel="noreferrer noopener">
+            <Github size={13} />
+            GitHub
+          </a>
+          <a
+            href="#/"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          >
+            返回顶部
+          </a>
+        </div>
+      </div>
+      <div className="footer-bottom">
+        <span>© 2026 {profile.name}</span>
+        <span>{profile.school} · 计算机科学与技术</span>
+      </div>
+    </footer>
+  );
+}
+
+/* ============ 首页 ============ */
+
+function Hero() {
+  return (
+    <section id="top" className="hero">
+      <div className="hero-copy">
+        <h1>
+          {profile.name}
+          <span>{profile.tagline}</span>
+        </h1>
+        <p className="hero-lede">
+          {profile.education}。用工程能力承载想法，用设计判断组织信息，
+          把课堂里的题目做成别人真的会打开来用的东西。
+        </p>
+        <div className="hero-actions">
+          <a className="btn btn--solid" href="#/campus" onClick={(e) => { e.preventDefault(); navigate('/campus'); }}>
+            查看校园圈子
+            <ArrowRight size={16} />
+          </a>
+          <a className="btn btn--plain" href="#/#work" onClick={(e) => { e.preventDefault(); goToSection('work'); }}>
+            浏览全部作品
+            <ArrowDown size={16} />
+          </a>
+        </div>
       </div>
 
-      <div className="project-grid" data-count={visibleProjects.length}>
-        {visibleProjects.map((project, index) => (
-          <ProjectCard
-            key={`${filter}-${project.id}`}
-            project={project}
-            featured={filter === 'all' && index === 0}
-            onOpen={onProjectOpen}
-          />
+      <div className="hero-visual" data-reveal>
+        <img src={campus.cover} alt="校园圈子学生中心界面" />
+      </div>
+
+      <div className="hero-facts">
+        {heroFacts.map((item) => (
+          <div key={item.label}>
+            <strong>{item.value}</strong>
+            <span>{item.label}</span>
+          </div>
         ))}
       </div>
     </section>
   );
 }
 
-function StrengthsSection() {
+function FeaturedSection() {
+  const preview = campus.chapters[1].blocks.filter((b) => b.type === 'shot').slice(0, 3);
+  const otherShots = campus.chapters[3].blocks.filter((b) => b.type === 'shot').slice(0, 1);
+
   return (
-    <section id="strengths" className="section section--strengths">
-      <div className="section-heading" data-reveal>
-        <div>
-          <SectionLabel icon={Trophy}>Capabilities / 能力组合</SectionLabel>
-          <h2>不止一种身份，也不止一种解法。</h2>
+    <section id="featured" className="featured">
+      <div className="section-head" data-reveal>
+        <h2>{campus.headline}</h2>
+        <p className="section-lede">{campus.lede}</p>
+        <div className="featured-meta">
+          <span>{campus.en}</span>
+          <span>{campus.period}</span>
+          <span>{campus.role}</span>
         </div>
-        <p>设计判断、技术理解与协作能力彼此连接，形成一套更完整、更靠近落地的创作方式。</p>
+        <div className="hero-actions">
+          <a
+            className="btn btn--solid"
+            href="#/campus"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/campus');
+            }}
+          >
+            查看完整项目详解
+            <ArrowRight size={16} />
+          </a>
+          <a className="btn btn--plain" href={campus.site} target="_blank" rel="noreferrer noopener">
+            访问线上站点
+            <ArrowUpRight size={16} />
+          </a>
+        </div>
       </div>
 
-      <div className="capability-grid">
-        {capabilities.map((item) => {
-          const Icon = item.icon;
-          return (
-            <article className={`capability-card liquid-glass ${item.className}`} key={item.title} data-reveal>
-              <div className="capability-topline">
-                <span className="capability-icon">
-                  <Icon size={22} />
-                </span>
-                <small>{item.index}</small>
+      <div className="campus-metrics" data-reveal>
+        {campus.metrics.map((m) => (
+          <div key={m.label}>
+            <strong>{m.value}</strong>
+            <span>{m.label}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="stage-grid">
+        {[...preview, ...otherShots].map((shot, i) => (
+          <figure
+            className={`stage-item stage-item--${i === 0 ? 'wide' : 'normal'}`}
+            key={shot.src}
+            data-reveal
+          >
+            <img src={shot.src} alt={shot.alt} />
+            <figcaption>{shot.caption}</figcaption>
+          </figure>
+        ))}
+      </div>
+
+      <div className="section-head section-head--center more-head" data-reveal>
+        <p className="eyebrow">完整项目详解</p>
+        <h2>六个章节，讲清这个产品。</h2>
+      </div>
+
+      <div className="chapter-cards">
+        {campus.chapters.map((c) => (
+          <a
+            className="chapter-card"
+            key={c.id}
+            href={`#/campus#${c.id}`}
+            data-reveal
+          >
+            <span className="chapter-index">{c.kicker}</span>
+            <h3>{c.nav}</h3>
+            <p>{c.title}</p>
+            <span className="chapter-more">
+              阅读
+              <ChevronRight size={15} />
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function WorkSection() {
+  return (
+    <section id="work" className="work">
+      <div className="section-head section-head--center" data-reveal>
+        <p className="eyebrow">全部作品</p>
+        <h2>每一个，都是完整做完的。</h2>
+        <p className="section-lede">
+          算法、系统、Web 与视觉，覆盖从底层逻辑到最终呈现的完整链路。
+        </p>
+      </div>
+
+      <div className="work-grid">
+        {projects.map((project) => (
+          <article className="work-card" key={project.id} data-reveal>
+            <a href={`#/${project.slug}`} onClick={(e) => { e.preventDefault(); navigate(`/${project.slug}`); }}>
+              <div className="work-media">
+                <img src={project.image} alt={`${project.title} 项目视觉`} />
               </div>
+              <div className="work-body">
+                <p className="work-meta">
+                  <span>{project.category}</span>
+                  <time>{project.year}</time>
+                </p>
+                <h3>{project.title}</h3>
+                <p className="work-desc">{project.description}</p>
+                <span className="work-more">
+                  查看详情
+                  <ChevronRight size={15} />
+                </span>
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function SkillsSection() {
+  return (
+    <section id="skills" className="skills">
+      <div className="section-head" data-reveal>
+        <p className="eyebrow">能力</p>
+        <h2>不止一种身份，也不止一种解法。</h2>
+        <p className="section-lede">
+          工程、算法、界面与协作彼此连接，形成一套更靠近真实落地的做事方式。
+        </p>
+      </div>
+
+      <div className="skills-grid">
+        {capabilities.map((item, index) => (
+          <article className="skill" key={item.title} data-reveal>
+            <span className="skill-index">{String(index + 1).padStart(2, '0')}</span>
+            <h3>{item.title}</h3>
+            <p>{item.text}</p>
+            <ul>
+              {item.tags.map((tag) => (
+                <li key={tag}>{tag}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+
+      <div className="achievement-panel" data-reveal>
+        <div className="achievement-head">
+          <Trophy size={18} />
+          <h3>成绩与荣誉</h3>
+        </div>
+        <ul className="achievement-list">
+          {achievements.map((item) => (
+            <li key={item.title}>
+              <Award size={15} />
+              <span className="achievement-title">{item.title}</span>
+              <span className="achievement-meta">{item.meta}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function AboutSection() {
+  return (
+    <section id="about" className="about">
+      <div className="section-head" data-reveal>
+        <p className="eyebrow">关于</p>
+        <h2>从工程基础，走向完整交付。</h2>
+      </div>
+
+      <div className="about-grid">
+        <div className="about-profile" data-reveal>
+          <div className="about-avatar">
+            <img src="/media/avatar-lky.png" alt={profile.name} />
+          </div>
+          <h3>{profile.name}</h3>
+          <p className="about-role">{profile.status}</p>
+          <ul className="about-facts">
+            <li>
+              <GraduationCap size={16} />
+              <span>{profile.education}</span>
+            </li>
+            <li>
+              <MapPin size={16} />
+              <span>{profile.city}</span>
+            </li>
+            <li>
+              <BookOpen size={16} />
+              <span>数据结构 · 算法 · 操作系统 · 计算机组成原理</span>
+            </li>
+          </ul>
+          <a className="btn btn--plain about-github" href={profile.github} target="_blank" rel="noreferrer noopener">
+            <Github size={16} />
+            github.com/2676136489-png
+          </a>
+        </div>
+
+        <ol className="about-timeline" data-reveal>
+          {timeline.map((item) => (
+            <li key={`${item.year}-${item.title}`}>
+              <time>{item.year}</time>
               <div>
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
               </div>
-              <div className="capability-tags">
-                {item.tags.map((tag) => (
-                  <span key={tag}>{tag}</span>
-                ))}
-              </div>
-            </article>
-          );
-        })}
-      </div>
-
-      <div className="workflow-rail" data-reveal>
-        <span className="workflow-title">MY PROCESS</span>
-        {['理解问题', '建立结构', '视觉探索', '原型验证', '持续迭代'].map((step, index) => (
-          <React.Fragment key={step}>
-            <div className="workflow-step">
-              <small>{String(index + 1).padStart(2, '0')}</small>
-              <strong>{step}</strong>
-            </div>
-            {index < 4 && <ArrowRight size={18} aria-hidden="true" />}
-          </React.Fragment>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function LabSection({ palette, onPaletteChange, theme, onThemeChange, motion, onMotionChange, blur, onBlurChange, onCommandOpen, onShare }) {
-  const time = useShanghaiTime();
-
-  return (
-    <section id="lab" className="section section--lab">
-      <div className="section-heading" data-reveal>
-        <div>
-          <SectionLabel icon={SwatchBook}>Interface lab / 交互实验室</SectionLabel>
-          <h2>这套界面，也可以由你来调。</h2>
-        </div>
-        <p>改变色彩、材质与动态偏好，看看同一套内容如何拥有不同性格。设置会保存在当前浏览器。</p>
-      </div>
-
-      <div className="lab-console liquid-glass" data-reveal>
-        <div className="lab-preview">
-          <div className="lab-preview-topline">
-            <span>
-              <span className="status-dot" />
-              LIVE SYSTEM
-            </span>
-            <strong>{time}</strong>
-          </div>
-          <div className="lab-symbol" aria-hidden="true">
-            <span>LKY</span>
-            <div className="lab-rings">
-              <i />
-              <i />
-              <i />
-            </div>
-          </div>
-          <div className="lab-preview-copy">
-            <small>Personal interface</small>
-            <strong>有秩序，也有一点意外。</strong>
-          </div>
-        </div>
-
-        <div className="lab-controls">
-          <div className="control-row">
-            <div className="control-label">
-              <Palette size={19} />
-              <div>
-                <strong>强调色</strong>
-                <span>切换全站色彩气质</span>
-              </div>
-            </div>
-            <div className="palette-options" role="group" aria-label="选择强调色">
-              {palettes.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  data-active={palette === item.id}
-                  aria-pressed={palette === item.id}
-                  onClick={() => onPaletteChange(item.id)}
-                  title={`${item.label}配色`}
-                >
-                  <span className="palette-swatch">
-                    {item.colors.map((color) => (
-                      <i key={color} style={{ backgroundColor: color }} />
-                    ))}
-                  </span>
-                  <span>{item.label}</span>
-                  {palette === item.id && <Check size={14} />}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="control-row">
-            <div className="control-label">
-              <Layers3 size={19} />
-              <div>
-                <strong>玻璃厚度</strong>
-                <span>调整背景模糊强度</span>
-              </div>
-            </div>
-            <div className="range-control">
-              <input
-                type="range"
-                min="16"
-                max="42"
-                value={blur}
-                aria-label="玻璃模糊强度"
-                onChange={(event) => onBlurChange(Number(event.target.value))}
-              />
-              <output>{blur}px</output>
-            </div>
-          </div>
-
-          <div className="control-row">
-            <div className="control-label">
-              {theme === 'light' ? <Sun size={19} /> : <Moon size={19} />}
-              <div>
-                <strong>外观模式</strong>
-                <span>明亮或深色材质</span>
-              </div>
-            </div>
-            <div className="mode-segment" role="group" aria-label="选择外观模式">
-              <button type="button" data-active={theme === 'light'} onClick={() => onThemeChange('light')}>
-                <Sun size={15} />
-                明亮
-              </button>
-              <button type="button" data-active={theme === 'dark'} onClick={() => onThemeChange('dark')}>
-                <Moon size={15} />
-                深色
-              </button>
-            </div>
-          </div>
-
-          <div className="control-row">
-            <div className="control-label">
-              <Zap size={19} />
-              <div>
-                <strong>界面动态</strong>
-                <span>控制装饰性运动反馈</span>
-              </div>
-            </div>
-            <button
-              className="switch-control"
-              type="button"
-              role="switch"
-              aria-checked={motion}
-              data-active={motion}
-              onClick={() => onMotionChange(!motion)}
-            >
-              <span />
-            </button>
-          </div>
-
-          <div className="lab-quick-actions">
-            <button type="button" onClick={onCommandOpen}>
-              <Command size={17} />
-              打开命令面板
-              <kbd>Ctrl K</kbd>
-            </button>
-            <button type="button" onClick={onShare}>
-              <Share2 size={17} />
-              分享作品集
-              <ArrowUpRight size={15} />
-            </button>
-          </div>
-        </div>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );
@@ -1098,285 +562,428 @@ function LabSection({ palette, onPaletteChange, theme, onThemeChange, motion, on
 
 function ContactSection({ onCopyEmail }) {
   return (
-    <section id="contact" className="contact-section">
+    <section id="contact" className="contact">
       <div className="contact-inner" data-reveal>
-        <SectionLabel icon={BadgeCheck}>Contact / 开始连接</SectionLabel>
         <h2>
-          有一个值得被认真设计的想法？
-          <span>我们聊聊。</span>
+          有合适的机会，
+          <span>或者只是想聊聊？</span>
         </h2>
-        <p>欢迎交流视觉设计、AI 创作、校园项目与前端体验。</p>
-        <div className="contact-actions">
-          <a className="button button--primary" href={`mailto:${profile.email}`}>
-            <Mail size={18} />
-            发送邮件
-          </a>
-          <button className="button button--glass" type="button" onClick={onCopyEmail}>
-            <Copy size={17} />
+        <p>欢迎交流实习机会、项目合作与技术问题，我会尽快回复。</p>
+        <div className="hero-actions">
+          <MailButton />
+          <button className="btn btn--plain" type="button" onClick={onCopyEmail}>
+            <Copy size={15} />
             {profile.email}
           </button>
         </div>
       </div>
-      <footer className="site-footer">
-        <div>
-          <strong>{profile.initials}</strong>
-          <span>Visual · AI · Brand</span>
-        </div>
-        <span>© 2026 卢柯宇 · Designed with clarity</span>
-        <a href="#top">
-          返回顶部
-          <ArrowUpRight size={15} />
-        </a>
-      </footer>
+      <SiteFooter onCopyEmail={onCopyEmail} />
     </section>
   );
 }
 
-const PROJECT_SHEET_DURATION = 240;
-
-function ProjectSheet({ project, onClose }) {
-  const [closing, setClosing] = useState(false);
-  const closeButtonRef = useRef(null);
-  const closeTimerRef = useRef(0);
-  const closingRef = useRef(false);
-  const sheetRef = useRef(null);
-
-  const requestClose = () => {
-    if (closingRef.current) return;
-    closingRef.current = true;
-    setClosing(true);
-    const reduceMotion =
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-      document.documentElement.dataset.motion === 'off';
-    closeTimerRef.current = window.setTimeout(
-      onClose,
-      reduceMotion ? 160 : PROJECT_SHEET_DURATION,
-    );
-  };
+function HomePage({ onCopyEmail }) {
+  useReveal([]);
 
   useEffect(() => {
-    if (!project) return undefined;
-
-    setClosing(false);
-    closingRef.current = false;
-    const previousFocus = document.activeElement;
-    acquireBodyOverlayLock();
-    window.requestAnimationFrame(() => closeButtonRef.current?.focus());
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        if (document.querySelector('.command-backdrop')) return;
-        event.preventDefault();
-        requestClose();
-        return;
-      }
-      trapTabInDialog(event, sheetRef.current);
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.clearTimeout(closeTimerRef.current);
-      window.removeEventListener('keydown', handleKeyDown);
-      releaseBodyOverlayLock();
-      previousFocus?.focus?.();
-    };
-  }, [project]);
-
-  if (!project) return null;
+    const anchor = window.location.hash.split('#')[2];
+    if (!anchor) return undefined;
+    const timer = window.setTimeout(() => {
+      const el = document.getElementById(anchor);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 160);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   return (
-    <div
-      className="sheet-backdrop"
-      data-closing={closing}
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) requestClose();
-      }}
-      role="presentation"
-    >
-      <section
-        ref={sheetRef}
-        className="project-sheet liquid-glass"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="project-sheet-title"
-      >
-        <div className="sheet-toolbar">
-          <div>
-            <span>{project.category}</span>
-            <small>{project.period}</small>
-          </div>
-          <IconButton ref={closeButtonRef} label="关闭项目详情" onClick={requestClose}>
-            <X size={20} />
-          </IconButton>
-        </div>
-
-        <div className="sheet-scroll">
-          <div className={`sheet-hero sheet-hero--${project.color}`}>
-            <img
-              src={project.image}
-              alt={`${project.title}项目视觉`}
-              style={project.imagePosition ? { objectPosition: project.imagePosition } : undefined}
-            />
-          </div>
-          <div className="sheet-content">
-            <p className="sheet-kicker">{project.tag}</p>
-            <h2 id="project-sheet-title">{project.title}</h2>
-            <p className="sheet-intro">{project.description}</p>
-
-            <div className="sheet-detail-grid">
-              <div>
-                <span>01 / 挑战</span>
-                <p>{project.challenge}</p>
-              </div>
-              <div>
-                <span>02 / 方法</span>
-                <p>{project.solution}</p>
-              </div>
-            </div>
-
-            <div className="sheet-features">
-              <span>核心模块</span>
-              <div>
-                {project.points.map((point) => (
-                  <strong key={point}>
-                    <Check size={15} />
-                    {point}
-                  </strong>
-                ))}
-              </div>
-            </div>
-
-            <div className="sheet-actions">
-              {project.github ? (
-                <a
-                  className="button button--primary"
-                  href={project.github}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  <Github size={17} />
-                  GitHub 源码
-                  <ArrowUpRight size={16} />
-                </a>
-              ) : null}
-              <a
-                className={`button ${project.github ? 'button--glass' : 'button--primary'}`}
-                href={`mailto:${profile.email}?subject=关于 ${project.title}`}
-              >
-                讨论这个项目
-                <ArrowUpRight size={17} />
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+    <>
+      <Hero />
+      <FeaturedSection />
+      <WorkSection />
+      <SkillsSection />
+      <AboutSection />
+      <ContactSection onCopyEmail={onCopyEmail} />
+    </>
   );
 }
 
-function CommandMenu({ open, onClose, onNavigate, onCopyEmail, onThemeChange, theme }) {
+/* ============ 校园圈子详情页 ============ */
+
+function ChapterBlocks({ blocks }) {
+  return blocks.map((block, i) => {
+    if (block.type === 'text') {
+      return (
+        <p className="prose" key={i} data-reveal>
+          {block.body}
+        </p>
+      );
+    }
+    if (block.type === 'shot') {
+      return (
+        <figure className="detail-shot" key={i} data-reveal>
+          <div className="shot-frame">
+            <img src={block.src} alt={block.alt} loading="lazy" />
+          </div>
+          <figcaption>{block.caption}</figcaption>
+        </figure>
+      );
+    }
+    if (block.type === 'points') {
+      return (
+        <ul className="point-list" key={i} data-reveal>
+          {block.items.map((item) => (
+            <li key={item.k}>
+              <strong>{item.k}</strong>
+              <span>{item.v}</span>
+            </li>
+          ))}
+        </ul>
+      );
+    }
+    if (block.type === 'arch') {
+      return (
+        <div className="arch-grid" key={i} data-reveal>
+          {block.groups.map((group) => (
+            <div className="arch-card" key={group.title}>
+              <h4>{group.title}</h4>
+              <ul>
+                {group.items.map((it) => (
+                  <li key={it}>{it}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  });
+}
+
+function CampusPage({ onCopyEmail }) {
+  const [activeChapter, setActiveChapter] = useState(campus.chapters[0].id);
+
+  useReveal([]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      let current = campus.chapters[0].id;
+      campus.chapters.forEach((c) => {
+        const el = document.getElementById(c.id);
+        if (el && el.getBoundingClientRect().top <= 180) current = c.id;
+      });
+      setActiveChapter(current);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return (
+    <>
+      <header className="page-hero">
+        <div className="page-hero-inner">
+          <a className="back-link" href="#/" onClick={(e) => { e.preventDefault(); navigate('/'); }}>
+            <ArrowLeft size={15} />
+            返回首页
+          </a>
+          <p className="eyebrow">{campus.en} · {campus.period}</p>
+          <h1>{campus.name}</h1>
+          <p className="page-hero-lede">{campus.lede}</p>
+          <div className="page-hero-meta">
+            <span>{campus.role}</span>
+            <span>{campus.stack}</span>
+          </div>
+          <div className="hero-actions hero-actions--left">
+            <a className="btn btn--solid" href={campus.site} target="_blank" rel="noreferrer noopener">
+              访问线上站点
+              <ArrowUpRight size={16} />
+            </a>
+          </div>
+        </div>
+        <div className="page-hero-shot">
+          <img src={campus.cover} alt="校园圈子学生中心界面" />
+        </div>
+      </header>
+
+      <section className="metrics-strip" data-reveal>
+        {campus.metrics.map((m) => (
+          <div key={m.label}>
+            <strong>{m.value}</strong>
+            <span>{m.label}</span>
+          </div>
+        ))}
+      </section>
+
+      <div className="doc-layout">
+        <aside className="doc-toc" aria-label="章节目录">
+          <p className="toc-title">目录</p>
+          {campus.chapters.map((c) => (
+            <a key={c.id} href={`#/campus#${c.id}`} data-active={activeChapter === c.id}>
+              <span>{c.kicker}</span>
+              {c.nav}
+            </a>
+          ))}
+        </aside>
+
+        <article className="doc-body">
+          {campus.chapters.map((c) => (
+            <section className="doc-chapter" id={c.id} key={c.id}>
+              <p className="chapter-kicker">{c.kicker}</p>
+              <h2>{c.title}</h2>
+              <ChapterBlocks blocks={c.blocks} />
+            </section>
+          ))}
+
+          <div className="doc-end" data-reveal>
+            <h3>想进一步了解？</h3>
+            <p>源码、数据库设计与测试用例都可以在仓库里查看，也欢迎直接聊。</p>
+            <div className="hero-actions hero-actions--left">
+              <a className="btn btn--solid" href={campus.site} target="_blank" rel="noreferrer noopener">
+                打开线上站点
+                <ArrowUpRight size={16} />
+              </a>
+              <MailButton className="btn btn--plain" />
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div className="other-projects">
+        <div className="section-head section-head--center" data-reveal>
+          <p className="eyebrow">继续浏览</p>
+          <h2>其他作品</h2>
+        </div>
+        <div className="work-grid">
+          {projects.slice(0, 4).map((p) => (
+            <article className="work-card" key={p.id} data-reveal>
+              <a href={`#/${p.slug}`} onClick={(e) => { e.preventDefault(); navigate(`/${p.slug}`); }}>
+                <div className="work-media">
+                  <img src={p.image} alt={`${p.title} 项目视觉`} />
+                </div>
+                <div className="work-body">
+                  <p className="work-meta">
+                    <span>{p.category}</span>
+                    <time>{p.year}</time>
+                  </p>
+                  <h3>{p.title}</h3>
+                  <p className="work-desc">{p.description}</p>
+                  <span className="work-more">
+                    查看详情
+                    <ChevronRight size={15} />
+                  </span>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <SiteFooter onCopyEmail={onCopyEmail} />
+    </>
+  );
+}
+
+/* ============ 其他项目详情页 ============ */
+
+function ProjectPage({ project, onCopyEmail }) {
+  useReveal([project?.id]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [project?.id]);
+
+  if (!project) {
+    return (
+      <div className="not-found">
+        <h1>没有找到这个页面</h1>
+        <a className="btn btn--solid" href="#/" onClick={(e) => { e.preventDefault(); navigate('/'); }}>
+          返回首页
+        </a>
+      </div>
+    );
+  }
+
+  const others = projects.filter((p) => p.id !== project.id).slice(0, 3);
+
+  return (
+    <>
+      <header className="page-hero page-hero--compact">
+        <div className="page-hero-inner">
+          <a className="back-link" href="#/" onClick={(e) => { e.preventDefault(); navigate('/'); }}>
+            <ArrowLeft size={15} />
+            返回首页
+          </a>
+          <p className="eyebrow">{project.tag} · {project.period}</p>
+          <h1>{project.title}</h1>
+          <p className="page-hero-lede">{project.description}</p>
+          <div className="hero-actions hero-actions--left">
+            {project.github ? (
+              <a className="btn btn--solid" href={project.github} target="_blank" rel="noreferrer noopener">
+                <Github size={16} />
+                GitHub 源码
+              </a>
+            ) : null}
+            <MailButton className="btn btn--plain" />
+          </div>
+        </div>
+        <div className="page-hero-shot">
+          <img src={project.image} alt={`${project.title} 项目视觉`} />
+        </div>
+      </header>
+
+      <div className="doc-layout doc-layout--single">
+        <article className="doc-body">
+          <section className="doc-chapter">
+            <p className="chapter-kicker">01</p>
+            <h2>挑战</h2>
+            <p className="prose">{project.detail.challenge}</p>
+          </section>
+
+          <section className="doc-chapter">
+            <p className="chapter-kicker">02</p>
+            <h2>做法</h2>
+            <p className="prose">{project.detail.solution}</p>
+          </section>
+
+          <section className="doc-chapter">
+            <p className="chapter-kicker">03</p>
+            <h2>核心模块</h2>
+            <ul className="point-list">
+              {project.detail.modules.map((m) => (
+                <li key={m}>
+                  <Check size={15} />
+                  <span>{m}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </article>
+      </div>
+
+      <div className="other-projects">
+        <div className="section-head section-head--center" data-reveal>
+          <p className="eyebrow">继续浏览</p>
+          <h2>其他作品</h2>
+        </div>
+        <div className="work-grid">
+          {others.map((p) => (
+            <article className="work-card" key={p.id} data-reveal>
+              <a href={`#/${p.slug}`} onClick={(e) => { e.preventDefault(); navigate(`/${p.slug}`); }}>
+                <div className="work-media">
+                  <img src={p.image} alt={`${p.title} 项目视觉`} />
+                </div>
+                <div className="work-body">
+                  <p className="work-meta">
+                    <span>{p.category}</span>
+                    <time>{p.year}</time>
+                  </p>
+                  <h3>{p.title}</h3>
+                  <p className="work-desc">{p.description}</p>
+                  <span className="work-more">
+                    查看详情
+                    <ChevronRight size={15} />
+                  </span>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <SiteFooter onCopyEmail={onCopyEmail} />
+    </>
+  );
+}
+
+/* ============ 命令面板 ============ */
+
+function CommandMenu({ open, onClose, onCopyEmail, onThemeChange, theme }) {
   const [query, setQuery] = useState('');
   const inputRef = useRef(null);
-  const menuRef = useRef(null);
 
   const actions = useMemo(
     () => [
-      { id: 'projects', label: '查看精选作品', hint: '跳转', icon: Grid2X2, run: () => onNavigate('projects') },
-      { id: 'profile', label: '了解个人经历', hint: '跳转', icon: UserRound, run: () => onNavigate('profile') },
-      { id: 'strengths', label: '浏览能力组合', hint: '跳转', icon: Sparkles, run: () => onNavigate('strengths') },
-      { id: 'lab', label: '打开交互实验室', hint: '跳转', icon: SwatchBook, run: () => onNavigate('lab') },
-      { id: 'email', label: '复制联系邮箱', hint: '复制', icon: Copy, run: onCopyEmail },
+      { id: 'home', label: '回到首页', run: () => navigate('/') },
+      { id: 'campus', label: '校园圈子 · 完整项目详解', run: () => navigate('/campus') },
+      { id: 'work', label: '首页 · 全部作品', run: () => goToSection('work') },
+      { id: 'skills', label: '首页 · 能力与成绩', run: () => goToSection('skills') },
+      { id: 'about', label: '首页 · 关于与时间线', run: () => goToSection('about') },
+      { id: 'contact', label: '首页 · 联系方式', run: () => goToSection('contact') },
+      ...projects.map((p) => ({
+        id: p.slug,
+        label: `${p.title} · 项目详情`,
+        run: () => navigate(`/${p.slug}`),
+      })),
+      { id: 'email', label: '复制邮箱地址', run: onCopyEmail },
       {
         id: 'theme',
-        label: theme === 'light' ? '切换到深色模式' : '切换到明亮模式',
-        hint: '外观',
-        icon: theme === 'light' ? Moon : Sun,
+        label: theme === 'light' ? '切换到深色外观' : '切换到浅色外观',
         run: () => onThemeChange(theme === 'light' ? 'dark' : 'light'),
       },
     ],
-    [onCopyEmail, onNavigate, onThemeChange, theme],
+    [onCopyEmail, onThemeChange, theme],
   );
 
-  const filteredActions = actions.filter((action) => action.label.toLowerCase().includes(query.toLowerCase()));
+  const visible = actions.filter((a) =>
+    a.label.toLowerCase().includes(query.trim().toLowerCase()),
+  );
 
   useEffect(() => {
     if (!open) return undefined;
     setQuery('');
-    acquireBodyOverlayLock();
+    document.body.setAttribute('data-overlay-open', 'true');
     window.requestAnimationFrame(() => inputRef.current?.focus());
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        onClose();
-        return;
-      }
-      trapTabInDialog(event, menuRef.current);
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
+    const onKey = (e) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
     return () => {
-      releaseBodyOverlayLock();
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keydown', onKey);
+      document.body.removeAttribute('data-overlay-open');
     };
   }, [open, onClose]);
 
   if (!open) return null;
 
   return (
-    <div className="command-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section
-        ref={menuRef}
-        className="command-menu liquid-glass"
-        role="dialog"
-        aria-modal="true"
-        aria-label="快速导航"
-        onKeyDown={(event) => {
-          if (event.key !== 'Enter' || !filteredActions[0]) return;
-          event.preventDefault();
-          filteredActions[0].run();
-          onClose();
-        }}
-      >
+    <div
+      className="command-backdrop"
+      role="presentation"
+      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <section className="command-menu" role="dialog" aria-modal="true" aria-label="快捷搜索">
         <div className="command-search">
-          <Search size={19} />
+          <Search size={17} />
           <input
             ref={inputRef}
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="搜索页面或操作…"
-            aria-label="搜索命令"
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="搜索页面或操作"
+            aria-label="搜索"
           />
           <kbd>ESC</kbd>
         </div>
         <div className="command-list">
-          {filteredActions.length > 0 ? (
-            filteredActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <button
-                  key={action.id}
-                  type="button"
-                  onClick={() => {
-                    action.run();
-                    onClose();
-                  }}
-                >
-                  <span className="command-icon">
-                    <Icon size={18} />
-                  </span>
-                  <strong>{action.label}</strong>
-                  <small>{action.hint}</small>
-                </button>
-              );
-            })
+          {visible.length ? (
+            visible.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                onClick={() => {
+                  a.run();
+                  onClose();
+                }}
+              >
+                {a.label}
+                <ChevronRight size={15} />
+              </button>
+            ))
           ) : (
-            <div className="command-empty">没有找到相关操作</div>
+            <p className="command-empty">没有找到相关操作</p>
           )}
-        </div>
-        <div className="command-footer">
-          <span>Enter 执行首项</span>
-          <span>Esc 关闭</span>
         </div>
       </section>
     </div>
@@ -1384,53 +991,28 @@ function CommandMenu({ open, onClose, onNavigate, onCopyEmail, onThemeChange, th
 }
 
 function Toast({ toast, onDismiss }) {
-  const [closing, setClosing] = useState(false);
-
   useEffect(() => {
     if (!toast) return undefined;
-    setClosing(false);
-    const closeTimer = window.setTimeout(() => setClosing(true), 2400);
-    const dismissTimer = window.setTimeout(() => onDismiss(null), 2580);
-
-    return () => {
-      window.clearTimeout(closeTimer);
-      window.clearTimeout(dismissTimer);
-    };
-  }, [toast?.id, onDismiss]);
+    const timer = window.setTimeout(() => onDismiss(null), 2200);
+    return () => window.clearTimeout(timer);
+  }, [toast, onDismiss]);
 
   if (!toast) return null;
   return (
-    <div
-      className="toast liquid-glass"
-      data-closing={closing}
-      role="status"
-      key={toast.id}
-    >
-      <span className="toast-check">
-        <Check size={15} />
-      </span>
-      {toast.message}
+    <div className="toast" role="status">
+      <Check size={15} />
+      {toast}
     </div>
   );
 }
 
+/* ============ 应用根 ============ */
+
 function App() {
+  const route = useRoute();
   const [theme, setTheme] = useState(() => localStorage.getItem('portfolio-theme') || 'light');
-  const [palette, setPalette] = useState(() => localStorage.getItem('portfolio-palette') || 'aurora');
-  const [motion, setMotion] = useState(() => {
-    const storedMotion = localStorage.getItem('portfolio-motion');
-    if (storedMotion === 'on' || storedMotion === 'off') return storedMotion === 'on';
-    return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  });
-  const [blur, setBlur] = useState(() => Number(localStorage.getItem('portfolio-blur')) || 30);
-  const [filter, setFilter] = useState('all');
-  const [selectedProject, setSelectedProject] = useState(null);
   const [commandOpen, setCommandOpen] = useState(false);
   const [toast, setToast] = useState(null);
-  const progressRef = useRef(null);
-  const pagePosition = usePagePosition(progressRef);
-
-  useReveal(filter);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -1438,106 +1020,50 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    document.documentElement.dataset.palette = palette;
-    localStorage.setItem('portfolio-palette', palette);
-  }, [palette]);
-
-  useEffect(() => {
-    document.documentElement.dataset.motion = motion ? 'on' : 'off';
-    localStorage.setItem('portfolio-motion', motion ? 'on' : 'off');
-  }, [motion]);
-
-  useEffect(() => {
-    document.documentElement.style.setProperty('--glass-blur', `${blur}px`);
-    localStorage.setItem('portfolio-blur', String(blur));
-  }, [blur]);
-
-  useEffect(() => {
-    const handleShortcut = (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        setCommandOpen((value) => !value);
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCommandOpen((v) => !v);
       }
+      if (e.key === 'Escape') setCommandOpen(false);
     };
-
-    window.addEventListener('keydown', handleShortcut);
-    return () => window.removeEventListener('keydown', handleShortcut);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
-
-  const notify = (message) => setToast({ id: Date.now(), message });
 
   const handleCopyEmail = async () => {
     await copyToClipboard(profile.email);
-    notify('邮箱已复制到剪贴板');
+    setToast('邮箱已复制');
   };
 
-  const handleNavigate = (id) => {
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document
-      .getElementById(id)
-      ?.scrollIntoView({ behavior: motion && !reduceMotion ? 'smooth' : 'auto' });
-  };
+  const path = route.path.replace(/^\//, '');
+  const project = projects.find((p) => p.slug === path);
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${profile.name} · 个人作品集`,
-          text: '视觉设计、AI 设计与品牌系统作品集',
-          url: window.location.href,
-        });
-        return;
-      } catch (error) {
-        if (error?.name === 'AbortError') return;
-      }
-    }
+  let page;
+  if (!path) {
+    page = <HomePage onCopyEmail={handleCopyEmail} />;
+  } else if (path === 'campus') {
+    page = <CampusPage onCopyEmail={handleCopyEmail} />;
+  } else if (project) {
+    page = <ProjectPage project={project} onCopyEmail={handleCopyEmail} />;
+  } else {
+    page = <ProjectPage project={null} onCopyEmail={handleCopyEmail} />;
+  }
 
-    await copyToClipboard(window.location.href);
-    notify('作品集链接已复制');
-  };
+  const navKey = path === 'campus' ? 'campus' : path ? '' : 'top';
 
   return (
     <div className="site-shell">
-      <AmbientScene />
       <Navigation
-        active={pagePosition.active}
-        scrolled={pagePosition.scrolled}
         theme={theme}
-        progressRef={progressRef}
         onThemeChange={() => setTheme(theme === 'light' ? 'dark' : 'light')}
         onCommandOpen={() => setCommandOpen(true)}
+        path={navKey}
       />
-
-      <main>
-        <Hero onCopyEmail={handleCopyEmail} />
-        <SignalStrip />
-        <ProfileSection />
-        <ProjectsSection
-          onProjectOpen={setSelectedProject}
-          filter={filter}
-          onFilterChange={setFilter}
-        />
-        <StrengthsSection />
-        <LabSection
-          palette={palette}
-          onPaletteChange={setPalette}
-          theme={theme}
-          onThemeChange={setTheme}
-          motion={motion}
-          onMotionChange={setMotion}
-          blur={blur}
-          onBlurChange={setBlur}
-          onCommandOpen={() => setCommandOpen(true)}
-          onShare={handleShare}
-        />
-        <ContactSection onCopyEmail={handleCopyEmail} />
-      </main>
-
-      <ProjectSheet project={selectedProject} onClose={() => setSelectedProject(null)} />
+      <main key={route.path}>{page}</main>
       <CommandMenu
         open={commandOpen}
         onClose={() => setCommandOpen(false)}
-        onNavigate={handleNavigate}
         onCopyEmail={handleCopyEmail}
         onThemeChange={setTheme}
         theme={theme}
