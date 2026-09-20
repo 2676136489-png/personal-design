@@ -329,7 +329,16 @@ function Hero() {
       </div>
 
       <div className="hero-visual" data-reveal>
-        <img src={campus.cover} alt="校园圈子学生中心界面" />
+        <img
+          src="/media/campus/dashboard-1960.webp"
+          srcSet="/media/campus/dashboard-980.webp 980w, /media/campus/dashboard-1960.webp 1960w"
+          sizes="(max-width: 1040px) 92vw, 940px"
+          width="1960"
+          height="1120"
+          alt="校园圈子学生中心界面"
+          fetchPriority="high"
+          decoding="async"
+        />
       </div>
 
       <div className="hero-facts">
@@ -393,7 +402,7 @@ function FeaturedSection() {
             key={shot.src}
             data-reveal
           >
-            <img src={shot.src} alt={shot.alt} />
+            <img src={shot.src} alt={shot.alt} loading="lazy" decoding="async" />
             <figcaption>{shot.caption}</figcaption>
           </figure>
         ))}
@@ -442,7 +451,7 @@ function WorkSection() {
           <article className="work-card" key={project.id} data-reveal>
             <a href={`#/${project.slug}`} onClick={(e) => { e.preventDefault(); navigate(`/${project.slug}`); }}>
               <div className="work-media">
-                <img src={project.image} alt={`${project.title} 项目视觉`} />
+                <img src={project.image} alt={`${project.title} 项目视觉`} loading="lazy" decoding="async" />
               </div>
               <div className="work-body">
                 <p className="work-meta">
@@ -520,7 +529,7 @@ function AboutSection() {
       <div className="about-grid">
         <div className="about-profile" data-reveal>
           <div className="about-avatar">
-            <img src="/media/avatar-lky.png" alt={profile.name} />
+            <img src="/media/avatar-lky.webp" alt={profile.name} />
           </div>
           <h3>{profile.name}</h3>
           <p className="about-role">{profile.status}</p>

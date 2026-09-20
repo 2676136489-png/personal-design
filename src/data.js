@@ -1,3 +1,15 @@
+/* 图片素材统一走 WebP（scripts/optimize-images.py 生成）。
+   截图原 PNG 单张接近 1MB，首屏大图弱网下要等 1 秒以上、看起来像加载失败，
+   转 WebP 后整站图片从 12.7MB 降到 0.85MB。 */
+export const media = {
+  avatar: '/media/avatar-lky.webp',
+  campus: {
+    desktop: '/media/campus-desktop.webp',
+    phone: '/media/campus-phone.webp',
+  },
+  campusShots: (name) => `/media/campus/${name}.webp`,
+};
+
 export const profile = {
   name: '卢柯宇',
   initials: 'LKY',
@@ -75,7 +87,7 @@ export const campus = {
   stack: 'PHP · MySQL · SSE · Docker',
   headline: '一个真正在运行的校园社交平台。',
   lede: '从实名认证到实时私信，从敏感词过滤到运营后台——它不仅仅是一次普通的课程作业，更是一个有真实用户、完整业务闭环、已经在线运行的产品。',
-  cover: '/media/campus/dashboard.png',
+  cover: '/media/campus/dashboard.webp',
 
   metrics: [
     { value: '19', label: '实名注册学生' },
@@ -123,7 +135,7 @@ export const campus = {
         },
         {
           type: 'shot',
-          src: '/media/campus/login.png',
+          src: '/media/campus/login.webp',
           alt: '校园圈子学生登录页',
           caption: '登录页：左侧品牌区用同心圆雷达表达「认识同校的人」，右侧表单含图形验证码、用户协议勾选与管理员入口。',
         },
@@ -133,7 +145,7 @@ export const campus = {
         },
         {
           type: 'shot',
-          src: '/media/campus/dashboard.png',
+          src: '/media/campus/dashboard-1960.webp',
           alt: '校园圈子学生中心',
           caption: '学生中心：左侧固定导航（学生中心 / 动态广场 / 同学），顶部实名状态胶囊，四格数据卡与校园公告。',
         },
@@ -143,7 +155,7 @@ export const campus = {
         },
         {
           type: 'shot',
-          src: '/media/campus/feed.png',
+          src: '/media/campus/feed.webp',
           alt: '校园圈子动态广场',
           caption: '动态广场：三重筛选（关键词 / 标签 / 学院）、共 17 条动态计数、右侧发布区与广场公约。',
         },
@@ -153,7 +165,7 @@ export const campus = {
         },
         {
           type: 'shot',
-          src: '/media/campus/students.png',
+          src: '/media/campus/students.webp',
           alt: '校园圈子已认证同学列表',
           caption: '同学页：实名认证同学列表，含兴趣标签、学院、年级、专业，支持按姓名/学院/专业与兴趣标签双向搜索。',
         },
@@ -171,7 +183,7 @@ export const campus = {
         },
         {
           type: 'shot',
-          src: '/media/campus/ai-assistant.png',
+          src: '/media/campus/ai-assistant.webp',
           alt: 'AI 校园小助手对话界面',
           caption: 'AI 助手：支持多轮对话与追问，回答前展示「已深度思考」状态，并标注实际调用的查询工具。',
         },
@@ -193,7 +205,7 @@ export const campus = {
         },
         {
           type: 'shot',
-          src: '/media/campus/admin-overview.png',
+          src: '/media/campus/admin-overview.webp',
           alt: '校园圈子管理后台总览',
           caption: '后台总览：四项核心计数、管理员二次验证开关，以及 12 个管理功能的快捷入口网格。',
         },
@@ -203,7 +215,7 @@ export const campus = {
         },
         {
           type: 'shot',
-          src: '/media/campus/admin-students.png',
+          src: '/media/campus/admin-students.webp',
           alt: '学生实名审核与账号管理',
           caption: '学生管理：19 名学生名单，含学生证照片预览与「通过 / 退回 / 停用」三态操作。',
         },
@@ -213,25 +225,25 @@ export const campus = {
         },
         {
           type: 'shot',
-          src: '/media/campus/admin-dynamics.png',
+          src: '/media/campus/admin-dynamics.webp',
           alt: '动态内容管理',
           caption: '动态管理：22 条动态列表，显示发布者、内容、图片、点赞评论数、状态，支持 CSV 导出。',
         },
         {
           type: 'shot',
-          src: '/media/campus/admin-comments.png',
+          src: '/media/campus/admin-comments.webp',
           alt: '评论管理',
           caption: '评论管理：31 条评论，可按评论内容或评论者搜索，标注所属动态发布者。',
         },
         {
           type: 'shot',
-          src: '/media/campus/admin-messages.png',
+          src: '/media/campus/admin-messages.webp',
           alt: '私信审计',
           caption: '私信审计：75 条私信记录，含发送者、接收者、内容、已读状态与时间。',
         },
         {
           type: 'shot',
-          src: '/media/campus/admin-reports.png',
+          src: '/media/campus/admin-reports.webp',
           alt: '举报审核队列',
           caption: '举报审核：待处理举报队列，含举报人、对象、原因、目标内容与操作。',
         },
@@ -241,7 +253,7 @@ export const campus = {
         },
         {
           type: 'shot',
-          src: '/media/campus/admin-audit.png',
+          src: '/media/campus/admin-audit.webp',
           alt: '管理员审计日志',
           caption: '审计日志：39 条管理员操作记录，含管理员、目标对象、操作类型、详情与时间，删除类操作可一键回滚。',
         },
@@ -251,7 +263,7 @@ export const campus = {
         },
         {
           type: 'shot',
-          src: '/media/campus/admin-accounts.png',
+          src: '/media/campus/admin-accounts.webp',
           alt: '管理员账号管理',
           caption: '管理员账号：支持新建管理员、分配角色（超级管理员 / 运营管理员）、设置启用状态。',
         },
@@ -326,7 +338,7 @@ export const projects = [
     category: '算法系统',
     year: '2026',
     period: '2026.04 — 2026.06',
-    image: '/media/project-gomoku.png',
+    image: '/media/project-gomoku.webp',
     tag: 'C++ · Game AI',
     description: '15×15 五子棋对弈 Bot，支持换手规则，通过 JSON 协议与对弈平台交互。',
     detail: {
@@ -345,7 +357,7 @@ export const projects = [
     category: '系统设计',
     year: '2024',
     period: '2024.09 — 2024.12',
-    image: '/media/project-station.png',
+    image: '/media/project-station.webp',
     tag: 'C Language · 独立完成',
     description: '双角色（管理员 / 顾客）校园快递站系统，按 UI、认证、业务三层划分实现。',
     detail: {
@@ -364,7 +376,7 @@ export const projects = [
     category: 'Web 组件',
     year: '2026',
     period: '2026.07',
-    image: '/media/project-wiki.png',
+    image: '/media/project-wiki.webp',
     tag: 'HTML · CSS · JavaScript',
     description: '面向 iGEM 团队的多页面 Wiki 模板，静态优先架构，附带可复用的界面与交互插件。',
     detail: {
@@ -383,7 +395,7 @@ export const projects = [
     category: '前端开发',
     year: '2026',
     period: '2026.07 — 2026.08',
-    image: '/media/project-dashboard.png',
+    image: '/media/project-dashboard.webp',
     tag: 'React · Vite',
     description: '从零搭建的响应式作品集，包含项目分页、主题切换、命令面板与实时状态组件。',
     detail: {
@@ -402,7 +414,7 @@ export const projects = [
     category: '品牌视觉',
     year: '概念',
     period: 'Exploration',
-    image: '/media/project-identity.png',
+    image: '/media/project-identity.webp',
     tag: 'Brand Direction',
     description: '围绕校园服务场景建立理性、清晰、可信赖的视觉方向，用克制的色彩与网格表达科技感。',
     detail: {
