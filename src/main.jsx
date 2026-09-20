@@ -328,19 +328,6 @@ function Hero() {
         </div>
       </div>
 
-      <div className="hero-visual" data-reveal>
-        <img
-          src="/media/campus/dashboard-1960.webp"
-          srcSet="/media/campus/dashboard-980.webp 980w, /media/campus/dashboard-1960.webp 1960w"
-          sizes="(max-width: 1040px) 92vw, 940px"
-          width="1960"
-          height="1120"
-          alt="校园圈子学生中心界面"
-          fetchPriority="high"
-          decoding="async"
-        />
-      </div>
-
       <div className="hero-facts">
         {heroFacts.map((item) => (
           <div key={item.label}>

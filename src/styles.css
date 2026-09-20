@@ -284,17 +284,8 @@ img {
   margin-top: 26px;
 }
 
-.hero-visual {
-  margin: 56px auto 0;
-  max-width: 940px;
-}
-
-.hero-visual img {
-  width: 100%;
-}
-
 .hero-facts {
-  margin-top: 48px;
+  margin-top: 64px;
   padding: 32px 0;
   border-top: 1px solid var(--line);
   display: grid;
@@ -1881,10 +1872,6 @@ section {
 
   .hero {
     padding-top: 52px;
-  }
-
-  .hero-visual {
-    margin-top: 40px;
   }
 
   .hero-facts {

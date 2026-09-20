@@ -87,7 +87,7 @@ export const campus = {
   stack: 'PHP · MySQL · SSE · Docker',
   headline: '一个真正在运行的校园社交平台。',
   lede: '从实名认证到实时私信，从敏感词过滤到运营后台——它不仅仅是一次普通的课程作业，更是一个有真实用户、完整业务闭环、已经在线运行的产品。',
-  cover: '/media/campus/dashboard.webp',
+  cover: '/media/campus/dashboard-1960.webp',
 
   metrics: [
     { value: '19', label: '实名注册学生' },
