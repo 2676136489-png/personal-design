@@ -20,6 +20,10 @@
   --max-width: 1080px;
   --wide: 1320px;
   --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  /* Apple 最常用的两条：out-expo 收尾极慢、起步很快，接近物体被推出去的观感；
+     spring 用于状态回归（hover 抬起、倾斜复位），带一点点过冲的弹性。 */
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
   --nav-height: 48px;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
     "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Inter, sans-serif;
@@ -258,7 +262,7 @@ img {
   letter-spacing: -0.015em;
 }
 
-.hero h1 span {
+.hero h1 > span {
   display: block;
   margin-top: 8px;
   color: var(--muted);
@@ -437,6 +441,9 @@ section {
 
 .stage-item {
   margin: 0;
+  /* 配合 data-reveal="img"：图片从 1.08 回缩到 1 时不要溢出到相邻卡片 */
+  overflow: hidden;
+  border-radius: var(--radius-lg);
 }
 
 .stage-item--wide {
@@ -1596,17 +1603,253 @@ section {
   }
 }
 
-/* ============ 进场动画 ============ */
+/* ============ 滚动揭示系统 ============ */
 
 [data-reveal] {
+  --reveal-delay: calc(var(--i, 0) * 70ms);
+  --reveal-y: 22px;
   opacity: 0;
-  transform: translateY(18px);
-  transition: opacity 620ms var(--ease), transform 620ms var(--ease);
+  transform: translate3d(0, var(--reveal-y), 0);
+  transition:
+    opacity 780ms var(--ease-out-expo) var(--reveal-delay),
+    transform 780ms var(--ease-out-expo) var(--reveal-delay);
 }
 
 [data-reveal][data-visible="true"] {
   opacity: 1;
   transform: none;
+}
+
+/* 只淡入，不位移——用于自身还要承载 hover / 指针倾斜的元素 */
+[data-reveal="fade"] {
+  --reveal-y: 0px;
+}
+
+/* 遮罩自下而上展开，标题类用 */
+[data-reveal="mask"] {
+  --reveal-y: 0px;
+  clip-path: inset(0 0 100% 0);
+  transition:
+    clip-path 900ms var(--ease-out-expo) var(--reveal-delay),
+    opacity 400ms linear var(--reveal-delay);
+}
+
+[data-reveal="mask"][data-visible="true"] {
+  clip-path: inset(-12% 0 -12% 0);
+}
+
+/* 图片：整块淡入 + 内部缓慢回缩，制造「聚焦」感 */
+[data-reveal="img"] {
+  --reveal-y: 0px;
+}
+
+[data-reveal="img"] img {
+  transform: scale(1.08);
+  transition: transform 1400ms var(--ease-out-expo) var(--reveal-delay);
+}
+
+[data-reveal="img"][data-visible="true"] img {
+  transform: scale(1);
+}
+
+/* 轻微放大而非位移，卡片网格用它 */
+[data-reveal="scale"] {
+  --reveal-y: 0px;
+  transform: scale(0.965);
+}
+
+[data-reveal="scale"][data-visible="true"] {
+  transform: none;
+}
+
+/* ============ 页面转场 ============ */
+
+main {
+  animation: page-in 620ms var(--ease-out-expo) both;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+}
+
+/* ============ 阅读进度条 ============ */
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 120;
+  width: 100%;
+  height: 2px;
+  transform-origin: 0 50%;
+  transform: scaleX(var(--progress, 0));
+  background: var(--accent);
+  opacity: 0.9;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* ============ 视差 ============ */
+
+[data-parallax] {
+  transform: translate3d(0, var(--parallax-y, 0px), 0);
+  will-change: transform;
+}
+
+/* ============ 指针倾斜卡片 ============ */
+
+/* 注意：transform 与 inset 抬升都由这一条统一控制。
+   加了 data-reveal 的元素靠 --rv-y 承接入场位移，避免两条规则互相覆盖。 */
+[data-tilt] {
+  position: relative;
+  transform: perspective(1200px)
+    translate3d(0, calc(var(--rv-y, 0px) + var(--lift, 0px)), 0) rotateX(var(--rx, 0deg))
+    rotateY(var(--ry, 0deg));
+  transition:
+    transform 520ms var(--ease-spring),
+    border-color 220ms var(--ease);
+  will-change: transform;
+}
+
+[data-reveal][data-tilt] {
+  --rv-y: 24px;
+  opacity: 0;
+  transform: perspective(1200px)
+    translate3d(0, calc(var(--rv-y, 0px) + var(--lift, 0px)), 0) rotateX(var(--rx, 0deg))
+    rotateY(var(--ry, 0deg));
+  transition:
+    opacity 780ms var(--ease-out-expo) var(--reveal-delay),
+    transform 780ms var(--ease-out-expo) var(--reveal-delay);
+}
+
+[data-reveal][data-tilt][data-visible="true"] {
+  --rv-y: 0px;
+  opacity: 1;
+}
+
+/* 指针还在移动时切短过渡，跟手感优先；离开后回到弹性复位 */
+[data-tilt][data-tilting="true"] {
+  transition: transform 90ms linear;
+}
+
+[data-tilt]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(0, 0, 0, 0.05),
+    transparent 62%
+  );
+  transition: opacity 320ms var(--ease);
+}
+
+:root[data-theme="dark"] [data-tilt]::after {
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 255, 255, 0.09),
+    transparent 62%
+  );
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-tilt]:hover::after {
+    opacity: 1;
+  }
+}
+
+/* ============ 逐字/逐词上浮 ============ */
+
+.split-unit {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.split-inner {
+  display: inline-block;
+  transform: translate3d(0, 105%, 0);
+  animation: unit-rise 900ms var(--ease-out-expo) both;
+  animation-delay: var(--unit-delay, 0ms);
+}
+
+@keyframes unit-rise {
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============ 磁性按钮 ============ */
+
+[data-magnetic] {
+  transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0);
+  transition:
+    transform 380ms var(--ease-spring),
+    background-color 180ms var(--ease),
+    color 180ms var(--ease),
+    border-color 180ms var(--ease);
+}
+
+[data-magnetic][data-magnet="true"] {
+  transition: transform 90ms linear;
+}
+
+/* ============ 首屏入场序列 ============ */
+
+[data-intro] {
+  opacity: 0;
+  animation: intro-rise 900ms var(--ease-out-expo) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+
+@keyframes intro-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ============ 导航滑动指示条 ============ */
+
+.nav-menu {
+  position: relative;
+}
+
+.nav-indicator {
+  position: absolute;
+  bottom: -7px;
+  left: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+  transition:
+    transform 460ms var(--ease-spring),
+    width 460ms var(--ease-spring),
+    opacity 240ms var(--ease);
+  pointer-events: none;
 }
 
 /* ============ 悬停（仅精确指针） ============ */
@@ -1623,7 +1866,7 @@ section {
 
   .work-card:hover {
     border-color: var(--line-strong);
-    transform: translateY(-3px);
+    --lift: -4px;
   }
 
   .work-card:hover .work-media img {
@@ -2022,10 +2265,40 @@ section {
     scroll-behavior: auto;
   }
 
-  [data-reveal] {
+  [data-reveal],
+  [data-reveal] img {
     opacity: 1;
     transform: none;
     transition: none;
+    clip-path: none;
+  }
+
+  [data-parallax] {
+    transform: none;
+  }
+
+  [data-intro],
+  .split-inner,
+  main {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  [data-tilt] {
+    transition: border-color 220ms var(--ease);
+  }
+
+  [data-tilt]::after {
+    display: none;
+  }
+
+  [data-magnetic] {
+    transform: none;
+  }
+
+  .nav-indicator {
+    display: none;
   }
 
   .toast {

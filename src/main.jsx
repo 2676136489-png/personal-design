@@ -36,6 +36,7 @@ import {
   timeline,
 } from './data.js';
 import { goToSection, navigate, useRoute } from './router.js';
+import { SplitText, usePageMotion, useSlidingIndicator } from './motion.jsx';
 import './styles.css';
 
 const SECTION_IDS = ['top', 'work', 'skills', 'about', 'contact'];
@@ -72,35 +73,17 @@ function trapTabInDialog(event, container) {
   }
 }
 
-function useReveal(deps = []) {
-  useEffect(() => {
-    const targets = Array.from(document.querySelectorAll('[data-reveal]:not([data-visible])'));
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce || !('IntersectionObserver' in window)) {
-      targets.forEach((t) => t.setAttribute('data-visible', 'true'));
-      return undefined;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.setAttribute('data-visible', 'true');
-          observer.unobserve(entry.target);
-        });
-      },
-      { rootMargin: '0px 0px -8% 0px', threshold: 0.06 },
-    );
-    targets.forEach((t) => observer.observe(t));
-    return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
-}
-
 /* ============ 顶部导航 ============ */
 
 function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [scrollActive, setScrollActive] = useState('top');
+  const menuRef = useRef(null);
+
+  // 首页时导航跟随滚动锚点，否则跟随路由
+  const activeKey = path === 'top' ? scrollActive : path;
+  const indicatorStyle = useSlidingIndicator(menuRef, activeKey);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -110,6 +93,26 @@ function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
   }, []);
 
   useEffect(() => setMenuOpen(false), [path]);
+
+  // 滚动跟随：取视口中线所在的那一节作为当前节
+  useEffect(() => {
+    if (path !== 'top') return undefined;
+    const sections = SECTION_IDS.map((id) => document.getElementById(id)).filter(Boolean);
+    if (!sections.length || !('IntersectionObserver' in window)) return undefined;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setScrollActive(visible.target.id);
+      },
+      { rootMargin: '-45% 0px -50% 0px', threshold: [0, 0.25, 0.5, 1] },
+    );
+
+    sections.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [path]);
 
   const handleNav = (event, item) => {
     const isHome = item.href === '#/' || item.href.startsWith('#/#');
@@ -140,17 +143,18 @@ function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
           <span>作品集</span>
         </a>
 
-        <nav className="nav-menu" aria-label="主导航">
+        <nav className="nav-menu" aria-label="主导航" ref={menuRef}>
           {navItems.map((item) => (
             <a
               key={item.id}
               href={item.href}
-              data-active={item.id === path}
+              data-active={item.id === activeKey}
               onClick={(e) => handleNav(e, item)}
             >
               {item.label}
             </a>
           ))}
+          <span className="nav-indicator" style={indicatorStyle} aria-hidden="true" />
         </nav>
 
         <div className="nav-tools">
@@ -308,28 +312,30 @@ function SiteFooter({ onCopyEmail }) {
 function Hero() {
   return (
     <section id="top" className="hero">
-      <div className="hero-copy">
-        <h1>
+      <div className="hero-copy" data-parallax="0.05">
+        <h1 data-intro style={{ '--i': 0 }}>
           {profile.name}
-          <span>{profile.tagline}</span>
+          <span>
+            <SplitText text={profile.tagline} delay={180} step={26} />
+          </span>
         </h1>
-        <p className="hero-lede">
+        <p className="hero-lede" data-intro style={{ '--i': 2 }}>
           {profile.education}。用工程能力承载想法，用设计判断组织信息，
           把课堂里的题目做成别人真的会打开来用的东西。
         </p>
-        <div className="hero-actions">
-          <a className="btn btn--solid" href="#/campus" onClick={(e) => { e.preventDefault(); navigate('/campus'); }}>
+        <div className="hero-actions" data-intro style={{ '--i': 3 }}>
+          <a className="btn btn--solid" data-magnetic href="#/campus" onClick={(e) => { e.preventDefault(); navigate('/campus'); }}>
             查看校园圈子
             <ArrowRight size={16} />
           </a>
-          <a className="btn btn--plain" href="#/#work" onClick={(e) => { e.preventDefault(); goToSection('work'); }}>
+          <a className="btn btn--plain" data-magnetic href="#/#work" onClick={(e) => { e.preventDefault(); goToSection('work'); }}>
             浏览全部作品
             <ArrowDown size={16} />
           </a>
         </div>
       </div>
 
-      <div className="hero-facts">
+      <div className="hero-facts" data-intro style={{ '--i': 4 }}>
         {heroFacts.map((item) => (
           <div key={item.label}>
             <strong>{item.value}</strong>
@@ -358,6 +364,7 @@ function FeaturedSection() {
         <div className="hero-actions">
           <a
             className="btn btn--solid"
+            data-magnetic
             href="#/campus"
             onClick={(e) => {
               e.preventDefault();
@@ -367,17 +374,17 @@ function FeaturedSection() {
             查看完整项目详解
             <ArrowRight size={16} />
           </a>
-          <a className="btn btn--plain" href={campus.site} target="_blank" rel="noreferrer noopener">
+          <a className="btn btn--plain" data-magnetic href={campus.site} target="_blank" rel="noreferrer noopener">
             访问线上站点
             <ArrowUpRight size={16} />
           </a>
         </div>
       </div>
 
-      <div className="campus-metrics" data-reveal>
+      <div className="campus-metrics" data-reveal="scale">
         {campus.metrics.map((m) => (
           <div key={m.label}>
-            <strong>{m.value}</strong>
+            <strong data-count={m.value}>{m.value}</strong>
             <span>{m.label}</span>
           </div>
         ))}
@@ -388,7 +395,8 @@ function FeaturedSection() {
           <figure
             className={`stage-item stage-item--${i === 0 ? 'wide' : 'normal'}`}
             key={shot.src}
-            data-reveal
+            data-reveal="img"
+            style={{ '--i': i }}
           >
             <img src={shot.src} alt={shot.alt} loading="lazy" decoding="async" />
             <figcaption>{shot.caption}</figcaption>
@@ -396,18 +404,20 @@ function FeaturedSection() {
         ))}
       </div>
 
-      <div className="section-head section-head--center more-head" data-reveal>
+      <div className="section-head section-head--center more-head" data-reveal="mask">
         <p className="eyebrow">完整项目详解</p>
         <h2>六个章节，讲清这个产品。</h2>
       </div>
 
       <div className="chapter-cards">
-        {campus.chapters.map((c) => (
+        {campus.chapters.map((c, i) => (
           <a
             className="chapter-card"
             key={c.id}
             href={`#/campus#${c.id}`}
-            data-reveal
+            data-reveal="scale"
+            data-tilt
+            style={{ '--i': i }}
           >
             <span className="chapter-index">{c.kicker}</span>
             <h3>{c.nav}</h3>
@@ -426,7 +436,7 @@ function FeaturedSection() {
 function WorkSection() {
   return (
     <section id="work" className="work">
-      <div className="section-head section-head--center" data-reveal>
+      <div className="section-head section-head--center" data-reveal="mask">
         <p className="eyebrow">全部作品</p>
         <h2>每一个，都是完整做完的。</h2>
         <p className="section-lede">
@@ -435,8 +445,8 @@ function WorkSection() {
       </div>
 
       <div className="work-grid">
-        {projects.map((project) => (
-          <article className="work-card" key={project.id} data-reveal>
+        {projects.map((project, i) => (
+          <article className="work-card" key={project.id} data-reveal data-tilt style={{ '--i': i % 2 }}>
             <a href={`#/${project.slug}`} onClick={(e) => { e.preventDefault(); navigate(`/${project.slug}`); }}>
               <div className="work-media">
                 <img src={project.image} alt={`${project.title} 项目视觉`} loading="lazy" decoding="async" />
@@ -464,7 +474,7 @@ function WorkSection() {
 function SkillsSection() {
   return (
     <section id="skills" className="skills">
-      <div className="section-head" data-reveal>
+      <div className="section-head" data-reveal="mask">
         <p className="eyebrow">能力</p>
         <h2>不止一种身份，也不止一种解法。</h2>
         <p className="section-lede">
@@ -474,7 +484,7 @@ function SkillsSection() {
 
       <div className="skills-grid">
         {capabilities.map((item, index) => (
-          <article className="skill" key={item.title} data-reveal>
+          <article className="skill" key={item.title} data-reveal="scale" data-tilt style={{ '--i': index % 3 }}>
             <span className="skill-index">{String(index + 1).padStart(2, '0')}</span>
             <h3>{item.title}</h3>
             <p>{item.text}</p>
@@ -580,7 +590,7 @@ function ContactSection({ onCopyEmail }) {
 }
 
 function HomePage({ onCopyEmail }) {
-  useReveal([]);
+  usePageMotion([]);
 
   useEffect(() => {
     const anchor = window.location.hash.split('#')[2];
@@ -617,7 +627,7 @@ function ChapterBlocks({ blocks }) {
     }
     if (block.type === 'shot') {
       return (
-        <figure className="detail-shot" key={i} data-reveal>
+        <figure className="detail-shot" key={i} data-reveal="img">
           <div className="shot-frame">
             <img src={block.src} alt={block.alt} loading="lazy" />
           </div>
@@ -660,7 +670,7 @@ function ChapterBlocks({ blocks }) {
 function CampusPage({ onCopyEmail }) {
   const [activeChapter, setActiveChapter] = useState(campus.chapters[0].id);
 
-  useReveal([]);
+  usePageMotion([]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -696,21 +706,21 @@ function CampusPage({ onCopyEmail }) {
             <span>{campus.stack}</span>
           </div>
           <div className="hero-actions hero-actions--left">
-            <a className="btn btn--solid" href={campus.site} target="_blank" rel="noreferrer noopener">
+            <a className="btn btn--solid" data-magnetic href={campus.site} target="_blank" rel="noreferrer noopener">
               访问线上站点
               <ArrowUpRight size={16} />
             </a>
           </div>
         </div>
-        <div className="page-hero-shot">
+        <div className="page-hero-shot" data-parallax="0.07">
           <img src={campus.cover} alt="校园圈子学生中心界面" />
         </div>
       </header>
 
-      <section className="metrics-strip" data-reveal>
+      <section className="metrics-strip" data-reveal="scale">
         {campus.metrics.map((m) => (
           <div key={m.label}>
-            <strong>{m.value}</strong>
+            <strong data-count={m.value}>{m.value}</strong>
             <span>{m.label}</span>
           </div>
         ))}
@@ -751,13 +761,13 @@ function CampusPage({ onCopyEmail }) {
       </div>
 
       <div className="other-projects">
-        <div className="section-head section-head--center" data-reveal>
+        <div className="section-head section-head--center" data-reveal="mask">
           <p className="eyebrow">继续浏览</p>
           <h2>其他作品</h2>
         </div>
         <div className="work-grid">
-          {projects.slice(0, 4).map((p) => (
-            <article className="work-card" key={p.id} data-reveal>
+          {projects.slice(0, 4).map((p, i) => (
+            <article className="work-card" key={p.id} data-reveal data-tilt style={{ '--i': i % 2 }}>
               <a href={`#/${p.slug}`} onClick={(e) => { e.preventDefault(); navigate(`/${p.slug}`); }}>
                 <div className="work-media">
                   <img src={p.image} alt={`${p.title} 项目视觉`} />
@@ -788,7 +798,7 @@ function CampusPage({ onCopyEmail }) {
 /* ============ 其他项目详情页 ============ */
 
 function ProjectPage({ project, onCopyEmail }) {
-  useReveal([project?.id]);
+  usePageMotion([project?.id]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -828,7 +838,7 @@ function ProjectPage({ project, onCopyEmail }) {
             <MailButton className="btn btn--plain" />
           </div>
         </div>
-        <div className="page-hero-shot">
+        <div className="page-hero-shot" data-parallax="0.07">
           <img src={project.image} alt={`${project.title} 项目视觉`} />
         </div>
       </header>
@@ -863,13 +873,13 @@ function ProjectPage({ project, onCopyEmail }) {
       </div>
 
       <div className="other-projects">
-        <div className="section-head section-head--center" data-reveal>
+        <div className="section-head section-head--center" data-reveal="mask">
           <p className="eyebrow">继续浏览</p>
           <h2>其他作品</h2>
         </div>
         <div className="work-grid">
-          {others.map((p) => (
-            <article className="work-card" key={p.id} data-reveal>
+          {others.map((p, i) => (
+            <article className="work-card" key={p.id} data-reveal data-tilt style={{ '--i': i % 2 }}>
               <a href={`#/${p.slug}`} onClick={(e) => { e.preventDefault(); navigate(`/${p.slug}`); }}>
                 <div className="work-media">
                   <img src={p.image} alt={`${p.title} 项目视觉`} />
@@ -1051,6 +1061,7 @@ function App() {
 
   return (
     <div className="site-shell">
+      <div className="scroll-progress" data-progress aria-hidden="true" />
       <Navigation
         theme={theme}
         onThemeChange={() => setTheme(theme === 'light' ? 'dark' : 'light')}
