@@ -1,5 +1,6 @@
 node_modules/
 dist/
+dist_bak/
 dist-pages/
 dist-pages-new/
 dist-pages-old*/
@@ -22,3 +23,4 @@ backup-portfolio-v2/
 .tmp-*
 .verify.html
 build.log
+dist-verify/

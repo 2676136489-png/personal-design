@@ -254,26 +254,25 @@ img {
   text-align: center;
 }
 
+.hero-welcome {
+  margin: 0;
+  color: var(--faint);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
 .hero h1 {
-  margin: 14px 0 0;
-  font-size: clamp(2.6rem, 6vw, 5rem);
-  line-height: 1.05;
+  margin: 16px 0 0;
+  font-size: clamp(2.2rem, 5.4vw, 4.4rem);
+  line-height: 1.08;
   font-weight: 600;
   letter-spacing: -0.015em;
 }
 
-.hero h1 > span {
-  display: block;
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: clamp(1.4rem, 3vw, 2.5rem);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
 .hero-lede {
   max-width: 640px;
-  margin: 22px auto 0;
+  margin: 26px auto 0;
   color: var(--muted);
   font-size: 17px;
   line-height: 1.6;
@@ -1586,6 +1585,178 @@ section {
   font-weight: 600;
 }
 
+/* ============ 简历页 ============ */
+
+.resume-layout {
+  width: min(var(--wide), calc(100% - 44px));
+  margin: 0 auto;
+  padding: 64px 0 110px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 64px;
+  align-items: start;
+}
+
+.resume-body {
+  max-width: none;
+}
+
+.resume-block + .resume-block {
+  margin-top: 46px;
+  padding-top: 46px;
+  border-top: 1px solid var(--line);
+}
+
+.resume-block h2 {
+  margin: 0 0 22px;
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.resume-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.resume-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.resume-title--link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+}
+
+.resume-title--link svg {
+  color: var(--faint);
+  transition: transform 220ms var(--ease-out-expo), color 220ms ease;
+}
+
+.resume-title--link:hover svg {
+  color: var(--accent);
+  transform: translateX(3px);
+}
+
+.resume-period,
+.resume-sub {
+  color: var(--faint);
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.resume-sub {
+  margin: 6px 0 0;
+  white-space: normal;
+}
+
+.resume-desc {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14.5px;
+  line-height: 1.62;
+}
+
+.resume-edu .point-list {
+  margin-top: 14px;
+}
+
+.resume-skills {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+.resume-skills li {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14.5px;
+}
+
+.resume-skills li:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.resume-skills strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.resume-skills span {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.resume-projects {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 28px;
+}
+
+.resume-honors {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+
+.resume-honors li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14.5px;
+}
+
+.resume-honors li:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+/* 右侧简历纸张：sticky 跟随，模拟纸张投影 */
+.resume-preview {
+  position: sticky;
+  top: calc(var(--nav-height) + 28px);
+}
+
+.resume-paper {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 0 20px 50px -28px rgba(0, 0, 0, 0.28);
+}
+
+.resume-paper img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.resume-preview-note {
+  margin: 14px 0 0;
+  text-align: center;
+  color: var(--faint);
+  font-size: 12.5px;
+}
+
 /* ============ 命令面板 ============ */
 
 .command-backdrop {
@@ -2012,12 +2183,31 @@ main {
     gap: 40px;
   }
 
+  .resume-layout {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 44px;
+  }
+
   .nav-menu {
     gap: 20px;
   }
 }
 
 @media (max-width: 833px) {
+  /* 简历页转单列：纸张放到正文上方，不再吸顶 */
+  .resume-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 46px;
+    padding-top: 52px;
+  }
+
+  .resume-preview {
+    position: static;
+    order: -1;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
   .nav-menu {
     display: none;
   }
@@ -2166,8 +2356,29 @@ main {
   .site-footer,
   .page-hero-inner,
   .page-hero-shot,
+  .resume-layout,
   .doc-layout {
     width: calc(100% - 36px);
+  }
+
+  /* 窄屏：技能表改成上下堆叠，避免名称列挤压描述 */
+  .resume-skills li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .resume-skills strong {
+    font-size: 13.5px;
+    color: var(--faint);
+  }
+
+  .resume-block h2 {
+    font-size: 19px;
+  }
+
+  .resume-period {
+    white-space: normal;
+    text-align: right;
   }
 
   .campus-metrics,

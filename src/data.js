@@ -14,12 +14,19 @@ export const media = {
     phone: asset('/media/campus-phone.webp'),
   },
   campusShots: (name) => asset(`/media/campus/${name}.webp`),
+  resume: {
+    preview: asset('/media/resume/resume.webp'),
+    previewSmall: asset('/media/resume/resume-900.webp'),
+    pdf: asset('/media/resume/lukeyu-resume.pdf'),
+  },
 };
 
 export const profile = {
   name: '卢柯宇',
   initials: 'LKY',
+  welcome: '欢迎来到我的个人网站',
   tagline: '把校园里的想法，做成真正能用的产品。',
+  heroIntro: '用工程能力承载想法，用设计判断组织信息，把课堂里的题目做成别人真的会打开来用的东西。',
   email: 'luky2124@mails.jlu.edu.cn',
   phone: '15144167675',
   city: '重庆',
@@ -36,11 +43,49 @@ export const heroFacts = [
   { label: '已交付项目', value: '6 个' },
 ];
 
+/* 简历页数据：与 D:\UserData\Desktop\简历制作\简历\卢柯宇简历_2026新版 保持一致。
+   改简历时这里要同步改，否则线上简历页会和 PDF 对不上。 */
+export const resume = {
+  updated: '2026 年 9 月',
+  summary:
+    '计算机科学与技术本科，独立交付多个 GitHub 项目，熟悉 C/C++ 算法系统，了解 HTML、CSS、JavaScript 与 React/TypeScript 等前端内容与 PHP/MySQL 全栈；熟练使用 GPT、DeepSeek、Kimi 等大模型完成需求拆解、架构设计、代码实现、测试与迭代，形成 AI 原生开发工作流。',
+  education: [
+    {
+      school: '吉林大学',
+      major: '计算机科学与技术 · 本科',
+      period: '2024.09 - 2028.06',
+      gpa: 'GPA 3.1 / 4',
+      points: [
+        '专业排名前 30%',
+        '核心课程：数据结构、算法设计与分析、操作系统、计算机组成原理、计算机系统结构',
+      ],
+    },
+  ],
+  skillGroups: [
+    ['Python 工程化', 'FastAPI、PostgreSQL/MySQL、Redis、Docker'],
+    ['LLM / RAG', 'Embedding、向量数据库、Rerank、Prompt Engineering'],
+    ['Agent', 'LangGraph、MCP、Tool Calling、Evaluation'],
+    ['算法 / 系统', 'C/C++、数据结构、机器学习、PyTorch、Transformer'],
+    ['后端', 'PHP、MySQL、REST API、Docker Compose、GitHub Actions'],
+    ['前端', 'HTML/CSS/JS、TypeScript、Vite、SSE'],
+  ],
+  honors: [
+    { title: '大学英语四级（CET-4）', period: '' },
+    { title: '吉林大学三等奖学金', period: '2024.09 - 2025.09' },
+    { title: '吉林大学校优秀学生干部', period: '2024.09 - 2025.09' },
+    { title: '数学建模省三', period: '2025.08 - 2025.09' },
+  ],
+  /* 简历页只列 PDF 里出现过的那几个项目，与投递版本保持一致。
+     顺序按简历原文：校园圈子 → Gomoku → 菜鸟驿站 → 个人作品集。 */
+  projectSlugs: ['campus', 'gomoku', 'station', 'portfolio'],
+};
+
 export const navItems = [
   { id: 'top', label: '首页', href: '#/' },
   { id: 'campus', label: '校园圈子', href: '#/campus' },
   { id: 'work', label: '全部作品', href: '#/#work' },
   { id: 'skills', label: '能力', href: '#/#skills' },
+  { id: 'resume', label: '简历', href: '#/resume' },
   { id: 'about', label: '关于', href: '#/#about' },
   { id: 'contact', label: '联系', href: '#/#contact' },
 ];

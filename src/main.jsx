@@ -30,9 +30,11 @@ import {
   capabilities,
   heroFacts,
   mailServices,
+  media,
   navItems,
   profile,
   projects,
+  resume,
   timeline,
 } from './data.js';
 import { goToSection, navigate, useRoute } from './router.js';
@@ -313,15 +315,14 @@ function Hero() {
   return (
     <section id="top" className="hero">
       <div className="hero-copy" data-parallax="0.05">
-        <h1 data-intro style={{ '--i': 0 }}>
-          {profile.name}
-          <span>
-            <SplitText text={profile.tagline} delay={180} step={26} />
-          </span>
+        <p className="hero-welcome" data-intro style={{ '--i': 0 }}>
+          {profile.welcome}
+        </p>
+        <h1 data-intro style={{ '--i': 1 }}>
+          <SplitText text={profile.tagline} delay={180} step={26} />
         </h1>
         <p className="hero-lede" data-intro style={{ '--i': 2 }}>
-          {profile.education}。用工程能力承载想法，用设计判断组织信息，
-          把课堂里的题目做成别人真的会打开来用的东西。
+          {profile.heroIntro}
         </p>
         <div className="hero-actions" data-intro style={{ '--i': 3 }}>
           <a className="btn btn--solid" data-magnetic href="#/campus" onClick={(e) => { e.preventDefault(); navigate('/campus'); }}>
@@ -1031,6 +1032,149 @@ function ProjectPage({ project, onCopyEmail }) {
   );
 }
 
+/* ============ 简历页 ============ */
+
+function ResumePage({ onCopyEmail }) {
+  usePageMotion([]);
+
+  // 按简历原文顺序取出对应项目（顺序与 PDF 一致，不是网站上的排列）
+  const resumeProjects = resume.projectSlugs
+    .map((slug) => (slug === campus.slug ? campus : projects.find((p) => p.slug === slug)))
+    .filter(Boolean);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, []);
+
+  return (
+    <>
+      <header className="page-hero">
+        <div className="page-hero-inner">
+          <a className="back-link" href="#/" onClick={(e) => { e.preventDefault(); navigate('/'); }}>
+            <ArrowLeft size={15} />
+            返回首页
+          </a>
+          <p className="eyebrow">简历 · 更新于 {resume.updated}</p>
+          <h1>我的简历</h1>
+          <p className="page-hero-lede">{resume.summary}</p>
+          <div className="hero-actions hero-actions--left">
+            <a className="btn btn--solid" data-magnetic href={media.resume.pdf} download="卢柯宇简历.pdf">
+              下载 PDF 简历
+              <ArrowDown size={16} />
+            </a>
+            <a className="btn btn--plain" href={`mailto:${profile.email}`}>
+              <Mail size={16} />
+              {profile.email}
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <div className="resume-layout">
+        <article className="doc-body resume-body">
+          <section className="resume-block" id="resume-education" data-reveal>
+            <h2>教育经历</h2>
+            {resume.education.map((item) => (
+              <div className="resume-edu" key={item.school}>
+                <div className="resume-row">
+                  <strong className="resume-title">{item.school}</strong>
+                  <span className="resume-period">{item.period}</span>
+                </div>
+                <p className="resume-sub">{item.major} · {item.gpa}</p>
+                <ul className="point-list">
+                  {item.points.map((p) => (
+                    <li key={p}>
+                      <Check size={15} />
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+
+          <section className="resume-block" id="resume-skills" data-reveal>
+            <h2>专业技能</h2>
+            <ul className="resume-skills">
+              {resume.skillGroups.map(([name, detail]) => (
+                <li key={name}>
+                  <strong>{name}</strong>
+                  <span>{detail}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="resume-block" id="resume-projects" data-reveal>
+            <h2>项目经历</h2>
+            <ul className="resume-projects">
+              {resumeProjects.map((p) => (
+                <li key={p.slug}>
+                  <div className="resume-row">
+                    <a
+                      className="resume-title resume-title--link"
+                      href={`#/${p.slug}`}
+                      onClick={(e) => { e.preventDefault(); navigate(`/${p.slug}`); }}
+                    >
+                      {p.title || `${p.name} ${p.en}`}
+                      <ChevronRight size={15} />
+                    </a>
+                    <span className="resume-period">{p.period}</span>
+                  </div>
+                  <p className="resume-sub">{p.role}</p>
+                  {p.lede ? <p className="resume-desc">{p.lede}</p> : null}
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="resume-block" id="resume-honors" data-reveal>
+            <h2>证书与校园</h2>
+            <ul className="resume-honors">
+              {resume.honors.map((h) => (
+                <li key={h.title}>
+                  <span>{h.title}</span>
+                  {h.period ? <span className="resume-period">{h.period}</span> : null}
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <div className="doc-end" data-reveal>
+            <h3>需要 PDF 版本？</h3>
+            <p>上面这份内容也有排好版的 PDF，投递或转发时用它可以保留原始排版。</p>
+            <div className="hero-actions hero-actions--left">
+              <a className="btn btn--solid" href={media.resume.pdf} download="卢柯宇简历.pdf">
+                下载 PDF
+                <ArrowDown size={16} />
+              </a>
+              <button className="btn btn--plain" type="button" onClick={onCopyEmail}>
+                <Copy size={16} />
+                复制邮箱
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <aside className="resume-preview" data-reveal="img">
+          <div className="resume-paper">
+            <img
+              src={media.resume.preview}
+              srcSet={`${media.resume.previewSmall} 900w, ${media.resume.preview} 1588w`}
+              sizes="(max-width: 1068px) 92vw, 380px"
+              alt="卢柯宇简历预览"
+              loading="lazy"
+            />
+          </div>
+          <p className="resume-preview-note">简历原版预览 · 共 1 页 A4</p>
+        </aside>
+      </div>
+
+      <SiteFooter onCopyEmail={onCopyEmail} />
+    </>
+  );
+}
+
 /* ============ 命令面板 ============ */
 
 function CommandMenu({ open, onClose, onCopyEmail, onThemeChange, theme }) {
@@ -1041,6 +1185,7 @@ function CommandMenu({ open, onClose, onCopyEmail, onThemeChange, theme }) {
     () => [
       { id: 'home', label: '回到首页', run: () => navigate('/') },
       { id: 'campus', label: '校园圈子 · 完整项目详解', run: () => navigate('/campus') },
+      { id: 'resume', label: '我的简历 · 在线版与 PDF', run: () => navigate('/resume') },
       { id: 'work', label: '首页 · 全部作品', run: () => goToSection('work') },
       { id: 'skills', label: '首页 · 能力与成绩', run: () => goToSection('skills') },
       { id: 'about', label: '首页 · 关于与时间线', run: () => goToSection('about') },
@@ -1175,6 +1320,8 @@ function App() {
     page = <HomePage onCopyEmail={handleCopyEmail} />;
   } else if (path === 'campus') {
     page = <CampusPage onCopyEmail={handleCopyEmail} />;
+  } else if (path === 'resume') {
+    page = <ResumePage onCopyEmail={handleCopyEmail} />;
   } else if (project) {
     page = <ProjectPage project={project} onCopyEmail={handleCopyEmail} />;
   } else {
@@ -1205,4 +1352,10 @@ function App() {
   );
 }
 
-createRoot(document.getElementById('root')).render(<App />);
+// 具名导出供 scripts/smoke-render.mjs 做服务端渲染冒烟测试使用；
+// 浏览器里仍走下面的 createRoot 挂载，不受影响。
+export { App };
+
+if (typeof document !== 'undefined' && document.getElementById('root')) {
+  createRoot(document.getElementById('root')).render(<App />);
+}
