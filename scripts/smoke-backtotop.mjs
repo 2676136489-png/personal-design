@@ -2,10 +2,10 @@
    SSR 只能验证「渲染出来了」，验证不了「滚动时显隐是否正确」，
    所以这里补三类检查：
    1) 组件在真实页面里的结构（经 Vite 转译后挂载）
-   2) 判据逻辑：isIntersecting 取反
+   2) 判据逻辑：由 scrollY 与阈值算出显隐
    3) 样式契约：居中、贴底、层级、reduced-motion 降级
 
-   本机无浏览器，IntersectionObserver 的浏览器实况无法实测，
+   本机无浏览器，真实滚动事件无法实测，
    因此把「显隐判据」和「样式开关」拆开各自断言，任一侧写错都能被发现。 */
 
 import { createServer } from 'vite';
@@ -114,6 +114,9 @@ const server = await createServer({
 
 try {
   const main = await server.ssrLoadModule('/src/main.jsx');
+  const motion = await server.ssrLoadModule('/src/motion.jsx');
+  const shouldShow = motion.shouldShowBackToTop;
+  const thresholdOf = motion.backToTopThreshold;
   const App = main.App ?? main.default;
   const render = (hash) => {
     currentHash = hash;
@@ -138,10 +141,10 @@ try {
     );
   }
 
-  // 判据逻辑：哨兵在视野内=页面顶端=隐藏；不在=已下滚=显形
-  const derive = (isIntersecting) => !isIntersecting;
-  expect('顶端时隐藏', derive(true) === false);
-  expect('下滚后显形', derive(false) === true);
+  // 判据逻辑：直接由 scrollY 与阈值决定（上一版用 fixed 哨兵是错的）
+  expect('顶端时隐藏', shouldShow(0, 900) === false);
+  expect('下滚后显形', shouldShow(500, 900) === true);
+  expect('未超阈值仍隐藏', shouldShow(50, 900) === false);
 
   const css = await (
     await import('node:fs/promises')
@@ -162,13 +165,22 @@ try {
     ),
   );
 
-  // hook 本体：确认用的是 fixed 哨兵（不受 body overflow 裁剪）
+  // hook 本体：必须走 scroll + rAF，不再用 fixed 哨兵
   const motionSrc = await (
     await import('node:fs/promises')
   ).readFile(new URL('../src/motion.jsx', import.meta.url), 'utf8');
-  expect('哨兵使用 fixed 定位', /position:fixed;top:0;left:0/.test(motionSrc));
-  expect('有 IntersectionObserver 兜底', /'IntersectionObserver' in window/.test(motionSrc));
-  expect('卸载时移除哨兵', /sentinel\.remove\(\)/.test(motionSrc));
+  expect('监听 scroll 事件', /addEventListener\('scroll'/.test(motionSrc));
+  expect('passive 监听', /'scroll',\s*onScroll,\s*\{\s*passive:\s*true/.test(motionSrc));
+  expect('用 rAF 合帧', /requestAnimationFrame/.test(motionSrc));
+  expect('只在翻转时 setState', /if \(next !== current\)/.test(motionSrc));
+  expect('卸载移除 scroll 监听', /removeEventListener\('scroll', onScroll\)/.test(motionSrc));
+  expect('卸载取消 rAF', /cancelAnimationFrame/.test(motionSrc));
+  expect('监听 resize 重判定', /addEventListener\('resize'/.test(motionSrc));
+  expect('小视口用 120px 下限', thresholdOf(500) === 120);
+  expect('大视口取 12%', thresholdOf(1200) === 144);
+  // 防回归：不能再退回上一版的 fixed 哨兵方案
+  expect('不再使用 fixed 哨兵', !/position:fixed;top:0;left:0/.test(motionSrc));
+  expect('不再靠 IntersectionObserver 判显隐', !/observer\.observe\(sentinel\)/.test(motionSrc));
 } catch (err) {
   checks.push([`抛错: ${err.message}`, false]);
 } finally {

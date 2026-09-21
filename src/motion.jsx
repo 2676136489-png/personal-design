@@ -432,43 +432,57 @@ export function SplitText({ text, delay = 0, step = 34, className = '' }) {
 
 /* ============================================================
    6. 回到顶部
-   离开页面顶端就显形。
+   离开页面顶端就显形；点一下平滑回顶。
 
-   实现要点：用 position:fixed 的哨兵元素贴住视口顶部，交给
-   IntersectionObserver 判断它在不在视野里，而不是监听 scroll 读
-   scrollY。两个好处——不抢滚动引擎的布局计算；fixed 元素不受
-   祖先 overflow 裁剪影响（body 上有 overflow-x:hidden）。
+   实现方式：直接监听 scroll 读 scrollY，位移在 rAF 里提交。
+
+   为什么不用 IntersectionObserver + 哨兵元素（曾这么写过，是错的）：
+   - position:fixed 的哨兵永远钉在视口上、不随页面滚动移动，
+     isIntersecting 恒为 true，按钮永远不出现。
+   - 换 position:absolute 又要依赖祖先的定位上下文，而本站
+     body 上有 overflow-x:hidden（会隐式变成 overflow-y:auto 成为
+     裁剪容器），absolute 元素有被裁掉或错位锚定的风险。
+
+   读 scrollY 本身很轻，配合 rAF 合帧就足够；不引入这类定位耦合。
    ============================================================ */
+
+/* 显隐判据：超过视口 12% 或 120px（取大者）就算离开顶端。
+   抽成具名导出，方便 scripts/smoke-backtotop.mjs 直接断言。 */
+export const backToTopThreshold = (viewportHeight) =>
+  Math.max(120, viewportHeight * 0.12);
+
+export const shouldShowBackToTop = (scrollTop, viewportHeight) =>
+  scrollTop > backToTopThreshold(viewportHeight);
 
 export function useBackToTop() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const sentinel = document.createElement('div');
-    sentinel.setAttribute('aria-hidden', 'true');
-    // fixed + 贴在视口最顶端：滚动到 0 时它在视野内，往下滚就离开
-    sentinel.style.cssText =
-      'position:fixed;top:0;left:0;width:1px;height:1px;pointer-events:none;opacity:0;';
-    document.body.appendChild(sentinel);
+    let frame = 0;
+    let current = false;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => setVisible(!entry.isIntersecting),
-      { threshold: 0 },
-    );
-    observer.observe(sentinel);
+    const commit = () => {
+      frame = 0;
+      const next = shouldShowBackToTop(window.scrollY, window.innerHeight);
+      // 只在真正翻转时 setState，避免每帧都触发 React 重渲染
+      if (next !== current) {
+        current = next;
+        setVisible(next);
+      }
+    };
 
-    // 兜底：老浏览器没有 IntersectionObserver 时退回滚动监听
-    let onScroll = null;
-    if (!('IntersectionObserver' in window)) {
-      onScroll = () => setVisible(window.scrollY > 80);
-      window.addEventListener('scroll', onScroll, { passive: true });
-      onScroll();
-    }
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(commit);
+    };
+
+    commit();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
 
     return () => {
-      observer.disconnect();
-      sentinel.remove();
-      if (onScroll) window.removeEventListener('scroll', onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
     };
   }, []);
 
