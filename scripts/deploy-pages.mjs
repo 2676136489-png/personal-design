@@ -75,7 +75,7 @@ run('git add -A', outDir);
 
 const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
 try {
-  run(`git commit -m "Deploy to GitHub Pages - ${stamp}"`, outDir);
+  run(`git commit -m "更新线上页面 ${stamp}"`, outDir);
 } catch {
   console.log('· 没有内容变化，跳过提交');
 }
