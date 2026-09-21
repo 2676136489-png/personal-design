@@ -1185,22 +1185,12 @@ section {
   transform: translateY(34px);
 }
 
-.page-hero--compact .page-hero-shot {
-  transform: none;
-  padding-top: 40px;
-  padding-bottom: 40px;
-}
-
 .page-hero-shot img {
   width: 100%;
   border-radius: var(--radius-lg);
   border: 1px solid var(--line);
   background: var(--surface);
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.1);
-}
-
-.page-hero--compact .page-hero-shot img {
-  box-shadow: none;
 }
 
 /* 指标条 */
@@ -1429,6 +1419,126 @@ section {
   height: 5px;
   border-radius: 50%;
   background: var(--accent);
+}
+
+/* ============ 文档表格 ============ */
+
+.doc-table {
+  margin: 32px 0 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.doc-table table {
+  width: 100%;
+  min-width: 440px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.doc-table th {
+  padding: 12px 18px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  background: var(--surface-alt);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.doc-table td {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--line);
+  line-height: 1.55;
+  vertical-align: top;
+}
+
+.doc-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.doc-table td:first-child {
+  font-weight: 500;
+}
+
+/* 数值列等宽，避免 100 / 1000 / 10000 参差 */
+.doc-table td:not(:first-child) {
+  font-variant-numeric: tabular-nums;
+}
+
+.doc-table figcaption {
+  margin: 0;
+  padding: 12px 18px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-alt);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ============ 代码块 ============ */
+
+.doc-code {
+  margin: 32px 0 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #1d1d1f;
+}
+
+.doc-code-lang {
+  margin: 0;
+  padding: 10px 18px 0;
+  color: #86868b;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+}
+
+.doc-code pre {
+  margin: 0;
+  padding: 16px 18px 18px;
+  overflow-x: auto;
+}
+
+.doc-code code {
+  display: block;
+  color: #f5f5f7;
+  font-size: 13px;
+  line-height: 1.7;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  white-space: pre;
+}
+
+.doc-code .code-line {
+  display: block;
+  min-height: 1.7em;
+}
+
+.doc-code figcaption:not(.doc-code-lang) {
+  margin: 0;
+  padding: 12px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  color: #a1a1a6;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ============ 详情页补充说明 ============ */
+
+.page-hero-note {
+  margin: 18px 0 0;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.6;
 }
 
 .doc-end {
@@ -2008,10 +2118,6 @@ main {
     transform: translateY(24px);
   }
 
-  .page-hero--compact .page-hero-shot {
-    transform: none;
-  }
-
   .metrics-strip {
     margin-top: 58px;
   }
@@ -2067,6 +2173,31 @@ main {
   .campus-metrics,
   .metrics-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .doc-table {
+    border-radius: var(--radius-sm);
+  }
+
+  .doc-table th,
+  .doc-table td,
+  .doc-table figcaption {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .doc-table table {
+    min-width: 360px;
+    font-size: 13px;
+  }
+
+  .doc-code code {
+    font-size: 12px;
+  }
+
+  .page-hero-note {
+    padding: 11px 14px;
+    font-size: 13px;
   }
 
   .campus-metrics strong,

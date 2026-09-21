@@ -591,16 +591,7 @@ function ContactSection({ onCopyEmail }) {
 
 function HomePage({ onCopyEmail }) {
   usePageMotion([]);
-
-  useEffect(() => {
-    const anchor = window.location.hash.split('#')[2];
-    if (!anchor) return undefined;
-    const timer = window.setTimeout(() => {
-      const el = document.getElementById(anchor);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 160);
-    return () => window.clearTimeout(timer);
-  }, []);
+  useAnchorScroll();
 
   return (
     <>
@@ -663,31 +654,152 @@ function ChapterBlocks({ blocks }) {
         </div>
       );
     }
+    if (block.type === 'table') {
+      return (
+        <figure className="doc-table" key={i} data-reveal>
+          <table>
+            <thead>
+              <tr>
+                {block.head.map((h) => (
+                  <th key={h}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {block.rows.map((row) => (
+                <tr key={row[0]}>
+                  {row.map((cell, ci) => (
+                    <td key={ci}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {block.caption ? <figcaption>{block.caption}</figcaption> : null}
+        </figure>
+      );
+    }
+    if (block.type === 'code') {
+      return (
+        <figure className="doc-code" key={i} data-reveal>
+          {block.lang ? <figcaption className="doc-code-lang">{block.lang}</figcaption> : null}
+          <pre>
+            <code>
+              {block.lines.map((line, li) => (
+                <span className="code-line" key={li}>
+                  {line || ' '}
+                </span>
+              ))}
+            </code>
+          </pre>
+          {block.caption ? <figcaption>{block.caption}</figcaption> : null}
+        </figure>
+      );
+    }
     return null;
   });
 }
 
-function CampusPage({ onCopyEmail }) {
-  const [activeChapter, setActiveChapter] = useState(campus.chapters[0].id);
+/* 章节锚点：路由为 /slug，锚点段落挂在第二个 # 后面 */
+function docAnchor(slug, id) {
+  return `#/${slug}#${id}`;
+}
 
-  usePageMotion([]);
+/* 稳定引用，避免 chapters 为空时 effect 反复重挂 */
+const NO_CHAPTERS = [];
 
+/* 锚点滚动：进入带锚点的页面时滚动到位，点击目录时跟随 hashchange 再次滚动。
+   HomePage、CampusPage、ProjectPage 共用，缺了 hashchange 监听会导致
+   目录点击只改 URL 却不滚动。 */
+function useAnchorScroll() {
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    const scrollToAnchor = () => {
+      const anchor = window.location.hash.split('#')[2];
+      if (!anchor) return;
+      const el = document.getElementById(anchor);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    const timer = window.setTimeout(scrollToAnchor, 160);
+    window.addEventListener('hashchange', scrollToAnchor);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('hashchange', scrollToAnchor);
+    };
   }, []);
+}
+
+/* 滚动时高亮当前所在章节 */
+function useChapterScroll(chapters) {
+  const [active, setActive] = useState(chapters[0]?.id);
 
   useEffect(() => {
     const onScroll = () => {
-      let current = campus.chapters[0].id;
-      campus.chapters.forEach((c) => {
+      let current = chapters[0]?.id;
+      chapters.forEach((c) => {
         const el = document.getElementById(c.id);
         if (el && el.getBoundingClientRect().top <= 180) current = c.id;
       });
-      setActiveChapter(current);
+      setActive(current);
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, [chapters]);
+
+  return active;
+}
+
+function DocToc({ chapters, activeId, slug }) {
+  return (
+    <aside className="doc-toc" aria-label="章节目录">
+      <p className="toc-title">目录</p>
+      {chapters.map((c) => (
+        <a key={c.id} href={docAnchor(slug, c.id)} data-active={activeId === c.id}>
+          <span>{c.kicker}</span>
+          {c.nav}
+        </a>
+      ))}
+    </aside>
+  );
+}
+
+function DocChapters({ chapters }) {
+  return chapters.map((c) => (
+    <section className="doc-chapter" id={c.id} key={c.id}>
+      <p className="chapter-kicker">{c.kicker}</p>
+      <h2>{c.title}</h2>
+      <ChapterBlocks blocks={c.blocks} />
+    </section>
+  ));
+}
+
+function MetricsStrip({ metrics }) {
+  if (!metrics || !metrics.length) return null;
+  return (
+    <section className="metrics-strip" data-reveal="scale">
+      {metrics.map((m) => {
+        /* 仅对「可选前缀 + 数字 + 可选百分号」的形式启用滚动计数，
+           像 15×15 这种复合写法保持静态，避免滚一半的怪异效果 */
+        const countable = /^[^\d]*\d+(?:\.\d+)?%?$/.test(m.value);
+        return (
+          <div key={m.label}>
+            <strong {...(countable ? { 'data-count': m.value } : null)}>{m.value}</strong>
+            <span>{m.label}</span>
+          </div>
+        );
+      })}
+    </section>
+  );
+}
+
+function CampusPage({ onCopyEmail }) {
+  const activeChapter = useChapterScroll(campus.chapters);
+
+  usePageMotion([]);
+  useAnchorScroll();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
   }, []);
 
   return (
@@ -717,34 +829,13 @@ function CampusPage({ onCopyEmail }) {
         </div>
       </header>
 
-      <section className="metrics-strip" data-reveal="scale">
-        {campus.metrics.map((m) => (
-          <div key={m.label}>
-            <strong data-count={m.value}>{m.value}</strong>
-            <span>{m.label}</span>
-          </div>
-        ))}
-      </section>
+      <MetricsStrip metrics={campus.metrics} />
 
       <div className="doc-layout">
-        <aside className="doc-toc" aria-label="章节目录">
-          <p className="toc-title">目录</p>
-          {campus.chapters.map((c) => (
-            <a key={c.id} href={`#/campus#${c.id}`} data-active={activeChapter === c.id}>
-              <span>{c.kicker}</span>
-              {c.nav}
-            </a>
-          ))}
-        </aside>
+        <DocToc chapters={campus.chapters} activeId={activeChapter} slug="campus" />
 
         <article className="doc-body">
-          {campus.chapters.map((c) => (
-            <section className="doc-chapter" id={c.id} key={c.id}>
-              <p className="chapter-kicker">{c.kicker}</p>
-              <h2>{c.title}</h2>
-              <ChapterBlocks blocks={c.blocks} />
-            </section>
-          ))}
+          <DocChapters chapters={campus.chapters} />
 
           <div className="doc-end" data-reveal>
             <h3>想进一步了解？</h3>
@@ -798,7 +889,10 @@ function CampusPage({ onCopyEmail }) {
 /* ============ 其他项目详情页 ============ */
 
 function ProjectPage({ project, onCopyEmail }) {
+  const activeChapter = useChapterScroll(project?.chapters ?? NO_CHAPTERS);
+
   usePageMotion([project?.id]);
+  useAnchorScroll();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -815,27 +909,49 @@ function ProjectPage({ project, onCopyEmail }) {
     );
   }
 
+  const chapters = project.chapters || [];
   const others = projects.filter((p) => p.id !== project.id).slice(0, 3);
 
   return (
     <>
-      <header className="page-hero page-hero--compact">
+      <header className="page-hero">
         <div className="page-hero-inner">
           <a className="back-link" href="#/" onClick={(e) => { e.preventDefault(); navigate('/'); }}>
             <ArrowLeft size={15} />
             返回首页
           </a>
-          <p className="eyebrow">{project.tag} · {project.period}</p>
+          <p className="eyebrow">{project.category} · {project.period}</p>
           <h1>{project.title}</h1>
-          <p className="page-hero-lede">{project.description}</p>
+          <p className="page-hero-lede">{project.lede || project.description}</p>
+          {project.note ? <p className="page-hero-note">{project.note}</p> : null}
+          <div className="page-hero-meta">
+            {project.role ? <span>{project.role}</span> : null}
+            {project.stack ? <span>{project.stack}</span> : null}
+          </div>
           <div className="hero-actions hero-actions--left">
             {project.github ? (
-              <a className="btn btn--solid" href={project.github} target="_blank" rel="noreferrer noopener">
+              <a
+                className="btn btn--solid"
+                data-magnetic
+                href={project.github}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
                 <Github size={16} />
                 GitHub 源码
               </a>
             ) : null}
-            <MailButton className="btn btn--plain" />
+            {project.site ? (
+              <a
+                className="btn btn--plain"
+                href={project.site}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                在线访问
+                <ArrowUpRight size={16} />
+              </a>
+            ) : null}
           </div>
         </div>
         <div className="page-hero-shot" data-parallax="0.07">
@@ -843,32 +959,40 @@ function ProjectPage({ project, onCopyEmail }) {
         </div>
       </header>
 
-      <div className="doc-layout doc-layout--single">
+      <MetricsStrip metrics={project.metrics} />
+
+      <div className={`doc-layout${chapters.length ? '' : ' doc-layout--single'}`}>
+        {chapters.length ? (
+          <DocToc chapters={chapters} activeId={activeChapter} slug={project.slug} />
+        ) : null}
+
         <article className="doc-body">
-          <section className="doc-chapter">
-            <p className="chapter-kicker">01</p>
-            <h2>挑战</h2>
-            <p className="prose">{project.detail.challenge}</p>
-          </section>
+          {chapters.length ? (
+            <DocChapters chapters={chapters} />
+          ) : (
+            <section className="doc-chapter">
+              <p className="prose">{project.description}</p>
+            </section>
+          )}
 
-          <section className="doc-chapter">
-            <p className="chapter-kicker">02</p>
-            <h2>做法</h2>
-            <p className="prose">{project.detail.solution}</p>
-          </section>
-
-          <section className="doc-chapter">
-            <p className="chapter-kicker">03</p>
-            <h2>核心模块</h2>
-            <ul className="point-list">
-              {project.detail.modules.map((m) => (
-                <li key={m}>
-                  <Check size={15} />
-                  <span>{m}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
+          <div className="doc-end" data-reveal>
+            <h3>想进一步了解？</h3>
+            <p>源码、设计与实现细节都在仓库里，也欢迎直接聊。</p>
+            <div className="hero-actions hero-actions--left">
+              {project.github ? (
+                <a
+                  className="btn btn--solid"
+                  href={project.github}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <Github size={16} />
+                  打开仓库
+                </a>
+              ) : null}
+              <MailButton className="btn btn--plain" />
+            </div>
+          </div>
         </article>
       </div>
 

@@ -1,6 +1,8 @@
 node_modules/
 dist/
 dist-pages/
+dist-pages-new/
+dist-pages-old*/
 screenshots/
 .vite/
 .vite-out.log
