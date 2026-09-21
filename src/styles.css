@@ -1757,6 +1757,64 @@ section {
   font-size: 12.5px;
 }
 
+/* ============ 回到顶部 ============ */
+
+.back-to-top {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  z-index: 90;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--page);
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 8px 26px -12px rgba(0, 0, 0, 0.28);
+  /* 默认藏起来：往下挪一点并淡出，显形时再回到原位 */
+  opacity: 0;
+  transform: translate3d(-50%, 14px, 0);
+  pointer-events: none;
+  transition:
+    opacity 320ms var(--ease-out-expo),
+    transform 420ms var(--ease-spring),
+    border-color 220ms var(--ease),
+    color 220ms var(--ease);
+}
+
+.back-to-top[data-visible='true'] {
+  opacity: 1;
+  transform: translate3d(-50%, 0, 0);
+  pointer-events: auto;
+}
+
+.back-to-top svg {
+  transition: transform 320ms var(--ease-out-expo);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .back-to-top:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .back-to-top:hover svg {
+    transform: translateY(-2px);
+  }
+}
+
+.back-to-top:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 /* ============ 命令面板 ============ */
 
 .command-backdrop {
@@ -2459,6 +2517,18 @@ main {
     padding-top: 52px;
   }
 
+  /* 窄屏只留箭头，文字省略；位置略微上移避开底部手势条 */
+  .back-to-top {
+    bottom: 20px;
+    padding: 0;
+    width: 42px;
+    justify-content: center;
+  }
+
+  .back-to-top span {
+    display: none;
+  }
+
   .hero-facts {
     padding: 26px 0;
   }
@@ -2636,6 +2706,17 @@ main {
   }
 
   [data-magnetic] {
+    transform: none;
+  }
+
+  /* 回到顶部只保留淡入淡出，去掉位移与悬停抬升 */
+  .back-to-top {
+    transform: translate3d(-50%, 0, 0);
+    transition: opacity 200ms linear, border-color 220ms var(--ease), color 220ms var(--ease);
+  }
+
+  .back-to-top svg,
+  .back-to-top:hover svg {
     transform: none;
   }
 

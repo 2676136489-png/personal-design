@@ -129,6 +129,17 @@ try {
 
   const gomoku = render('#/gomoku');
   expect('项目详情页仍正常', gomoku.includes('Gomoku'));
+
+  // 回到顶部按钮：所有页面都应渲染，且初始为隐藏态
+  const hasBackToTop = (html) =>
+    html.includes('class="back-to-top"') &&
+    html.includes('data-visible="false"') &&
+    html.includes('回到页面顶端');
+  expect('首页有回到顶部按钮', hasBackToTop(home));
+  expect('简历页有回到顶部按钮', hasBackToTop(resumeHtml));
+  expect('校园圈子页有回到顶部按钮', hasBackToTop(campusHtml));
+  expect('项目详情页有回到顶部按钮', hasBackToTop(gomoku));
+  expect('回到顶部初始不可聚焦', home.includes('tabindex="-1"'));
 } catch (err) {
   checks.push([`渲染抛错: ${err.message}`, false]);
 } finally {

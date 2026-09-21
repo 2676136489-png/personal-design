@@ -4,6 +4,7 @@ import {
   ArrowDown,
   ArrowLeft,
   ArrowRight,
+  ArrowUp,
   ArrowUpRight,
   Award,
   BookOpen,
@@ -38,7 +39,7 @@ import {
   timeline,
 } from './data.js';
 import { goToSection, navigate, useRoute } from './router.js';
-import { SplitText, usePageMotion, useSlidingIndicator } from './motion.jsx';
+import { SplitText, useBackToTop, usePageMotion, useSlidingIndicator } from './motion.jsx';
 import './styles.css';
 
 const SECTION_IDS = ['top', 'work', 'skills', 'about', 'contact'];
@@ -1175,6 +1176,27 @@ function ResumePage({ onCopyEmail }) {
   );
 }
 
+/* ============ 回到顶部 ============ */
+
+function BackToTop() {
+  const { visible, toTop } = useBackToTop();
+
+  return (
+    <button
+      className="back-to-top"
+      type="button"
+      aria-label="回到页面顶端"
+      data-visible={visible}
+      tabIndex={visible ? 0 : -1}
+      aria-hidden={!visible}
+      onClick={toTop}
+    >
+      <ArrowUp size={17} />
+      <span>顶部</span>
+    </button>
+  );
+}
+
 /* ============ 命令面板 ============ */
 
 function CommandMenu({ open, onClose, onCopyEmail, onThemeChange, theme }) {
@@ -1347,6 +1369,7 @@ function App() {
         onThemeChange={setTheme}
         theme={theme}
       />
+      <BackToTop />
       <Toast toast={toast} onDismiss={setToast} />
     </div>
   );

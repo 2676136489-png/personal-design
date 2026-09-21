@@ -429,3 +429,52 @@ export function SplitText({ text, delay = 0, step = 34, className = '' }) {
     </span>
   );
 }
+
+/* ============================================================
+   6. 回到顶部
+   离开页面顶端就显形。
+
+   实现要点：用 position:fixed 的哨兵元素贴住视口顶部，交给
+   IntersectionObserver 判断它在不在视野里，而不是监听 scroll 读
+   scrollY。两个好处——不抢滚动引擎的布局计算；fixed 元素不受
+   祖先 overflow 裁剪影响（body 上有 overflow-x:hidden）。
+   ============================================================ */
+
+export function useBackToTop() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const sentinel = document.createElement('div');
+    sentinel.setAttribute('aria-hidden', 'true');
+    // fixed + 贴在视口最顶端：滚动到 0 时它在视野内，往下滚就离开
+    sentinel.style.cssText =
+      'position:fixed;top:0;left:0;width:1px;height:1px;pointer-events:none;opacity:0;';
+    document.body.appendChild(sentinel);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(sentinel);
+
+    // 兜底：老浏览器没有 IntersectionObserver 时退回滚动监听
+    let onScroll = null;
+    if (!('IntersectionObserver' in window)) {
+      onScroll = () => setVisible(window.scrollY > 80);
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
+
+    return () => {
+      observer.disconnect();
+      sentinel.remove();
+      if (onScroll) window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
+  const toTop = () => {
+    window.scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' });
+  };
+
+  return { visible, toTop };
+}
