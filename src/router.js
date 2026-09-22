@@ -34,3 +34,19 @@ export function goToSection(id) {
   const target = document.getElementById(id);
   if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+/* 统一的导航入口：既能去某个页面，也能去首页的某个区块。
+   导航栏的子项里有「项目详情页」和「首页区块」两种目标，交给这里分派，
+   免得每个子项各自判断一遍路由状态。 */
+export function goToNavTarget(target) {
+  if (target === '/') {
+    navigate('/');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+  if (target.startsWith('/#')) {
+    goToSection(target.slice(2));
+    return;
+  }
+  navigate(target);
+}

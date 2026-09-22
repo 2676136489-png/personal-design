@@ -124,6 +124,16 @@ try {
   expect('导航中关于排在能力之前', navAbout > -1 && navSkills > -1 && navAbout < navSkills);
 
   const resumeHtml = render('#/resume');
+  /* 导航是全站共享的，下拉里也列着所有项目名。
+     所以「简历正文里没有某个项目」这类断言必须把 <main> 摘出来看，
+     否则会被导航里的同名文字污染（踩过一次）。 */
+  const bodyOf = (html) => {
+    const start = html.indexOf('<main');
+    const end = html.lastIndexOf('</main>');
+    return start > -1 && end > start ? html.slice(start, end) : html;
+  };
+  const resumeBody = bodyOf(resumeHtml);
+
   expect('简历页含标题', resumeHtml.includes('我的简历'));
   expect('简历页含下载按钮', resumeHtml.includes('下载 PDF 简历'));
   expect('简历页含教育经历', resumeHtml.includes('教育经历'));
@@ -134,9 +144,9 @@ try {
   expect('简历页含 PDF 链接', resumeHtml.includes('lukeyu-resume.pdf'));
   expect(
     '简历页含 4 个项目',
-    ['校园圈子', 'Gomoku', '菜鸟驿站', '个人作品集'].every((k) => resumeHtml.includes(k)),
+    ['校园圈子', 'Gomoku', '菜鸟驿站', '个人作品集'].every((k) => resumeBody.includes(k)),
   );
-  expect('简历页不含 Wiki 插件', !resumeHtml.includes('iGEM'));
+  expect('简历正文不含 Wiki 插件', !resumeBody.includes('iGEM'));
   expect('简历页含学校', resumeHtml.includes('吉林大学'));
   expect('简历页含技能分组', resumeHtml.includes('LangGraph'));
 

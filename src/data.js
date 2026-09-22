@@ -80,12 +80,148 @@ export const resume = {
   projectSlugs: ['campus', 'gomoku', 'station', 'portfolio'],
 };
 
+/* 导航结构。
+   有 columns 的项在悬停/聚焦时展开全宽面板（苹果官网那种）。
+   面板由若干列组成，每列一个标题 + 一组条目；每组再细分成
+   featured（粗体大字）和普通链接两种层级。
+
+   条目的 href 支持两种目标：#/xxx 是独立页面，#/#xxx 是首页的某个区块。
+   顺序要和 main.jsx 里首页各 section 的渲染顺序保持一致。 */
 export const navItems = [
   { id: 'top', label: '首页', href: '#/' },
-  { id: 'campus', label: '校园圈子', href: '#/campus' },
-  { id: 'work', label: '全部作品', href: '#/#work' },
-  { id: 'about', label: '关于', href: '#/#about' },
-  { id: 'skills', label: '能力', href: '#/#skills' },
+  {
+    id: 'campus',
+    label: '校园圈子',
+    href: '#/campus',
+    columns: [
+      {
+        title: '进入项目',
+        featured: [
+          { label: '项目详解', href: '#/campus' },
+          { label: '在线站点', href: 'https://www.lucky-campus.top', external: true },
+        ],
+        links: [{ label: 'GitHub 仓库', href: 'https://github.com/2676136489-png/campus', external: true }],
+      },
+      {
+        title: '六个章节',
+        links: [
+          { label: '项目缘起', href: '#/campus#background' },
+          { label: '学生端', href: '#/campus#students' },
+          { label: 'AI 助手', href: '#/campus#assistant' },
+          { label: '管理后台', href: '#/campus#admin' },
+          { label: '技术架构', href: '#/campus#stack' },
+          { label: '工程复盘', href: '#/campus#lessons' },
+        ],
+      },
+      {
+        title: '项目数据',
+        links: [
+          { label: '19 位实名学生', href: '#/campus' },
+          { label: '22 条动态', href: '#/campus' },
+          { label: '75 条私信记录', href: '#/campus' },
+          { label: '39 条审计日志', href: '#/campus' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'work',
+    label: '全部作品',
+    href: '#/#work',
+    columns: [
+      {
+        title: '作品',
+        featured: [{ label: '全部作品', href: '#/#work' }],
+        links: [
+          { label: 'Transformer Gomoku 对弈 Bot', href: '#/gomoku' },
+          { label: '菜鸟驿站快递管理系统', href: '#/station' },
+          { label: 'iGEM Glass Wiki 插件', href: '#/wiki' },
+          { label: '个人作品集', href: '#/portfolio' },
+          { label: '校园服务视觉系统', href: '#/identity' },
+        ],
+      },
+      {
+        title: '按方向',
+        links: [
+          { label: '算法系统', href: '#/#work' },
+          { label: '系统设计', href: '#/#work' },
+          { label: 'Web 组件', href: '#/#work' },
+          { label: '前端开发', href: '#/#work' },
+          { label: '品牌视觉', href: '#/#work' },
+        ],
+      },
+      {
+        title: '源码',
+        links: [
+          { label: 'GitHub 主页', href: 'https://github.com/2676136489-png', external: true },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'about',
+    label: '关于',
+    href: '#/#about',
+    columns: [
+      {
+        title: '我',
+        featured: [{ label: '个人名片', href: '#/#about' }],
+        links: [{ label: '在线简历', href: '#/resume' }],
+      },
+      {
+        title: '经历',
+        links: [
+          { label: '成长时间线', href: '#/#about' },
+          { label: '吉林大学 · 计算机', href: '#/#about' },
+          { label: 'GPA 3.1 / 4', href: '#/#about' },
+          { label: '专业排名前 30%', href: '#/#about' },
+        ],
+      },
+      {
+        title: '下载',
+        links: [
+          { label: '简历 PDF', href: '#/resume' },
+          { label: 'GitHub', href: 'https://github.com/2676136489-png', external: true },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'skills',
+    label: '能力',
+    href: '#/#skills',
+    columns: [
+      {
+        title: '方向',
+        featured: [{ label: '能力方向', href: '#/#skills' }],
+        links: [
+          { label: 'AI 原生开发', href: '#/#skills' },
+          { label: '工程与算法', href: '#/#skills' },
+          { label: '前端与界面', href: '#/#skills' },
+          { label: '组织与推进', href: '#/#skills' },
+        ],
+      },
+      {
+        title: '技术栈',
+        links: [
+          { label: 'C / C++ · 数据结构', href: '#/#skills' },
+          { label: 'Python · FastAPI', href: '#/#skills' },
+          { label: 'PHP · MySQL', href: '#/#skills' },
+          { label: 'React · TypeScript', href: '#/#skills' },
+          { label: 'Docker · CI', href: '#/#skills' },
+        ],
+      },
+      {
+        title: '成绩与荣誉',
+        links: [
+          { label: '吉林大学三等奖学金', href: '#/#skills' },
+          { label: '校优秀学生干部', href: '#/#skills' },
+          { label: '数学建模省三', href: '#/#skills' },
+          { label: '大学英语四级 CET-4', href: '#/#skills' },
+        ],
+      },
+    ],
+  },
   { id: 'resume', label: '简历', href: '#/resume' },
   { id: 'contact', label: '联系', href: '#/#contact' },
 ];

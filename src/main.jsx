@@ -38,7 +38,7 @@ import {
   resume,
   timeline,
 } from './data.js';
-import { goToSection, navigate, useRoute } from './router.js';
+import { goToNavTarget, goToSection, navigate, useRoute } from './router.js';
 import { SplitText, useBackToTop, usePageMotion, useSlidingIndicator } from './motion.jsx';
 import { ImageLightbox } from './lightbox.jsx';
 import './styles.css';
@@ -79,10 +79,143 @@ function trapTabInDialog(event, container) {
 
 /* ============ 顶部导航 ============ */
 
+/* 下拉的收起要延后一拍再执行，否则指针从触发项移向面板的途中
+   会经过两者之间的缝隙，菜单会先关再开，看起来像在闪烁。
+   这一拍里指针若又移回组内，定时器会被 onMouseEnter 作废。 */
+export const dropdownCloseDelay = () => 140;
+
+function NavGroup({ item, label, active, onNavigate, onOpenChange }) {
+  const [open, setOpen] = useState(false);
+  const keepTimerRef = useRef(false);
+  const timerRef = useRef(0);
+
+  const clear = () => {
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = 0;
+    }
+  };
+
+  /* open 的每次翻转都要同步给外层：导航栏要在面板展开时跟着换底色，
+     两者连成一片才没有接缝。 */
+  const commit = (next) => {
+    setOpen(next);
+    onOpenChange?.(next);
+  };
+
+  const openNow = () => {
+    keepTimerRef.current = false;
+    clear();
+    commit(true);
+  };
+
+  const closeNow = () => {
+    keepTimerRef.current = false;
+    clear();
+    commit(false);
+  };
+
+  const closeLater = () => {
+    keepTimerRef.current = true;
+    clear();
+    timerRef.current = window.setTimeout(() => {
+      // 这一拍里指针又回来了（onMouseLeave → onMouseEnter）就作废
+      if (keepTimerRef.current) closeNow();
+    }, dropdownCloseDelay());
+  };
+
+  useEffect(
+    () => () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+      // 组件卸载时若面板还开着，得把外层状态一起复位，
+      // 否则切页后导航栏会停在面板的底色上
+      onOpenChange?.(false);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  // 焦点离开整组（含面板）就收起，键盘用户不会留下一个悬空的面板
+  const onBlur = (event) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) closeNow();
+  };
+
+  return (
+    <div
+      className="nav-group"
+      data-open={open}
+      onMouseEnter={openNow}
+      onMouseLeave={closeLater}
+      onFocus={openNow}
+      onBlur={onBlur}
+      onKeyDown={(event) => {
+        if (event.key !== 'Escape' || !open) return;
+        // 停在这里，屏掉全局的 ESC 处理，否则会顺手把命令面板也关了
+        event.stopPropagation();
+        closeNow();
+      }}
+    >
+      <a
+        className="nav-group-trigger"
+        href={item.href}
+        data-active={active}
+        aria-expanded={open}
+        onClick={(event) => onNavigate(event, item)}
+      >
+        {label}
+        <ChevronDown className="nav-caret" size={12} aria-hidden="true" />
+      </a>
+
+      <div className="nav-panel">
+        <div className="nav-panel-inner">
+          {item.columns.map((column, colIndex) => (
+            <div className="nav-panel-col" key={column.title} style={{ '--c': colIndex }}>
+              <p className="nav-panel-title">{column.title}</p>
+              <ul>
+                {column.featured?.map((entry, i) => (
+                  <li key={`f-${entry.href}-${entry.label}`} style={{ '--i': i }}>
+                    <a
+                      className="nav-panel-featured"
+                      href={entry.href}
+                      target={entry.external ? '_blank' : undefined}
+                      rel={entry.external ? 'noreferrer noopener' : undefined}
+                      onClick={(event) => onNavigate(event, entry)}
+                    >
+                      {entry.label}
+                      {entry.external ? <ArrowUpRight size={15} aria-hidden="true" /> : null}
+                    </a>
+                  </li>
+                ))}
+                {column.links?.map((entry, i) => (
+                  <li
+                    key={`l-${entry.href}-${entry.label}`}
+                    style={{ '--i': (column.featured?.length || 0) + i }}
+                  >
+                    <a
+                      href={entry.href}
+                      target={entry.external ? '_blank' : undefined}
+                      rel={entry.external ? 'noreferrer noopener' : undefined}
+                      onClick={(event) => onNavigate(event, entry)}
+                    >
+                      {entry.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [scrollActive, setScrollActive] = useState('top');
+  // 有面板展开时，导航栏整体换成面板底色，两者连成一片
+  const [panelOpen, setPanelOpen] = useState(false);
   const menuRef = useRef(null);
 
   // 首页时导航跟随滚动锚点，否则跟随路由
@@ -97,6 +230,9 @@ function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
   }, []);
 
   useEffect(() => setMenuOpen(false), [path]);
+
+  // 切换页面时收起面板，否则会留一个悬空的展开态
+  useEffect(() => setPanelOpen(false), [path]);
 
   // 滚动跟随：取视口中线所在的那一节作为当前节
   useEffect(() => {
@@ -118,24 +254,15 @@ function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
     return () => observer.disconnect();
   }, [path]);
 
-  const handleNav = (event, item) => {
-    const isHome = item.href === '#/' || item.href.startsWith('#/#');
-    if (item.href === '#/') {
-      event.preventDefault();
-      navigate('/');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-    if (item.href.startsWith('#/#')) {
-      event.preventDefault();
-      goToSection(item.href.replace('#/#', ''));
-      return;
-    }
-    if (isHome) return;
+  const handleNav = (event, target) => {
+    // 外部站点交给浏览器原生行为，不拦
+    if (target.external || /^https?:/i.test(target.href)) return;
+    event.preventDefault();
+    goToNavTarget(target.href.replace(/^#/, ''));
   };
 
   return (
-    <header className="global-nav" data-scrolled={scrolled}>
+    <header className="global-nav" data-scrolled={scrolled} data-section={panelOpen}>
       <div className="nav-inner">
         <a
           className="nav-brand"
@@ -148,16 +275,32 @@ function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
         </a>
 
         <nav className="nav-menu" aria-label="主导航" ref={menuRef}>
-          {navItems.map((item) => (
-            <a
-              key={item.id}
-              href={item.href}
-              data-active={item.id === activeKey}
-              onClick={(e) => handleNav(e, item)}
-            >
-              {item.label}
-            </a>
-          ))}
+          {navItems.map((item) => {
+            const { id, label } = item;
+            const isActive = id === activeKey;
+            if (!item.columns?.length) {
+              return (
+                <a
+                  key={id}
+                  href={item.href}
+                  data-active={isActive}
+                  onClick={(e) => handleNav(e, item)}
+                >
+                  {label}
+                </a>
+              );
+            }
+            return (
+              <NavGroup
+                key={id}
+                item={item}
+                label={label}
+                active={isActive}
+                onNavigate={(event, target) => handleNav(event, target)}
+                onOpenChange={setPanelOpen}
+              />
+            );
+          })}
           <span className="nav-indicator" style={indicatorStyle} aria-hidden="true" />
         </nav>
 

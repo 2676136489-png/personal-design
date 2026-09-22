@@ -123,11 +123,18 @@ img {
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid transparent;
-  transition: border-color 200ms var(--ease);
+  transition: border-color 200ms var(--ease), background-color 320ms var(--ease);
 }
 
 .global-nav[data-scrolled="true"] {
   border-bottom-color: var(--line);
+}
+
+/* 面板展开时导航栏跟着换底色，和面板连成一片。
+   收起时底色再慢慢transition回去，接缝不会跳。 */
+.global-nav[data-section="true"] {
+  background: var(--surface-alt);
+  border-bottom-color: transparent;
 }
 
 .nav-inner {
@@ -161,14 +168,144 @@ img {
   gap: 26px;
 }
 
-.nav-menu a {
+/* 顶部导航的每一项字号在手机上会大一点（触屏没有悬停，
+   不给放大反馈反而更省事），桌面端才用小的 12px 并叠加悬停放大。 */
+.nav-menu > a,
+.nav-group-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--muted);
-  font-size: 12px;
-  transition: color 160ms var(--ease);
+  font-size: 13px;
+  line-height: 1;
+  transform-origin: 50% 100%;
+  transition: color 180ms var(--ease), transform 220ms var(--ease-spring);
 }
 
-.nav-menu a[data-active="true"] {
+.nav-menu > a[data-active="true"],
+.nav-group[data-open="true"] > .nav-group-trigger,
+.nav-group-trigger[data-active="true"] {
   color: var(--ink);
+}
+
+.nav-caret {
+  color: currentColor;
+  opacity: 0.6;
+  transition: transform 240ms var(--ease-spring), opacity 180ms var(--ease);
+}
+
+.nav-group[data-open="true"] .nav-caret {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+/* ---- 全宽下拉面板（苹果官网那种）----
+
+   和「小气泡式」下拉的关键区别：
+   - 面板铺满整页宽，不是一个贴着触发项的小卡片
+   - 靠整片换底色来表达层级，不用阴影、不用圆角、不加边框
+   - 内容按列排，每列一个标题，标题下分粗体大字与常规链接两级
+   - 导航栏本身也一起变色，两者连成一片，看不出接缝 */
+
+.nav-group {
+  /* 不设 position:relative —— 面板要相对 .global-nav 定位（整页宽），
+     而不是相对这个窄窄的触发项 */
+  display: flex;
+  align-items: center;
+  /* 撑满导航高度，让指针从触发项移到面板时不会掉出整组 */
+  align-self: stretch;
+}
+
+.nav-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 110;
+  padding: 12px 0 40px;
+  background: var(--surface-alt);
+  border-bottom: 1px solid var(--line);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate3d(0, -8px, 0);
+  transition:
+    opacity 200ms var(--ease),
+    transform 380ms var(--ease-out-expo),
+    visibility 0s linear 200ms;
+}
+
+.nav-group[data-open="true"] .nav-panel {
+  opacity: 1;
+  visibility: visible;
+  transform: translate3d(0, 0, 0);
+  transition-delay: 0s;
+}
+
+.nav-panel-inner {
+  width: min(var(--wide), calc(100% - 44px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px 56px;
+}
+
+.nav-panel-title {
+  margin: 0 0 2px;
+  color: var(--faint);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.nav-panel-col ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-panel-col li {
+  opacity: 0;
+  transform: translate3d(0, -8px, 0);
+  transition:
+    opacity 200ms var(--ease),
+    transform 340ms var(--ease-out-expo);
+  transition-delay: 0ms;
+}
+
+/* 条目自上而下依次滑入：--i 是列内序号，--c 是列序号，
+   让右边的列整体稍慢一点，扫视方向是左上 → 右下。 */
+.nav-group[data-open="true"] .nav-panel-col li {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-delay: calc(var(--c, 0) * 60ms + var(--i, 0) * 32ms + 60ms);
+}
+
+.nav-panel-col li a {
+  display: block;
+  padding: 5px 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.5;
+  transition: color 140ms var(--ease);
+}
+
+.nav-panel-col li a:hover {
+  color: var(--ink);
+}
+
+/* 粗体大字一级：字号、字重、留白都明显拉开 */
+.nav-panel-featured {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink) !important;
+  font-size: 19px !important;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.nav-panel-col li a.nav-panel-featured {
+  padding: 3px 0;
+  line-height: 1.35;
 }
 
 .nav-tools {
@@ -2423,12 +2560,29 @@ main {
 /* ============ 悬停（仅精确指针） ============ */
 
 @media (hover: hover) and (pointer: fine) {
-  .nav-menu a:hover,
-  .nav-icon:hover {
+  .nav-menu {
+    font-size: 12px;
+  }
+
+  .nav-menu > a,
+  .nav-group-trigger {
+    font-size: 12px;
+  }
+
+  /* 悬停放大。1.14 是眼睛看出来的上限——
+     再大就会顶到相邻项，字距也会显得散。 */
+  .nav-menu > a:hover,
+  .nav-group-trigger:hover {
     color: var(--ink);
+    transform: scale(1.14);
+  }
+
+  .nav-group:hover .nav-caret {
+    opacity: 1;
   }
 
   .nav-icon:hover {
+    color: var(--ink);
     background: var(--surface-alt);
   }
 
@@ -2497,6 +2651,15 @@ main {
 
   .nav-menu {
     display: none;
+  }
+
+  /* 触屏没有悬停，面板没有触发方式，直接不参与布局 */
+  .nav-panel {
+    display: none;
+  }
+
+  .global-nav[data-section="true"] {
+    background: var(--nav-bg);
   }
 
   .nav-tools {
@@ -2951,6 +3114,29 @@ main {
 
   .nav-indicator {
     display: none;
+  }
+
+  /* 去掉位移与缩放，只保留状态切换的透明度变化 */
+  .nav-menu > a,
+  .nav-group-trigger,
+  .nav-panel,
+  .nav-panel-col li {
+    transform: none;
+  }
+
+  .nav-panel,
+  .nav-panel-col li {
+    transition: opacity 160ms linear;
+  }
+
+  .nav-panel-col li {
+    opacity: 1;
+  }
+
+  /* 逐条滑入整体取消，所有条目一起淡入 */
+  .nav-group[data-open="true"] .nav-panel-col li {
+    transform: none;
+    transition-delay: 0ms;
   }
 
   .toast {
