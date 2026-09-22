@@ -167,7 +167,8 @@ function NavGroup({ item, label, active, onNavigate, onOpenChange }) {
       </a>
 
       <div className="nav-panel">
-        <div className="nav-panel-inner">
+        {/* --cols 告诉网格按几列铺开。不给的话它没法知道该占满多宽。 */}
+        <div className="nav-panel-inner" style={{ '--cols': item.columns.length }}>
           {item.columns.map((column, colIndex) => (
             <div className="nav-panel-col" key={column.title} style={{ '--c': colIndex }}>
               <p className="nav-panel-title">{column.title}</p>

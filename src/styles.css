@@ -245,8 +245,19 @@ img {
   width: min(var(--wide), calc(100% - 44px));
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  /* 等比铺满整行，而不是每列定死宽度堆在左边。
+     之前用 minmax(210px, 1fr) 时，3 列只占约 700px，
+     面板右边会空出很大一片——苹果的列是铺开的。 */
+  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
   gap: 14px 56px;
+}
+
+/* 视口不够宽时按内容自动减列，而不是把列压窄到读不下去 */
+@media (max-width: 1180px) {
+  .nav-panel-inner {
+    grid-template-columns: repeat(min(var(--cols, 3), 2), minmax(0, 1fr));
+    gap: 14px 40px;
+  }
 }
 
 .nav-panel-title {
@@ -285,7 +296,10 @@ img {
   color: var(--ink-soft);
   font-size: 12px;
   line-height: 1.5;
-  transition: color 140ms var(--ease);
+  /* transform-origin 在左侧：放大时文字往右长，
+     左边界不动，扫起来不会左右跳。 */
+  transform-origin: 0 50%;
+  transition: color 140ms var(--ease), transform 200ms var(--ease-spring);
 }
 
 .nav-panel-col li a:hover {
@@ -2575,6 +2589,18 @@ main {
   .nav-group-trigger:hover {
     color: var(--ink);
     transform: scale(1.14);
+  }
+
+  /* 面板里的条目也放大，但幅度小得多。
+     导航栏那排字号小、间距紧，放大是主要的反馈手段；
+     面板里条目本来就一行行排开，放大只需充当「跟手」的提示，
+     幅度大了反而会撞到下一行。 */
+  .nav-panel-col li a:hover {
+    transform: scale(1.06);
+  }
+
+  .nav-panel-featured:hover {
+    transform: scale(1.03);
   }
 
   .nav-group:hover .nav-caret {

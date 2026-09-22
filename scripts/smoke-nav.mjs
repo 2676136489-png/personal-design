@@ -287,6 +287,18 @@ try {
     /transition-delay: calc\(var\(--c, 0\) \* \d+ms \+ var\(--i, 0\) \* \d+ms/.test(css),
   );
   expect('面板按列排布', /\.nav-panel-inner \{[\s\S]*?grid-template-columns/.test(css));
+  // 列要等比铺满整行。之前用 minmax(210px,1fr) 时 3 列只占约 700px，
+  // 面板右边空一大片——苹果的列是铺开的。
+  expect(
+    '列按数量等比铺满',
+    /grid-template-columns: repeat\(var\(--cols, \d+\), minmax\(0, 1fr\)\)/.test(css),
+  );
+  expect('不再用定宽列挤在左边', !/repeat\(auto-fit, minmax\(210px/.test(css));
+  expect('列数由数据传进去', /style=\{\{ '--cols': item\.columns\.length \}\}/.test(mainSrc));
+  expect(
+    '中等视口自动减列',
+    /@media \(max-width: 1180px\)/.test(css) && /min\(var\(--cols/.test(css),
+  );
   expect(
     '粗体大字一级明显更大更重',
     /\.nav-panel-featured \{[\s\S]*?font-size: 19px/.test(css) &&
@@ -294,9 +306,21 @@ try {
   );
   // 悬停放大必须在精确指针的媒体查询里，触屏不该有
   const finePointerBlock = css.slice(css.indexOf('@media (hover: hover) and (pointer: fine)'));
-  expect('悬停放大写在精确指针媒体查询里', /\.nav-group-trigger:hover \{/.test(finePointerBlock));
-  expect('悬停放大用 scale', /transform: scale\(1\.1[0-9]?\)/.test(finePointerBlock));
+  expect('导航项悬停放大写在精确指针媒体查询里', /\.nav-group-trigger:hover \{/.test(finePointerBlock));
+  expect('导航项悬停放大用 scale', /transform: scale\(1\.1[0-9]?\)/.test(finePointerBlock));
   expect('放大时给了复位过渡', /transform 220ms var\(--ease-spring\)/.test(css));
+  // 面板里的条目也要放大，但幅度小得多
+  expect(
+    '面板条目悬停也放大',
+    /\.nav-panel-col li a:hover \{[\s\S]*?transform: scale\(1\.0[0-9]\)/.test(finePointerBlock),
+  );
+  expect(
+    '面板条目的放大幅度小于导航项',
+    /\.nav-panel-col li a:hover \{[\s\S]*?scale\(1\.06\)/.test(finePointerBlock),
+  );
+  expect('面板条目给了放大过渡', /transform 200ms var\(--ease-spring\)/.test(css));
+  // 从左侧放大，左边界不动，扫视时不会左右跳
+  expect('面板条目从左边界放大', /transform-origin: 0 50%/.test(css));
 
   // reduced-motion 下不能还有位移
   const reducedBlock = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'));
