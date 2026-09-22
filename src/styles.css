@@ -709,6 +709,8 @@ section {
 }
 
 .skill {
+  display: flex;
+  flex-direction: column;
   padding: 30px 26px 32px;
   border-radius: var(--radius-lg);
   background: var(--surface);
@@ -734,9 +736,10 @@ section {
   line-height: 1.62;
 }
 
+/* 说明文字行数不一时，让标签行始终贴住卡片底部，四张卡视觉齐平 */
 .skill ul {
-  margin: 20px 0 0;
-  padding: 0;
+  margin: auto 0 0;
+  padding: 20px 0 0;
   list-style: none;
   display: flex;
   flex-wrap: wrap;

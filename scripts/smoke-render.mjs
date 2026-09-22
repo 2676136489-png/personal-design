@@ -92,6 +92,8 @@ const server = await createServer({
 
 try {
   const main = await server.ssrLoadModule('/src/main.jsx');
+  const data = await server.ssrLoadModule('/src/data.js');
+  const { profile } = data;
   const App = main.App ?? main.default;
   if (!App) throw new Error('App 未导出，无法渲染');
 
@@ -101,11 +103,25 @@ try {
   };
 
   const home = render('#/');
-  expect('首页含欢迎语', home.includes('欢迎来到我的个人网站'));
-  expect('首页含 tagline', home.includes('把校园里的想法'));
+  // 文案从数据源取值断言，不要写死字符串——否则每次润色文案都会误报
+  expect('首页含欢迎语', home.includes(profile.welcome));
+  expect('首页含 tagline', home.includes(profile.tagline));
   expect('首页 h1 不再是姓名', !home.includes('<h1>卢柯宇</h1>'));
-  expect('首页含 heroIntro', home.includes('用工程能力承载想法'));
+  expect('首页含 heroIntro', home.includes(profile.heroIntro));
   expect('首页含事实条', home.includes('GPA'));
+
+  // 区块顺序：关于（个人名片 + 时间线）应在能力与荣誉之前
+  const iAbout = home.indexOf('id="about"');
+  const iSkills = home.indexOf('id="skills"');
+  expect('关于区在能力区之前', iAbout > -1 && iSkills > -1 && iAbout < iSkills);
+  expect('关于区含个人名片', home.includes('about-profile'));
+  expect('关于区含时间线', home.includes('about-timeline'));
+  expect('能力区含成绩与荣誉', home.includes('achievement-panel'));
+
+  // 导航顺序应与区块顺序一致
+  const navAbout = home.indexOf('关于');
+  const navSkills = home.indexOf('>能力<');
+  expect('导航中关于排在能力之前', navAbout > -1 && navSkills > -1 && navAbout < navSkills);
 
   const resumeHtml = render('#/resume');
   expect('简历页含标题', resumeHtml.includes('我的简历'));

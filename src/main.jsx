@@ -43,7 +43,7 @@ import { SplitText, useBackToTop, usePageMotion, useSlidingIndicator } from './m
 import { ImageLightbox } from './lightbox.jsx';
 import './styles.css';
 
-const SECTION_IDS = ['top', 'work', 'skills', 'about', 'contact'];
+const SECTION_IDS = ['top', 'work', 'about', 'skills', 'contact'];
 
 function copyToClipboard(text) {
   if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
@@ -441,7 +441,7 @@ function WorkSection() {
     <section id="work" className="work">
       <div className="section-head section-head--center" data-reveal="mask">
         <p className="eyebrow">全部作品</p>
-        <h2>每一个，都是完整做完的。</h2>
+        <h2>每一个都做完了。</h2>
         <p className="section-lede">
           算法、系统、Web 与视觉，覆盖从底层逻辑到最终呈现的完整链路。
         </p>
@@ -479,9 +479,9 @@ function SkillsSection() {
     <section id="skills" className="skills">
       <div className="section-head" data-reveal="mask">
         <p className="eyebrow">能力</p>
-        <h2>不止一种身份，也不止一种解法。</h2>
+        <h2>四个方向，一套做事方式。</h2>
         <p className="section-lede">
-          工程、算法、界面与协作彼此连接，形成一套更靠近真实落地的做事方式。
+          算法与工程打底，前端负责呈现，协作把想法推到落地。
         </p>
       </div>
 
@@ -524,7 +524,10 @@ function AboutSection() {
     <section id="about" className="about">
       <div className="section-head" data-reveal>
         <p className="eyebrow">关于</p>
-        <h2>从工程基础，走向完整交付。</h2>
+        <h2>正在成为一个能独立交付的人。</h2>
+        <p className="section-lede">
+          从 2024 年进入吉林大学起，课堂之外的时间基本都花在了把想法做成项目上。
+        </p>
       </div>
 
       <div className="about-grid">
@@ -578,7 +581,7 @@ function ContactSection({ onCopyEmail }) {
           有合适的机会，
           <span>或者只是想聊聊？</span>
         </h2>
-        <p>欢迎交流实习机会、项目合作与技术问题，我会尽快回复。</p>
+        <p>实习、项目合作、技术问题，都可以直接找我，看到就会回。</p>
         <div className="hero-actions">
           <MailButton />
           <button className="btn btn--plain" type="button" onClick={onCopyEmail}>
@@ -601,8 +604,8 @@ function HomePage({ onCopyEmail }) {
       <Hero />
       <FeaturedSection />
       <WorkSection />
-      <SkillsSection />
       <AboutSection />
+      <SkillsSection />
       <ContactSection onCopyEmail={onCopyEmail} />
     </>
   );

@@ -25,8 +25,8 @@ export const profile = {
   name: '卢柯宇',
   initials: 'LKY',
   welcome: '欢迎来到我的个人网站',
-  tagline: '把校园里的想法，做成真正能用的产品。',
-  heroIntro: '用工程能力承载想法，用设计判断组织信息，把课堂里的题目做成别人真的会打开来用的东西。',
+  tagline: '把还在纸上的想法，做成能跑起来的东西。',
+  heroIntro: '从算法到界面，从第一行代码到线上运行。我更在意它有没有被人真的用上。',
   email: 'luky2124@mails.jlu.edu.cn',
   phone: '15144167675',
   city: '重庆',
@@ -84,9 +84,9 @@ export const navItems = [
   { id: 'top', label: '首页', href: '#/' },
   { id: 'campus', label: '校园圈子', href: '#/campus' },
   { id: 'work', label: '全部作品', href: '#/#work' },
+  { id: 'about', label: '关于', href: '#/#about' },
   { id: 'skills', label: '能力', href: '#/#skills' },
   { id: 'resume', label: '简历', href: '#/resume' },
-  { id: 'about', label: '关于', href: '#/#about' },
   { id: 'contact', label: '联系', href: '#/#contact' },
 ];
 
@@ -137,7 +137,7 @@ export const campus = {
   role: '独立开发 · AI 辅助工程',
   stack: 'PHP · MySQL · SSE · Docker',
   headline: '一个真正在运行的校园社交平台。',
-  lede: '从实名认证到实时私信，从敏感词过滤到运营后台——它不仅仅是一次普通的课程作业，更是一个有真实用户、完整业务闭环、已经在线运行的产品。',
+  lede: '从实名认证到实时私信，从敏感词过滤到运营后台。它有真实用户、完整业务闭环，此刻仍在线运行。',
   cover: asset('/media/campus/dashboard-1960.webp'),
 
   metrics: [
@@ -1136,22 +1136,22 @@ export const projects = [
 export const capabilities = [
   {
     title: 'AI 原生开发',
-    text: '熟练使用主流大模型完成需求拆解、架构设计、代码实现、测试与迭代，把 AI 融入真实交付流程。',
+    text: '用大模型做需求拆解、架构设计与代码迭代，让它真正参与交付，而不只是补全代码。',
     tags: ['LLM / RAG', 'Agent / MCP', 'Prompt Engineering'],
   },
   {
     title: '工程与算法',
-    text: 'C/C++ 算法与数据结构打底，贯通 Python 工程化、PHP/MySQL 后端与前端实现。',
+    text: 'C/C++ 算法与数据结构打底，向上贯通 Python 服务端与 PHP / MySQL 后端。',
     tags: ['C / C++', 'FastAPI · Docker', 'PHP · MySQL'],
   },
   {
     title: '前端与界面',
-    text: 'HTML / CSS / JavaScript 与 TypeScript、React、Vite、SSE，关注信息层级与真实可用。',
+    text: 'TypeScript、React 与 Vite 构建界面，把信息层级和操作路径设计清楚。',
     tags: ['React · TypeScript', 'Vite', 'SSE'],
   },
   {
     title: '组织与推进',
-    text: '校优秀学生干部。持续训练沟通、任务拆解与协作推进，把共识变成具体行动。',
+    text: '校优秀学生干部。习惯把模糊需求拆成可执行的任务，并推动到落地。',
     tags: ['沟通协调', '任务拆解', '团队协作'],
   },
 ];
@@ -1166,9 +1166,9 @@ export const achievements = [
 ];
 
 export const timeline = [
-  { year: '2026', title: '校园圈子上线', text: '独立完成实名社交平台，从架构到测试全部落地并部署运行。' },
-  { year: '2026', title: 'Transformer Gomoku Bot', text: 'C++ 五子棋对弈 Bot，棋形库加权估值覆盖复合威胁。' },
-  { year: '2026', title: 'iGEM Wiki 插件', text: '为竞赛团队搭建多页面 Wiki 模板与可复用交互组件。' },
-  { year: '2024', title: '菜鸟驿站管理系统', text: '独立完成 C 语言系统项目，从数据结构到业务闭环。' },
-  { year: '2024', title: '进入吉林大学', text: '计算机科学与技术本科，GPA 3.1/4，专业排名前 30%。' },
+  { year: '2026', title: '校园圈子上线', text: '独立完成实名社交平台，从架构设计、接口实现到测试部署全部落地，已在自己购买的服务器上稳定运行。' },
+  { year: '2026', title: 'Transformer Gomoku Bot', text: 'C++ 五子棋对弈 Bot，以棋形库加权估值覆盖复合威胁，并接入蒙特卡洛搜索。' },
+  { year: '2026', title: 'iGEM Wiki 插件', text: '为竞赛团队搭建多页面 Wiki 模板，沉淀一套可复用的交互组件。' },
+  { year: '2024', title: '菜鸟驿站管理系统', text: '独立完成 C 语言系统项目，从数据结构设计到业务闭环完整实现。' },
+  { year: '2024', title: '进入吉林大学', text: '计算机科学与技术本科，GPA 3.1 / 4，专业排名前 30%。' },
 ];
