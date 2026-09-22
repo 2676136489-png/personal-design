@@ -40,6 +40,7 @@ import {
 } from './data.js';
 import { goToSection, navigate, useRoute } from './router.js';
 import { SplitText, useBackToTop, usePageMotion, useSlidingIndicator } from './motion.jsx';
+import { ImageLightbox } from './lightbox.jsx';
 import './styles.css';
 
 const SECTION_IDS = ['top', 'work', 'skills', 'about', 'contact'];
@@ -1038,6 +1039,9 @@ function ProjectPage({ project, onCopyEmail }) {
 function ResumePage({ onCopyEmail }) {
   usePageMotion([]);
 
+  // 简历预览图放大查看
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
   // 按简历原文顺序取出对应项目（顺序与 PDF 一致，不是网站上的排列）
   const resumeProjects = resume.projectSlugs
     .map((slug) => (slug === campus.slug ? campus : projects.find((p) => p.slug === slug)))
@@ -1158,7 +1162,12 @@ function ResumePage({ onCopyEmail }) {
         </article>
 
         <aside className="resume-preview" data-reveal="img">
-          <div className="resume-paper">
+          <button
+            type="button"
+            className="resume-paper"
+            onClick={() => setLightboxOpen(true)}
+            aria-label="放大查看简历原版"
+          >
             <img
               src={media.resume.preview}
               srcSet={`${media.resume.previewSmall} 900w, ${media.resume.preview} 1588w`}
@@ -1166,10 +1175,25 @@ function ResumePage({ onCopyEmail }) {
               alt="卢柯宇简历预览"
               loading="lazy"
             />
-          </div>
+            <span className="resume-paper-zoom" aria-hidden="true">
+              <Search size={15} />
+              点击放大
+            </span>
+          </button>
           <p className="resume-preview-note">简历原版预览 · 共 1 页 A4</p>
         </aside>
       </div>
+
+      {lightboxOpen && (
+        <ImageLightbox
+          src={media.resume.preview}
+          srcSet={`${media.resume.previewSmall} 900w, ${media.resume.preview} 1588w`}
+          sizes="92vw"
+          alt="卢柯宇简历"
+          caption="卢柯宇简历 · 2026 年 9 月"
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
 
       <SiteFooter onCopyEmail={onCopyEmail} />
     </>
