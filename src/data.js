@@ -36,11 +36,13 @@ export const profile = {
   status: '本科在读',
 };
 
+/* 首屏数据条讲的是「做出来了什么」。
+   成绩、学校、排名不放这里——那些属于简历和关于页（关于页的个人名片里已有教育信息）。 */
 export const heroFacts = [
-  { label: '在吉林大学', value: '计算机科学' },
-  { label: 'GPA', value: '3.1 / 4' },
-  { label: '专业排名', value: '前 30%' },
-  { label: '已交付项目', value: '6 个' },
+  { label: '收录作品', value: '6 个' },
+  { label: '线上运行中', value: '2 个' },
+  { label: '校园圈子用户', value: '19 位' },
+  { label: '自动化测试', value: '4 类' },
 ];
 
 /* 简历页数据：与 D:\UserData\Desktop\简历制作\简历\卢柯宇简历_2026新版 保持一致。

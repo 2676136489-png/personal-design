@@ -108,7 +108,24 @@ try {
   expect('首页含 tagline', home.includes(profile.tagline));
   expect('首页 h1 不再是姓名', !home.includes('<h1>卢柯宇</h1>'));
   expect('首页含 heroIntro', home.includes(profile.heroIntro));
-  expect('首页含事实条', home.includes('GPA'));
+
+  // 首屏数据条：内容来自 heroFacts，且只讲项目，不放成绩与学校
+  const { heroFacts } = data;
+  expect(
+    '首屏数据条渲染出全部条目',
+    heroFacts.every((f) => home.includes(f.value) && home.includes(f.label)),
+  );
+  const heroFactsHtml = (() => {
+    const at = home.indexOf('hero-facts');
+    return at > -1 ? home.slice(at, home.indexOf('</section>', at)) : '';
+  })();
+  expect('首屏数据条取到了', heroFactsHtml.length > 0);
+  expect(
+    '首屏数据条不含成绩与学校',
+    !/GPA|排名|吉林大学|奖学金/.test(heroFactsHtml),
+  );
+  // 反向锚定：这些信息仍要出现在该出现的地方（关于页 / 简历页）
+  expect('关于区仍含教育信息', home.includes(profile.education));
 
   // 区块顺序：关于（个人名片 + 时间线）应在能力与荣誉之前
   const iAbout = home.indexOf('id="about"');
@@ -148,6 +165,8 @@ try {
   );
   expect('简历正文不含 Wiki 插件', !resumeBody.includes('iGEM'));
   expect('简历页含学校', resumeHtml.includes('吉林大学'));
+  // 成绩从首屏拿掉后，简历页仍要保留——否则就是把信息弄丢了
+  expect('简历页仍含 GPA 与排名', /GPA|排名/.test(resumeBody));
   expect('简历页含技能分组', resumeHtml.includes('LangGraph'));
 
   const campusHtml = render('#/campus');
