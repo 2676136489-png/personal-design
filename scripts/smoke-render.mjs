@@ -140,6 +140,17 @@ try {
   const navSkills = home.indexOf('>能力<');
   expect('导航中关于排在能力之前', navAbout > -1 && navSkills > -1 && navAbout < navSkills);
 
+  /* 首页精选截图网格：第 1 张占满一行，其余两两成对。
+     所以「其余」必须是偶数，否则右下角会空一格。
+     这条断言就是钉住这个对称性。 */
+  const countOf = (html, cls) => (html.match(new RegExp(cls, 'g')) || []).length;
+  const wideCount = countOf(home, 'stage-item--wide');
+  const normalCount = countOf(home, 'stage-item--normal');
+  expect('精选网格渲染出图片', wideCount + normalCount > 0);
+  expect('精选网格只有一张占满整行', wideCount === 1);
+  expect('精选网格其余张数为偶数（铺满不留空）', normalCount > 0 && normalCount % 2 === 0);
+  expect('精选网格含 AI 助手整屏截图', home.includes('ai-assistant-overview.webp'));
+
   const resumeHtml = render('#/resume');
   /* 导航是全站共享的，下拉里也列着所有项目名。
      所以「简历正文里没有某个项目」这类断言必须把 <main> 摘出来看，

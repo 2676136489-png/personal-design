@@ -494,9 +494,21 @@ function Hero() {
   );
 }
 
+/* 按章节 id 取前 N 张截图 */
+export const campusShots = (chapterId, take = 1) => {
+  const chapter = campus.chapters.find((c) => c.id === chapterId);
+  return (chapter?.blocks || []).filter((b) => b.type === 'shot').slice(0, take);
+};
+
 function FeaturedSection() {
-  const preview = campus.chapters[1].blocks.filter((b) => b.type === 'shot').slice(0, 3);
-  const otherShots = campus.chapters[3].blocks.filter((b) => b.type === 'shot').slice(0, 1);
+  /* 首页精选截图：第 1 张占满一整行，其余按 2 列两两成对。
+     所以总数得是「1 + 偶数」，否则右下角会空一格。
+     3（学生端）+ 1（管理后台）+ 1（AI 助手）= 5，正好排成大图 + 2×2。 */
+  const shots = [
+    ...campusShots('students', 3),
+    ...campusShots('admin'),
+    campus.featuredAssistantShot,
+  ];
 
   return (
     <section id="featured" className="featured">
@@ -538,7 +550,7 @@ function FeaturedSection() {
       </div>
 
       <div className="stage-grid">
-        {[...preview, ...otherShots].map((shot, i) => (
+        {shots.map((shot, i) => (
           <figure
             className={`stage-item stage-item--${i === 0 ? 'wide' : 'normal'}`}
             key={shot.src}

@@ -278,6 +278,15 @@ export const campus = {
   lede: '从实名认证到实时私信，从敏感词过滤到运营后台。它有真实用户、完整业务闭环，此刻仍在线运行。',
   cover: asset('/media/campus/dashboard-1960.webp'),
 
+  /* 首页精选网格里用的 AI 助手整屏截图。
+     详情页第 3 章放的是对话特写（那张是竖图，塞进横向网格会变成一条细条），
+     首页需要横版，所以单独留一张。 */
+  featuredAssistantShot: {
+    src: asset('/media/campus/ai-assistant-overview.webp'),
+    alt: '校园圈子 AI 助手整屏界面',
+    caption: 'AI 助手整屏：对话区支持多轮追问，回答前会标注实际调用的查询工具。',
+  },
+
   metrics: [
     { value: '19', label: '实名注册学生' },
     { value: '22', label: '已发布动态' },
