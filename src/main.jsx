@@ -30,6 +30,7 @@ import {
   campus,
   capabilities,
   heroFacts,
+  imgAttrs,
   mailServices,
   media,
   navItems,
@@ -557,7 +558,7 @@ function FeaturedSection() {
             data-reveal="img"
             style={{ '--i': i }}
           >
-            <img src={shot.src} alt={shot.alt} loading="lazy" decoding="async" />
+            <img src={shot.src} alt={shot.alt} loading="lazy" decoding="async" {...imgAttrs(shot.src)} />
             <figcaption>{shot.caption}</figcaption>
           </figure>
         ))}
@@ -608,7 +609,13 @@ function WorkSection() {
           <article className="work-card" key={project.id} data-reveal data-tilt style={{ '--i': i % 2 }}>
             <a href={`#/${project.slug}`} onClick={(e) => { e.preventDefault(); navigate(`/${project.slug}`); }}>
               <div className="work-media">
-                <img src={project.image} alt={`${project.title} 项目视觉`} loading="lazy" decoding="async" />
+                <img
+                  src={project.image}
+                  alt={`${project.title} 项目视觉`}
+                  loading="lazy"
+                  decoding="async"
+                  {...imgAttrs(project.image)}
+                />
               </div>
               <div className="work-body">
                 <p className="work-meta">
@@ -689,7 +696,7 @@ function AboutSection() {
       <div className="about-grid">
         <div className="about-profile" data-reveal>
           <div className="about-avatar">
-            <img src={asset('/media/avatar-lky.webp')} alt={profile.name} />
+            <img src={asset('/media/avatar-lky.webp')} alt={profile.name} {...imgAttrs(asset('/media/avatar-lky.webp'))} />
           </div>
           <h3>{profile.name}</h3>
           <p className="about-role">{profile.status}</p>
@@ -781,8 +788,8 @@ function ChapterBlocks({ blocks }) {
     if (block.type === 'shot') {
       return (
         <figure className="detail-shot" key={i} data-reveal="img">
-          <div className="shot-frame">
-            <img src={block.src} alt={block.alt} loading="lazy" />
+          <div className="shot-frame" data-fit={block.fit || 'wide'}>
+            <img src={block.src} alt={block.alt} loading="lazy" {...imgAttrs(block.src)} />
           </div>
           <figcaption>{block.caption}</figcaption>
         </figure>
@@ -987,7 +994,15 @@ function CampusPage({ onCopyEmail }) {
           </div>
         </div>
         <div className="page-hero-shot" data-parallax="0.07">
-          <img src={campus.cover} alt="校园圈子学生中心界面" />
+          {/* 首屏最大的一张图，别让浏览器把它排到后面 */}
+          <img
+            src={campus.cover}
+            alt="校园圈子学生中心界面"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            {...imgAttrs(campus.cover)}
+          />
         </div>
       </header>
 
@@ -1023,7 +1038,7 @@ function CampusPage({ onCopyEmail }) {
             <article className="work-card" key={p.id} data-reveal data-tilt style={{ '--i': i % 2 }}>
               <a href={`#/${p.slug}`} onClick={(e) => { e.preventDefault(); navigate(`/${p.slug}`); }}>
                 <div className="work-media">
-                  <img src={p.image} alt={`${p.title} 项目视觉`} />
+                  <img src={p.image} alt={`${p.title} 项目视觉`} loading="lazy" decoding="async" {...imgAttrs(p.image)} />
                 </div>
                 <div className="work-body">
                   <p className="work-meta">
@@ -1117,7 +1132,15 @@ function ProjectPage({ project, onCopyEmail }) {
           </div>
         </div>
         <div className="page-hero-shot" data-parallax="0.07">
-          <img src={project.image} alt={`${project.title} 项目视觉`} />
+          {/* 首屏最大的一张图，别让浏览器把它排到后面 */}
+          <img
+            src={project.image}
+            alt={`${project.title} 项目视觉`}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            {...imgAttrs(project.image)}
+          />
         </div>
       </header>
 
@@ -1168,7 +1191,7 @@ function ProjectPage({ project, onCopyEmail }) {
             <article className="work-card" key={p.id} data-reveal data-tilt style={{ '--i': i % 2 }}>
               <a href={`#/${p.slug}`} onClick={(e) => { e.preventDefault(); navigate(`/${p.slug}`); }}>
                 <div className="work-media">
-                  <img src={p.image} alt={`${p.title} 项目视觉`} />
+                  <img src={p.image} alt={`${p.title} 项目视觉`} loading="lazy" decoding="async" {...imgAttrs(p.image)} />
                 </div>
                 <div className="work-body">
                   <p className="work-meta">
@@ -1333,6 +1356,7 @@ function ResumePage({ onCopyEmail }) {
               sizes="(max-width: 1068px) 92vw, 380px"
               alt="卢柯宇简历预览"
               loading="lazy"
+              {...imgAttrs(media.resume.preview)}
             />
             <span className="resume-paper-zoom" aria-hidden="true">
               <Search size={15} />

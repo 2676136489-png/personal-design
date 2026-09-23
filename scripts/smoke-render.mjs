@@ -7,7 +7,7 @@
 import { createServer } from 'vite';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 /* SSR 下没有浏览器 API，先打最小桩。
@@ -213,6 +213,15 @@ try {
   };
   walkPublic(publicDir);
   expect('public 下没有 PNG 死重源图', pngInPublic.length === 0);
+
+  /* 防回归：og:description 和 data.js 的 tagline 是两处独立维护的同一句文案。
+     2026-09-23 发现转发到微信/QQ 时显示的还是被替换掉的那句旧文案。 */
+  const htmlRaw = readFileSync(fileURLToPath(new URL('../index.html', import.meta.url)), 'utf8');
+  const ogDesc = (htmlRaw.match(/og:description"\s+content="([^"]*)"/) || [])[1] || '';
+  expect('分享描述与 tagline 同步', ogDesc === profile.tagline);
+  if (ogDesc !== profile.tagline) {
+    console.log(`    og:description 是「${ogDesc}」，tagline 是「${profile.tagline}」`);
+  }
   if (pngInPublic.length) {
     console.log(`    死重 PNG（应移到 media-src/）: ${pngInPublic.join(', ')}`);
   }

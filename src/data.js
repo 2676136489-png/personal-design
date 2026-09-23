@@ -7,6 +7,44 @@
 const BASE = import.meta.env.BASE_URL;
 export const asset = (path) => `${BASE}${path.replace(/^\//, '')}`;
 
+/* 素材实测尺寸（scripts 里跑 PIL 量出来的，新增图片时补一行）。
+   给 <img> 写上 width/height，浏览器就能按属性里的比例预留位置，
+   图片加载完成时页面不会往下一顶（CLS）。CSS 里是 width:100%，
+   所以这里填真实像素值即可，显示尺寸仍由布局决定。 */
+export const IMAGE_SIZES = {
+  '/media/avatar-lky.webp': [1200, 1500],
+  '/media/campus-desktop.webp': [1216, 832],
+  '/media/campus-phone.webp': [832, 1216],
+  '/media/campus/admin-accounts.webp': [2321, 1189],
+  '/media/campus/admin-audit.webp': [2252, 1274],
+  '/media/campus/admin-comments.webp': [2142, 1123],
+  '/media/campus/admin-dynamics.webp': [2231, 1290],
+  '/media/campus/admin-messages.webp': [2273, 1293],
+  '/media/campus/admin-overview.webp': [2558, 1289],
+  '/media/campus/admin-reports.webp': [2175, 1089],
+  '/media/campus/admin-students.webp': [2319, 1228],
+  '/media/campus/ai-assistant-overview.webp': [1920, 962],
+  '/media/campus/ai-assistant.webp': [454, 776],
+  '/media/campus/dashboard-1960.webp': [1960, 989],
+  '/media/campus/feed.webp': [2559, 1283],
+  '/media/campus/login.webp': [2559, 1256],
+  '/media/campus/students.webp': [2146, 1183],
+  '/media/project-dashboard.webp': [1400, 960],
+  '/media/project-gomoku.webp': [1216, 832],
+  '/media/project-identity.webp': [1400, 960],
+  '/media/project-station.webp': [1400, 960],
+  '/media/project-wiki.webp': [1385, 950],
+  '/media/resume/resume-900.webp': [900, 1421],
+  '/media/resume/resume.webp': [1588, 2508],
+};
+
+/* 传给 <img> 的 width/height；查不到就什么都不给，宁可缺也不要写错的比例。 */
+export const imgAttrs = (src) => {
+  const key = src.startsWith(BASE) ? `/${src.slice(BASE.length)}` : src;
+  const size = IMAGE_SIZES[key];
+  return size ? { width: size[0], height: size[1] } : {};
+};
+
 export const media = {
   avatar: asset('/media/avatar-lky.webp'),
   campus: {
@@ -383,6 +421,8 @@ export const campus = {
           type: 'shot',
           src: asset('/media/campus/ai-assistant.webp'),
           alt: 'AI 校园小助手对话界面',
+          // 这张是手机式竖图（454×776），拉满栏宽会放大近 2 倍且高过一屏，单独限宽居中
+          fit: 'portrait',
           caption: 'AI 助手：支持多轮对话与追问，回答前展示「已深度思考」状态，并标注实际调用的查询工具。',
         },
         {

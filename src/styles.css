@@ -1475,6 +1475,13 @@ section {
   border: 1px solid var(--line);
   background: var(--surface-alt);
 }
+/* 竖图（手机式对话截图这类）：拉满栏宽会放大近 2 倍、高度还超过一屏。
+   限到源图本来的宽度（约 460px），既是 1:1 不放大，也刚好一屏放得下。 */
+.shot-frame[data-fit='portrait'] {
+  width: 100%;
+  max-width: 460px;
+  margin-inline: auto;
+}
 
 .shot-frame img {
   width: 100%;
