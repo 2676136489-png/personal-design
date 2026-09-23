@@ -7,6 +7,8 @@
 import { createServer } from 'vite';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { readdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 /* SSR 下没有浏览器 API，先打最小桩。
    注意：必须在动态加载业务模块之前完成打桩。 */
@@ -196,6 +198,24 @@ try {
   expect('校园圈子页有回到顶部按钮', hasBackToTop(campusHtml));
   expect('项目详情页有回到顶部按钮', hasBackToTop(gomoku));
   expect('回到顶部初始不可聚焦', home.includes('tabindex="-1"'));
+
+  /* 防回归：PNG 源图只能放 media-src/，一旦出现在 public/ 就会被 Vite 原样拷进
+     产物。2026-09-22 清掉过 22 张共 12.67MB 的死重 PNG（运行时引用的全是 .webp），
+     产物从 14.59MB 降到 1.92MB。别让它们再回来。 */
+  const publicDir = fileURLToPath(new URL('../public', import.meta.url));
+  const pngInPublic = [];
+  const walkPublic = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const p = `${dir}/${entry.name}`;
+      if (entry.isDirectory()) walkPublic(p);
+      else if (p.endsWith('.png')) pngInPublic.push(p.slice(publicDir.length + 1));
+    }
+  };
+  walkPublic(publicDir);
+  expect('public 下没有 PNG 死重源图', pngInPublic.length === 0);
+  if (pngInPublic.length) {
+    console.log(`    死重 PNG（应移到 media-src/）: ${pngInPublic.join(', ')}`);
+  }
 } catch (err) {
   checks.push([`渲染抛错: ${err.message}`, false]);
 } finally {
