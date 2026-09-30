@@ -214,6 +214,38 @@ try {
   walkPublic(publicDir);
   expect('public 下没有 PNG 死重源图', pngInPublic.length === 0);
 
+  /* 防回归：<img> 上的 width/height 属性会被浏览器当作固定像素尺寸（呈现提示），
+     优先级低于 CSS 但高于 auto。2026-09-30 给全站 <img> 补尺寸属性后，
+     凡是只写了 width:100% 没写 height 的规则，高度都被属性里的定值顶住，
+     图片被垂直拉伸。修法是全局 img 规则里声明 height:auto 兜底。
+     下面两条钉住这个兜底和它要保护的那些规则。 */
+  const cssRaw = readFileSync(fileURLToPath(new URL('../src/styles.css', import.meta.url)), 'utf8');
+  const bareImgRule = cssRaw.match(/(?:^|\n)\s*img\s*\{([^}]*)\}/);
+  expect('全局 img 规则存在', !!bareImgRule);
+  const hasGlobalHeightAuto = !!bareImgRule && /(^|[;\s])height\s*:\s*auto/.test(bareImgRule[1]);
+  expect('全局 img 规则声明 height: auto（防图片被拉伸）', hasGlobalHeightAuto);
+  const heightlessWidthRules = [...cssRaw.matchAll(/([^\n{}]*\bimg\b[^\n{}]*)\{([^}]*)\}/g)]
+    .map(([, sel, body]) => ({ sel: sel.trim(), body }))
+    .filter(
+      (r) =>
+        r.sel !== 'img' &&
+        /width\s*:\s*100%/.test(r.body) &&
+        !/(^|[;\s])height\s*:/.test(r.body),
+    );
+  expect(
+    '只写 width:100% 的图片规则都有全局 height:auto 兜底',
+    heightlessWidthRules.every(() => hasGlobalHeightAuto),
+  );
+  if (heightlessWidthRules.length && !hasGlobalHeightAuto) {
+    console.log(`    受影响规则: ${heightlessWidthRules.map((r) => r.sel).join(' / ')}`);
+  }
+
+  // 尺寸属性本身要留着——它是防 CLS 的手段，别连带一起删掉
+  expect(
+    '图片尺寸属性仍在（防 CLS 不回退）',
+    campusHtml.includes('width="1960" height="989"'),
+  );
+
   /* 防回归：og:description 和 data.js 的 tagline 是两处独立维护的同一句文案。
      2026-09-23 发现转发到微信/QQ 时显示的还是被替换掉的那句旧文案。 */
   const htmlRaw = readFileSync(fileURLToPath(new URL('../index.html', import.meta.url)), 'utf8');
