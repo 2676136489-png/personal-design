@@ -1,6 +1,9 @@
 node_modules/
 dist/
 dist_bak/
+dist-pages/
+dist-pages-new/
+# 构建验证用的临时产物目录（每次改样式换一个，跑完就删）
 dist-verify/
 dist-v2/
 dist-v3/
@@ -9,8 +12,7 @@ dist-v5*/
 dist-v6*/
 dist-v7*/
 dist-fix/
-dist-pages/
-dist-pages-new/
+dist-tl/
 dist-pages-old*/
 screenshots/
 # CDP 实测时的临时截图
@@ -33,6 +35,5 @@ backup-portfolio-v2/
 .tmp-*
 .verify.html
 build.log
-dist-verify/
 .mutation-check.mjs
 .shot-nav*.mjs

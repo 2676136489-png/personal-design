@@ -226,6 +226,30 @@ try {
   expect('首屏「线上运行中」与有 site 的项目数一致',
     factOf('线上运行中') === projects.filter((p) => p.site).length + (data.campus?.site ? 1 : 0));
 
+  /* 时间线按项目体量排，不按时间，所以它不是 projects 的子集 ——
+     竞赛插件、课程作业这类体量小的仍然收录在作品列表里，只是不占时间线；
+     「进入吉林大学」这种里程碑也不是项目。
+
+     标题必须与作品列表逐字一致。两边写法不同时（时间线写简称、
+     作品列表写全称），读者会以为是两个东西 —— 这条断言就是防这个。
+     所以匹配不上的条目只允许是里程碑，不能有真项目对不上。 */
+  const { timeline, campus } = data;
+  const titles = new Set([...projects.map((p) => p.title), campus?.name].filter(Boolean));
+  const MILESTONES = ['进入吉林大学'];
+  const missing = timeline
+    .filter((t) => !titles.has(t.title))
+    .map((t) => t.title)
+    .filter((t) => !MILESTONES.includes(t));
+  expect('时间线的项目标题与作品列表逐字一致', missing.length === 0);
+  if (missing.length) console.log('    对不上的标题:', missing.join(', '));
+  expect('时间线含体量最大的两个 Agent 项目',
+    titles.has('OpsPilot · AI 事故响应系统')
+    && timeline.some((t) => t.title.includes('OpsPilot'))
+    && timeline.some((t) => t.title.includes('研究工作台')));
+  expect('时间线首位是最新的 Agent 项目（按体量而非时间排序）',
+    timeline[0]?.title.includes('OpsPilot'));
+  expect('时间线条目文字非空', timeline.every((t) => t.text && t.text.length > 10));
+
   // 回到顶部按钮：所有页面都应渲染，且初始为隐藏态
   const hasBackToTop = (html) =>
     html.includes('class="back-to-top"') &&
