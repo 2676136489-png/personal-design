@@ -89,6 +89,8 @@ scripts/        构建部署、图片处理、验证脚本
 
 **`<img>` 上的 `width` / `height` 是固定像素尺寸提示**，优先级低于 CSS、高于 `auto`。只写 `width: 100%` 而不写高度时，高度会被属性里那个定值顶住，图片纵向变形。所以全局 `img` 规则里显式写了 `height: auto`。
 
+**`overflow: hidden` 只包住图片，不包整张卡片**。精选截图的卡片需要裁切（`data-reveal="img"` 让图片从 1.08 回缩到 1，这期间会超出边框），但 `<figcaption>` 是卡片的子元素——卡片级裁切会把图注文字一起切掉，句子在两侧截断、中间像少了字。改成 `.stage-shot` 单独裁图片，文字留在外面。
+
 主题偏好存在 `localStorage`，key 带版本号（`portfolio-theme-v2`）：整体视觉换过一次之后，旧 key 里存的偏好属于上一套外观，继续沿用会让访客看不到新样式。
 
 ## 本地开发
@@ -131,7 +133,7 @@ README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓线上界面，`sc
 四个 SSR 冒烟脚本。在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器。
 
 ```bash
-node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（76 条）
+node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（79 条）
 node scripts/smoke-nav.mjs         # 导航下拉：SSR 结构 + 数据 + 样式契约（74 条）
 node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约（43 条）
 node scripts/smoke-backtotop.mjs   # 回到顶部按钮显隐逻辑（31 条）
@@ -156,6 +158,8 @@ node scripts/hover-trace.mjs http://127.0.0.1:5199/          # 真实鼠标走�
 node scripts/nav-switch-trace.mjs http://127.0.0.1:5199/       # 连续切换下拉项，看每次是否都弹得出来
 node scripts/nav-panel-links.mjs http://127.0.0.1:5199/        # 面板展开后链接还能不能点
 node scripts/shot-nav.mjs http://127.0.0.1:5199/ out.png 关于  # 悬停截图 + 量面板几何
+node scripts/caption-probe.mjs http://127.0.0.1:5199/         # 扫多个宽度查图注文字有没有被裁
+node scripts/shot-captions.mjs http://127.0.0.1:5199/ 9333 1080  # 截图注，用于肉眼确认
 node scripts/verify-projects.mjs 5267 9333                    # 逐个详情页量真实几何
 node scripts/space-probe.mjs 9333 http://127.0.0.1:5270/  # 量详情页纵向间距，找贴太近的地方
 node scripts/shoot-docs.mjs 9333                              # 抓 README 配图

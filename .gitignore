@@ -39,3 +39,6 @@ build.log
 .shot-nav*.mjs
 dist-nav2/
 dist-nav3/
+dist-cap/
+dist-cap2/
+dist-cap3/

@@ -572,7 +572,12 @@ function FeaturedSection() {
             data-reveal="img"
             style={{ '--i': i }}
           >
-            <img src={shot.src} alt={shot.alt} loading="lazy" decoding="async" {...imgAttrs(shot.src)} />
+            {/* 图片单独包一层：overflow:hidden 只需要裁住图片
+                （data-reveal="img" 让它从 1.08 回缩到 1），
+                图注留在卡片里，文字才不会被卡片边缘切掉。 */}
+            <div className="stage-shot">
+              <img src={shot.src} alt={shot.alt} loading="lazy" decoding="async" {...imgAttrs(shot.src)} />
+            </div>
             <figcaption>{shot.caption}</figcaption>
           </figure>
         ))}

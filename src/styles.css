@@ -752,7 +752,18 @@ section {
 
 .stage-item {
   margin: 0;
-  /* 配合 data-reveal="img"：图片从 1.08 回缩到 1 时不要溢出到相邻卡片 */
+  /* 裁切只包住图片，不包整张卡片。
+     data-reveal="img" 让图片从 1.08 回缩到 1（见下方规则），
+     这期间图片会超出边框，所以需要 overflow:hidden 把它切在圆角内。
+     但 <figcaption> 是 .stage-item 的子元素 —— 卡片级 overflow:hidden
+     会把图注超出卡片宽度的部分一起切掉，句子在两侧被截断、
+     中间像少了字（「顶部实名状态胶囊」显示成「四格数」）。
+     overflow 挪到 .stage-shot 里，两者各自只管自己该管的。 */
+  border-radius: var(--radius-lg);
+}
+
+/* 图片容器：只负责裁切图片，文字在容器外面不受影响 */
+.stage-shot {
   overflow: hidden;
   border-radius: var(--radius-lg);
 }

@@ -104,6 +104,22 @@ try {
     return renderToStaticMarkup(React.createElement(App));
   };
 
+  /* styles.css 全文：后面多条断言要读它（面板 pointer-events、
+     精选卡片的 overflow 归属、图片 height:auto 兜底等）。
+     提前到渲染之前读，后面的断言才拿得到。 */
+  const cssRaw = readFileSync(fileURLToPath(new URL('../src/styles.css', import.meta.url)), 'utf8');
+
+  /* 取一条 CSS 规则的内容，并剔除注释。
+     ⚠️ 必须去注释：这个文件里不少规则都写了长注释解释「为什么这样写」，
+     注释里经常直接出现属性名（比如 overflow:hidden）。
+     正则不剔除注释就会把注释当成声明 —— 我已经被这个骗过一次：
+     「精选卡片不裁切」那条断言一直 FAIL，其实规则里根本没那个属性，
+     是注释里的字样被匹配上了。 */
+  const rule = (pattern) => {
+    const body = (cssRaw.match(pattern) || [])[1] || '';
+    return body.replace(/\/\*[\s\S]*?\*\//g, '');
+  };
+
   const home = render('#/');
   // 文案从数据源取值断言，不要写死字符串——否则每次润色文案都会误报
   expect('首页含欢迎语', home.includes(profile.welcome));
@@ -152,6 +168,21 @@ try {
   expect('精选网格只有一张占满整行', wideCount === 1);
   expect('精选网格其余张数为偶数（铺满不留空）', normalCount > 0 && normalCount % 2 === 0);
   expect('精选网格含 AI 助手整屏截图', home.includes('ai-assistant-overview.webp'));
+
+  /* 图注不能被裁。
+     原来 .stage-item 带 overflow:hidden（为了裁住 data-reveal="img"
+     从 1.08 回缩到 1 的图片），<figcaption> 是它的子元素，
+     于是图注超出卡片宽度的部分被一起切掉 —— 句子在两侧截断、
+     中间像少了字（「顶部实名状态胶囊」显示成「四格数」）。
+     裁切现在只包住图片，文字在容器外面。 */
+  expect('精选网格图片有独立裁切容器', /class="stage-shot"/.test(home));
+  /* 断言要只认「属性声明」，不能被注释里的字样带偏 ——
+     这条规则的注释里就写着 overflow:hidden（解释为什么不能加），
+     正则不剔除注释就会把注释当成声明，误判成「还在裁切」。 */
+  expect('精选卡片本身不裁切（否则图注文字被切）',
+    !/overflow\s*:\s*hidden/.test(rule(/\n\s*\.stage-item\s*\{([^}]*)\}/)));
+  expect('裁切落在图片容器上',
+    /overflow\s*:\s*hidden/.test(rule(/\.stage-shot\s*\{([^}]*)\}/)));
 
   const resumeHtml = render('#/resume');
   /* 导航是全站共享的，下拉里也列着所有项目名。
@@ -281,7 +312,6 @@ try {
      凡是只写了 width:100% 没写 height 的规则，高度都被属性里的定值顶住，
      图片被垂直拉伸。修法是全局 img 规则里声明 height:auto 兜底。
      下面两条钉住这个兜底和它要保护的那些规则。 */
-  const cssRaw = readFileSync(fileURLToPath(new URL('../src/styles.css', import.meta.url)), 'utf8');
   const bareImgRule = cssRaw.match(/(?:^|\n)\s*img\s*\{([^}]*)\}/);
   expect('全局 img 规则存在', !!bareImgRule);
   const hasGlobalHeightAuto = !!bareImgRule && /(^|[;\s])height\s*:\s*auto/.test(bareImgRule[1]);
@@ -369,14 +399,14 @@ left:0;right:0 就只能铺满那点宽度），断言立刻断。 */
   if (/onMouseEnter|onMouseLeave/.test(panelDiv)) {
     console.log('    面板不该自己管开合，命中判定要统一交给 header');
   }
-  const navGroupRule = (cssRaw.match(/\.nav-group\s*\{([^}]*)\}/) || [])[1] || '';
+  const navGroupRule = rule(/\.nav-group\s*\{([^}]*)\}/);
   expect('面板参照物是导航栏而非触发项', !!navGroupRule && !/position\s*:/.test(navGroupRule));
-  const panelBg = (cssRaw.match(/\.nav-panel\s*\{([^}]*)\}/) || [])[1] || '';
+  const panelBg = rule(/\.nav-panel\s*\{([^}]*)\}/);
   expect(
     '面板底色用不透明的 --panel-bg（半透明会让底下大标题透出来）',
     /background\s*:\s*var\(--panel-bg\)/.test(panelBg),
   );
-  const panelColHover = (cssRaw.match(/\.nav-panel-col:hover\s*\{([^}]*)\}/) || [])[1] || '';
+  const panelColHover = rule(/\.nav-panel-col:hover\s*\{([^}]*)\}/);
   expect(
     '列悬停高亮用不透明层色',
     /var\(--panel-col-hover\)/.test(panelColHover),
@@ -392,7 +422,7 @@ left:0;right:0 就只能铺满那点宽度），断言立刻断。 */
 // 列与列之间必须有可见分隔，用户要一眼看出分组的边界。
 // 注意只能匹配到列本体那条规则：:first-child 里也有 border-left（值是 0），
 // 宽松匹配会被它顶掉，于是「把分隔线删了」这种改动照样能过。
-const colRule = (cssRaw.match(/\n\s*\.nav-panel-col\s*\{([^}]*)\}/) || [])[1] || '';
+const colRule = rule(/\n\s*\.nav-panel-col\s*\{([^}]*)\}/);
 expect(
   '面板列之间有分隔线',
   /border-left\s*:\s*1px\s+solid/.test(colRule),
@@ -420,8 +450,8 @@ expect(
      表现就是「放到第二个选项就不弹了，而且永远停在第一个」。
      修复是面板本体 pointer-events: none、只让 .nav-panel-inner 恢复 auto。
      命中判定本来就挂在 <header> 上，不依赖导航项自己收到事件。 */
-  const panelRule2 = (cssRaw.match(/\.nav-panel\s*\{([^}]*)\}/) || [])[1] || '';
-  const panelInnerRule = (cssRaw.match(/\.nav-panel-inner\s*\{([^}]*)\}/) || [])[1] || '';
+  const panelRule2 = rule(/\.nav-panel\s*\{([^}]*)\}/);
+  const panelInnerRule = rule(/\.nav-panel-inner\s*\{([^}]*)\}/);
   expect('面板本体不参与命中（否则会盖住其他导航项）',
     /pointer-events\s*:\s*none/.test(panelRule2));
   expect('面板内容区恢复命中（否则链接点不动）',
@@ -440,8 +470,8 @@ expect(
      按钮和截图几乎贴在一起（实测 13px）。
      底部留白必须大于位移量 + 视觉上想要的间距，这条断言钉住这个关系，
      改 padding 或改 transform 任一边都会被抓到。 */
-  const heroInner = (cssRaw.match(/\.page-hero-inner\s*\{([^}]*)\}/) || [])[1] || '';
-  const shotRule = (cssRaw.match(/\.page-hero-shot\s*\{([^}]*)\}/) || [])[1] || '';
+  const heroInner = rule(/\.page-hero-inner\s*\{([^}]*)\}/);
+  const shotRule = rule(/\.page-hero-shot\s*\{([^}]*)\}/);
   const padBottom = Number((heroInner.match(/padding:\s*[\d.]+px\s+0\s+(\d+)px/) || [])[1] || 0);
   const shiftY = Number((shotRule.match(/translateY\((-?[\d.]+)px\)/) || [])[1] || 0);
   console.log(`    hero padding-bottom=${padBottom}px, shot translateY=${shiftY}px, 实际余量 ${padBottom - shiftY}px`);
@@ -450,7 +480,7 @@ expect(
   /* .back-link 曾是 inline-flex：行内元素的垂直 margin 不生效，
      「返回首页」和下面的 eyebrow 挤在同一行、箭头几乎贴住文字。
      必须是块级 flex 才能独占一行且 margin 恢复作用。 */
-  const backRule = (cssRaw.match(/\.back-link\s*\{([^}]*)\}/) || [])[1] || '';
+  const backRule = rule(/\.back-link\s*\{([^}]*)\}/);
   expect('返回链接是块级（否则与下方 eyebrow 挤在同一行）',
     /display:\s*flex/.test(backRule) && !/display:\s*inline-flex/.test(backRule));
   expect('返回链接用 margin 撑开间距', /margin-bottom:\s*\d/.test(backRule));
