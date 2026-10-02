@@ -51,7 +51,25 @@ await evaluate(`(() => {
   const st = document.createElement('style');
   st.textContent = '[data-reveal]{opacity:1 !important;transform:none !important}';
   document.head.appendChild(st);
+
+  /* 顺手把懒加载改成立即加载。
+     这个脚本刻意不滚动页面（scrollIntoView 会被 hash 路由重置），
+     而 loading="lazy" 的图只在进入视口时才请求 ——
+     于是截出来是一堆空占位框，看不出图有没有被裁。
+     这里只改 DOM 属性，不碰源码。 */
+  document.querySelectorAll('img[loading="lazy"]').forEach((img) => {
+    img.loading = 'eager';
+    if (!img.complete) img.setAttribute('data-pending', '1');
+  });
   return true;
+})()`);
+
+/* 等图片真的解码完再截。complete 只表示拿到字节，
+   decode() 才保证能画出来（否则可能截到半张）。 */
+await evaluate(`(async () => {
+  const imgs = [...document.querySelectorAll('.stage-item img')];
+  await Promise.all(imgs.map((i) => (i.decode ? i.decode().catch(() => {}) : null)));
+  return imgs.length;
 })()`);
 await new Promise((r) => setTimeout(r, 600));
 
