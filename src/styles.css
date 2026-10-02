@@ -1423,15 +1423,23 @@ section {
 .page-hero-inner {
   width: min(var(--wide), calc(100% - 44px));
   margin: 0 auto;
-  padding: 56px 0 48px;
+  /* 底部留白要够 .page-hero-shot 往上 translateY 用。
+     截图上移 34px 会盖掉这段留白，48 - 34 只剩 14px，
+     按钮几乎贴住图片上沿（实测 13px）。84 - 34 = 50px 才够。 */
+  padding: 56px 0 84px;
   max-width: 880px;
 }
 
+/* inline-flex 是行内级元素，垂直 margin 不生效、也不独占一行，
+   结果「返回首页」和下面的 eyebrow 挤在同一行，箭头几乎贴住文字。
+   inline-block 仍然行内，唯一的办法是让容器换行 ——
+   display: flex 会让它变成块级 flex item，独占一行且 margin 恢复生效。 */
 .back-link {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 28px;
+  width: fit-content;
+  margin-bottom: 26px;
   color: var(--faint);
   font-size: 13px;
   transition: color 160ms var(--ease);
@@ -1838,7 +1846,9 @@ section {
 /* ============ 详情页补充说明 ============ */
 
 .page-hero-note {
-  margin: 18px 0 0;
+  /* note 有背景色块，与上方 lede 的视觉分隔要比纯文字之间更明确，
+     18px 看着还是贴着。 */
+  margin: 24px 0 0;
   padding: 12px 16px;
   border-radius: var(--radius-sm);
   background: var(--surface-alt);
@@ -3069,8 +3079,10 @@ main {
     grid-template-columns: 1fr;
   }
 
+  /* 同样要预留截图上移吃掉的那部分：34 - 18 = 16px 余量，
+     跟桌面端一个道理，不然窄屏按钮又贴到图上了。 */
   .page-hero-inner {
-    padding: 38px 0 34px;
+    padding: 38px 0 56px;
   }
 
   .page-hero-shot {

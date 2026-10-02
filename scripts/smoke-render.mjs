@@ -387,6 +387,28 @@ expect(
     '面板列数由数据传入并等比铺满',
     /--cols/.test(navRaw) && /grid-template-columns:\s*repeat\(var\(--cols/.test(cssRaw),
   );
+  /* 防回归：详情页 hero 的纵向间距。
+
+     .page-hero-shot 带 translateY(34px) 把截图往上提，
+     这段位移会直接吃掉父容器 padding-bottom —— 原来 48 - 34 = 14px，
+     按钮和截图几乎贴在一起（实测 13px）。
+     底部留白必须大于位移量 + 视觉上想要的间距，这条断言钉住这个关系，
+     改 padding 或改 transform 任一边都会被抓到。 */
+  const heroInner = (cssRaw.match(/\.page-hero-inner\s*\{([^}]*)\}/) || [])[1] || '';
+  const shotRule = (cssRaw.match(/\.page-hero-shot\s*\{([^}]*)\}/) || [])[1] || '';
+  const padBottom = Number((heroInner.match(/padding:\s*[\d.]+px\s+0\s+(\d+)px/) || [])[1] || 0);
+  const shiftY = Number((shotRule.match(/translateY\((-?[\d.]+)px\)/) || [])[1] || 0);
+  console.log(`    hero padding-bottom=${padBottom}px, shot translateY=${shiftY}px, 实际余量 ${padBottom - shiftY}px`);
+  expect('hero 底部留白盖得住截图上移（按钮不会贴住图片）', padBottom - shiftY >= 36);
+
+  /* .back-link 曾是 inline-flex：行内元素的垂直 margin 不生效，
+     「返回首页」和下面的 eyebrow 挤在同一行、箭头几乎贴住文字。
+     必须是块级 flex 才能独占一行且 margin 恢复作用。 */
+  const backRule = (cssRaw.match(/\.back-link\s*\{([^}]*)\}/) || [])[1] || '';
+  expect('返回链接是块级（否则与下方 eyebrow 挤在同一行）',
+    /display:\s*flex/.test(backRule) && !/display:\s*inline-flex/.test(backRule));
+  expect('返回链接用 margin 撑开间距', /margin-bottom:\s*\d/.test(backRule));
+
   if (!/background\s*:\s*var\(--panel-bg\)/.test(panelBg)) {
     console.log('    .nav-panel 当前底色: ' + (panelBg.match(/background[^;]*/) || ['无'])[0]);
   }

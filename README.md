@@ -81,6 +81,10 @@ scripts/        构建部署、图片处理、验证脚本
 
 **逐字切分时标点要并进前一个字**。每个字是独立的 `inline-block`，换行发生在盒子边界上，浏览器不再套用中文避头尾规则，句号会被甩到下一行单独成行。
 
+**详情页底部留白要盖得住截图的上移量**。`.page-hero-shot` 带 `translateY(34px)` 把首图往上提，这段位移直接吃掉父容器的 `padding-bottom`——按直觉写 48px 的话，实际只剩 14px，按钮和截图几乎贴在一起。这里留 84px，减去位移还剩 50px。断言里写死的是「留白 − 位移 ≥ 36px」这个关系，改任一边都会被拦到。
+
+**「返回首页」是块级 flex，不是 inline-flex**。行内级元素的垂直 margin 不生效，`margin-bottom: 26px` 根本不推动下一行，结果它和下面的分类标签挤在同一行、箭头几乎贴住文字。
+
 **`<img>` 上的 `width` / `height` 是固定像素尺寸提示**，优先级低于 CSS、高于 `auto`。只写 `width: 100%` 而不写高度时，高度会被属性里那个定值顶住，图片纵向变形。所以全局 `img` 规则里显式写了 `height: auto`。
 
 主题偏好存在 `localStorage`，key 带版本号（`portfolio-theme-v2`）：整体视觉换过一次之后，旧 key 里存的偏好属于上一套外观，继续沿用会让访客看不到新样式。
@@ -125,7 +129,7 @@ README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓线上界面，`sc
 四个 SSR 冒烟脚本。在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器。
 
 ```bash
-node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（66 条）
+node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（69 条）
 node scripts/smoke-nav.mjs         # 导航下拉：SSR 结构 + 数据 + 样式契约（74 条）
 node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约（43 条）
 node scripts/smoke-backtotop.mjs   # 回到顶部按钮显隐逻辑（31 条）
@@ -149,6 +153,7 @@ node scripts/cdp-probe.mjs http://127.0.0.1:5199/ 1440 900   # 量布局宽、�
 node scripts/hover-trace.mjs http://127.0.0.1:5199/          # 真实鼠标走两条路径，数开合翻转次数
 node scripts/shot-nav.mjs http://127.0.0.1:5199/ out.png 关于  # 悬停截图 + 量面板几何
 node scripts/verify-projects.mjs 5267 9333                    # 逐个详情页量真实几何
+node scripts/space-probe.mjs 9333 http://127.0.0.1:5270/  # 量详情页纵向间距，找贴太近的地方
 node scripts/shoot-docs.mjs 9333                              # 抓 README 配图
 ```
 
