@@ -481,7 +481,9 @@ img {
 
 .hero h1 {
   margin: 16px 0 0;
-  font-size: clamp(2.2rem, 5.4vw, 4.4rem);
+  /* 上限从 4.4rem 降到 4.15rem：18 个汉字在宽屏下一行放不下时，
+     末尾标点会被挤到第二行单独成行（inline-block 之间不套用中文避头尾规则）。 */
+  font-size: clamp(2.2rem, 5.15vw, 4.15rem);
   line-height: 1.08;
   font-weight: 600;
   letter-spacing: -0.015em;
@@ -3270,8 +3272,12 @@ main {
 
 /* 首屏与区块标题：渐变文字。用 @supports 包住，
    万一浏览器不认 background-clip: text，文字仍然是 --ink 色而不是隐形。 */
+/* ⚠️ 逐字上浮的标题（首屏 h1）不能进这套渐变。
+   SplitText 把每个字拆成带 transform 的 inline-block 子元素，transform 会让子元素
+   建立独立层叠上下文，父级的 background-clip:text 就裁剪不到它们，文字因为继承了
+   -webkit-text-fill-color: transparent 而全部隐形（只剩首字可见）。
+   .section-head h2 与 .page-hero h1 不含 SplitText，可以放心用渐变。 */
 @supports (background-clip: text) or (-webkit-background-clip: text) {
-  .hero h1,
   .section-head h2,
   .page-hero h1 {
     background-image: linear-gradient(

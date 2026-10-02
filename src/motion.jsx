@@ -401,8 +401,19 @@ const CJK = /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\u3040-\u30ff]/;
 
 export function SplitText({ text, delay = 0, step = 34, className = '' }) {
   const tokens = useMemo(() => {
-    if (CJK.test(text)) return Array.from(text);
-    return text.split(/(\s+)/).filter(Boolean);
+    if (!CJK.test(text)) return text.split(/(\s+)/).filter(Boolean);
+    /* 每个字都是独立的 inline-block，换行发生在盒子边界上，
+       浏览器不再套用中文避头尾规则（句号、逗号会被甩到下一行单独成行）。
+       所以切分时把标点并进前一个字，让它跟着一起走。 */
+    const merged = [];
+    for (const ch of Array.from(text)) {
+      if (/[。，、！？：；「」『』（）】…—·]/.test(ch) && merged.length) {
+        merged[merged.length - 1] += ch;
+      } else {
+        merged.push(ch);
+      }
+    }
+    return merged;
   }, [text]);
 
   let index = 0;

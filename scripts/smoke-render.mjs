@@ -246,6 +246,21 @@ try {
     campusHtml.includes('width="1960" height="989"'),
   );
 
+  /* 防回归：首屏 h1 里是 SplitText 拆出的一组 span，而 .split-inner 带 transform。
+     transform 会让子元素建立独立层叠上下文，父级 h1 上的 background-clip:text
+     就裁剪不到它们，文字因为继承到 -webkit-text-fill-color: transparent 而全部隐形
+     （2026-10-02 线上实际发生过，表现为标题只剩首字可见）。
+     真想给这个标题上渐变，渐变要施加到 .split-inner 自己身上，不能靠父级透明填充。 */
+  const heroH1Rule = cssRaw.match(/(?:^|\n)\s*\.hero\s+h1\s*\{([^}]*)\}/);
+  expect('首屏 h1 规则存在', !!heroH1Rule);
+  expect(
+    '逐字动画标题不用透明填充色做渐变（否则文字隐形）',
+    !!heroH1Rule && !/-webkit-text-fill-color|background-clip/.test(heroH1Rule[1]),
+  );
+  if (heroH1Rule && /-webkit-text-fill-color|background-clip/.test(heroH1Rule[1])) {
+    console.log('    .hero h1 里含: ' + heroH1Rule[1].trim());
+  }
+
   /* 防回归：og:description 和 data.js 的 tagline 是两处独立维护的同一句文案。
      2026-09-23 发现转发到微信/QQ 时显示的还是被替换掉的那句旧文案。 */
   const htmlRaw = readFileSync(fileURLToPath(new URL('../index.html', import.meta.url)), 'utf8');
