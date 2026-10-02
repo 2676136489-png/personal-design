@@ -269,6 +269,89 @@ try {
   if (ogDesc !== profile.tagline) {
     console.log(`    og:description 是「${ogDesc}」，tagline 是「${profile.tagline}」`);
   }
+
+  /* 防回归：导航下拉面板。
+     面板挂在 .global-nav 上（sticky 元素 = 整页宽的定位参照），
+     挂在触发项里时参照物只有几十像素宽，面板永远缩在中间。
+     面板底色必须是不透明的：半透明色叠在毛玻璃导航栏上，
+     首屏那行 66px 大标题会透出来跟面板条目叠成鬼影。
+     open/leave 判定挂在 header 上，整条移动路径是一个连续命中区。 */
+  const navRaw = readFileSync(fileURLToPath(new URL('../src/main.jsx', import.meta.url)), 'utf8');
+  const navBody = navRaw.slice(navRaw.indexOf('function Navigation'));
+  /* 面板渲染在 </nav> 之后、</header> 之前 ⇒ 它是 header 的直接子元素，
+     不是 .nav-menu / .nav-group 的后代。
+     这比「正则找一段 className 顺序」稳：一旦面板被挪回触发项内部
+     （面板变成 nav-menu 的后代，定位参照物从整页宽缩回几十像素宽，
+left:0;right:0 就只能铺满那点宽度），断言立刻断。 */
+  const panelAt = navBody.indexOf('<NavPanel');
+  const navClose = navBody.indexOf('</nav>');
+  const headerEnd = navBody.indexOf('</header>');
+  expect(
+    '下拉面板挂在 .global-nav 内（不是触发项内部）',
+    panelAt > navClose && panelAt < headerEnd && panelAt > -1,
+  );
+  if (!(panelAt > navClose && panelAt < headerEnd)) {
+    console.log(
+      `    面板调用在 ${panelAt}，</nav> 在 ${navClose}，</header> 在 ${headerEnd}（面板须落在两者之间）`,
+    );
+  }
+  // 面板自己不再管开合，否则和 header 上的判定抢同一个状态。
+  // 要看的是 NavPanel 组件定义里那个真实渲染出来的 div —— 调用处传的是
+  // props，在那里查 onMouseEnter 只会查到 <NavPanel .../> 这个自闭合标签。
+  const panelDef = navRaw.slice(navRaw.indexOf('function NavPanel'));
+  const panelDiv = (panelDef.match(/<div className="nav-panel"[\s\S]*?>/) || [])[0] || '';
+  expect(
+    '面板不重复绑定开合判定',
+    !!panelDiv && !/onMouseEnter|onMouseLeave|onPointerEnter|onPointerLeave/.test(panelDiv),
+  );
+  if (/onMouseEnter|onMouseLeave/.test(panelDiv)) {
+    console.log('    面板不该自己管开合，命中判定要统一交给 header');
+  }
+  const navGroupRule = (cssRaw.match(/\.nav-group\s*\{([^}]*)\}/) || [])[1] || '';
+  expect('面板参照物是导航栏而非触发项', !!navGroupRule && !/position\s*:/.test(navGroupRule));
+  const panelBg = (cssRaw.match(/\.nav-panel\s*\{([^}]*)\}/) || [])[1] || '';
+  expect(
+    '面板底色用不透明的 --panel-bg（半透明会让底下大标题透出来）',
+    /background\s*:\s*var\(--panel-bg\)/.test(panelBg),
+  );
+  const panelColHover = (cssRaw.match(/\.nav-panel-col:hover\s*\{([^}]*)\}/) || [])[1] || '';
+  expect(
+    '列悬停高亮用不透明层色',
+    /var\(--panel-col-hover\)/.test(panelColHover),
+  );
+  const openHeader = navBody.slice(0, navBody.indexOf('<div className="nav-inner">'));
+  expect(
+    '导航栏开合判定挂在 header 上（保证移动路径不出现命中空隙）',
+    /className="global-nav"[\s\S]*?onMouseEnter=\{keep\}[\s\S]*?onMouseLeave=\{closeLater\}/.test(
+      openHeader,
+    ),
+  );
+
+// 列与列之间必须有可见分隔，用户要一眼看出分组的边界。
+// 注意只能匹配到列本体那条规则：:first-child 里也有 border-left（值是 0），
+// 宽松匹配会被它顶掉，于是「把分隔线删了」这种改动照样能过。
+const colRule = (cssRaw.match(/\n\s*\.nav-panel-col\s*\{([^}]*)\}/) || [])[1] || '';
+expect(
+  '面板列之间有分隔线',
+  /border-left\s*:\s*1px\s+solid/.test(colRule),
+);
+if (!/border-left\s*:\s*1px\s+solid/.test(colRule)) {
+  console.log('    .nav-panel-col 里没有 1px 竖线，各列会糊成一片');
+}
+// 竖线要用比页面分隔线更重的 --panel-divider：面板是实色底，
+// 页面上的 --line 打上去几乎看不见，分列就白说了。
+expect(
+  '面板竖线用加重的 --panel-divider（实色底上 --line 太淡）',
+  /border-left\s*:\s*1px\s+solid\s+var\(--panel-divider\)/.test(colRule),
+);
+  // 列数由数据传给 CSS 变量，否则 3 列只占左边一小块、右边空一大片
+  expect(
+    '面板列数由数据传入并等比铺满',
+    /--cols/.test(navRaw) && /grid-template-columns:\s*repeat\(var\(--cols/.test(cssRaw),
+  );
+  if (!/background\s*:\s*var\(--panel-bg\)/.test(panelBg)) {
+    console.log('    .nav-panel 当前底色: ' + (panelBg.match(/background[^;]*/) || ['无'])[0]);
+  }
   if (pngInPublic.length) {
     console.log(`    死重 PNG（应移到 media-src/）: ${pngInPublic.join(', ')}`);
   }

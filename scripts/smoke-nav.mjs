@@ -246,38 +246,76 @@ try {
 
   /* ---------- 4. 源码与样式契约 ---------- */
 
-  expect('分组的悬停打开绑定在 mouseenter', /onMouseEnter=\{openNow\}/.test(mainSrc));
+  /* 这些断言锚定的是「期望行为」，不是当时的写法。
+     面板从触发项内部挪到 .global-nav 之后，开合状态由 useNavDropdown 统一管，
+     每组组件各自的 openNow/keepTimerRef 都不存在了。 */
+
+  // 悬停打开：触发项进入即展开对应分组
+  expect(
+    '分组悬停即展开',
+    /<div key=\{id\} className="nav-group"[^>]*onMouseEnter=\{\(\) => open\(id\)\}/.test(mainSrc),
+  );
+  // 收起走延迟而不是立即
   expect('收起走延迟而不是立即', /dropdownCloseDelay/.test(mainSrc));
   expect(
     '延迟期间指针折返会作废关闭',
-    /keepTimerRef\.current = true;/.test(mainSrc) &&
-      /if \(keepTimerRef\.current\) closeNow\(\);/.test(mainSrc),
+    /armedRef\.current = true;/.test(mainSrc) &&
+      /if \(armedRef\.current\) setOpenId\(null\)/.test(mainSrc) &&
+      /const keep = \(\) => \{[\s\S]{0,80}?armedRef\.current = false/.test(mainSrc),
   );
-  expect('焦点进入即展开（键盘可用）', /onFocus=\{openNow\}/.test(mainSrc));
+  expect('焦点进入即取消收起（键盘可用）', /onFocus=\{keep\}/.test(mainSrc));
   expect(
-    '焦点离开整组才收起',
+    '焦点离开整个导航区才收起',
     /currentTarget\.contains\(event\.relatedTarget\)/.test(mainSrc),
   );
-  expect('ESC 可关闭且不冒泡到全局', /event\.stopPropagation\(\);/.test(mainSrc));
+  expect('ESC 可关闭且不冒泡到全局', /event\.stopPropagation\(\);[\s\S]{0,40}?closeNow\(\);/.test(mainSrc));
   expect('卸载时清掉定时器', /window\.clearTimeout\(timerRef\.current\)/.test(mainSrc));
+  // 开合判定必须落在 header 上：面板是 header 的子元素，整条移动路径
+  // 才是一个连续命中区。挂在导航项或面板各自身上都会在两者之间留下缝隙。
+  expect(
+    '开合判定挂在 header 上（路径连续，不出现命中空隙）',
+    /className="global-nav"[\s\S]*?onMouseEnter=\{keep\}[\s\S]*?onMouseLeave=\{closeLater\}/.test(mainSrc),
+  );
+  expect(
+    '面板自身不再重复绑定开合',
+    !/<div className="nav-panel"[^>]*onMouse/.test(mainSrc),
+  );
+  expect('面板在 nav-menu 之外渲染（是 header 的直接子元素）', (() => {
+    const navBody = mainSrc.slice(mainSrc.indexOf('function Navigation'));
+    const panelAt = navBody.indexOf('<NavPanel');
+    return panelAt > navBody.indexOf('</nav>') && panelAt < navBody.indexOf('</header>');
+  })());
+  expect('导航栏绑定展开态', /data-section=\{openId !== null\}/.test(mainSrc));
+  expect(
+    '切页时收起面板',
+    /useEffect\(\(\) => \{[\s\S]{0,120}?setOpenId\(null\);[\s\S]{0,20}?\}, \[path\]\)/.test(mainSrc),
+  );
+  // 移到没有下拉的那几项上时要收起，否则面板会挂在另一个分组下不消失
+  expect('移到无下拉的导航项上会收起面板', /onMouseEnter=\{\(\) => closeNow\(\)\}/.test(mainSrc));
 
   // 样式契约
-  expect('分组自身撑满导航高度', /\.nav-group \{[\s\S]*?align-self: stretch/.test(css));
   expect('面板默认不可见', /\.nav-panel \{[\s\S]*?visibility: hidden/.test(css));
+  expect('面板靠自身 data-open 才显形', /\.nav-panel\[data-open="true"\] \{/.test(css));
+  expect('面板的展开选择器不再依赖 .nav-group', !/\.nav-group\[data-open="true"\][^{]*\.nav-panel/.test(css));
+  // 面板必须有指针桥梁：它贴在导航栏下沿，而触发项在导航栏内部，
+  // 指针斜着往下走会在两者之间断开命中
   expect(
-    '面板靠 data-open 才显形',
-    /\.nav-group\[data-open="true"\] \.nav-panel \{/.test(css),
+    '面板有指针桥梁接上导航栏',
+    /\.nav-panel::before \{[\s\S]*?top: -28px/.test(css),
   );
-  // 苹果式面板的关键：铺满整页宽 + 靠底色分层 + 没有阴影和圆角
-  expect('面板铺满左右', /\.nav-panel \{[\s\S]*?left: 0;[\s\S]*?right: 0;/.test(css));
   expect('面板不加阴影', !/\.nav-panel \{[\s\S]{0,400}?box-shadow/.test(css));
   expect('面板不加圆角', !/\.nav-panel \{[\s\S]{0,400}?border-radius/.test(css));
-  expect('面板用底色而非描边分层', /\.nav-panel \{[\s\S]*?background: var\(--surface-alt\)/.test(css));
+  // 面板与导航栏展开态必须是同一个不透明色：半透明色叠在毛玻璃上，
+  // 首屏那行 66px 大标题会透出来跟面板条目叠成鬼影
+  expect('面板用不透明底色', /\.nav-panel \{[\s\S]*?background: var\(--panel-bg\)/.test(css));
   expect(
-    '导航栏在面板展开时换同色底色',
-    /\.global-nav\[data-section="true"\] \{[\s\S]*?background: var\(--surface-alt\)/.test(css),
+    '导航栏在面板展开时换同一底色',
+    /\.global-nav\[data-section="true"\] \{[\s\S]*?background: var\(--panel-bg\)/.test(css),
   );
-  expect('面板相对导航定位（分组不设 relative）', /\.nav-group \{[\s\S]*?\/\* 不设 position/.test(css));
+  // .nav-group 绝不能设 position —— 一旦设了，面板的定位参照物就从
+  // 整页宽的 .global-nav 变成这个几十像素宽的项，left:0;right:0 只剩几十像素
+  const navGroupRule = (css.match(/\.nav-group \{([\s\S]*?)\}/) || [])[1] || '';
+  expect('分组不设 position（否则面板定位参照物变窄）', !/position\s*:/.test(navGroupRule));
   expect(
     '条目默认下沉并透明',
     /\.nav-panel-col li \{[\s\S]*?transform: translate3d\(0, -8px, 0\)/.test(css),
@@ -298,6 +336,13 @@ try {
   expect(
     '中等视口自动减列',
     /@media \(max-width: 1180px\)/.test(css) && /min\(var\(--cols/.test(css),
+  );
+  // 列分区：竖线 + 整列悬停高亮，缺一个用户就看不出分组边界
+  const colRule = (css.match(/\.nav-panel-col \{([\s\S]*?)\}/) || [])[1] || '';
+  expect('列之间有竖线分隔', /border-left\s*:\s*1px solid/.test(colRule));
+  expect(
+    '整列悬停有高亮（条目间距窄，只靠条目 hover 反馈范围不够）',
+    /\.nav-panel-col:hover \{[\s\S]*?background/.test(css),
   );
   expect(
     '粗体大字一级明显更大更重',
@@ -338,19 +383,6 @@ try {
   expect(
     '窄屏隐藏面板',
     /\.nav-panel \{[\s\S]*?display: none/.test(narrowBlock.slice(0, 900)),
-  );
-
-  // 面板开合要同步给外层：导航栏底色靠这个状态驱动
-  expect('面板状态回传外层', /onOpenChange=\{setPanelOpen\}/.test(mainSrc));
-  expect('导航栏绑定展开态', /data-section=\{panelOpen\}/.test(mainSrc));
-  expect('切页时收起面板', /useEffect\(\(\) => setPanelOpen\(false\), \[path\]\)/.test(mainSrc));
-  expect(
-    '卸载时复位外层展开态',
-    /onOpenChange\?\.\(false\);/.test(mainSrc),
-  );
-  expect(
-    'ESC 用 closeNow 以同步外层',
-    /event\.stopPropagation\(\);\s*closeNow\(\);/.test(mainSrc),
   );
 } catch (err) {
   checks.push([`执行抛错: ${err.message}`, false]);

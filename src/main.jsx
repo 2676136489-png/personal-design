@@ -82,13 +82,20 @@ function trapTabInDialog(event, container) {
 
 /* 下拉的收起要延后一拍再执行，否则指针从触发项移向面板的途中
    会经过两者之间的缝隙，菜单会先关再开，看起来像在闪烁。
-   这一拍里指针若又移回组内，定时器会被 onMouseEnter 作废。 */
-export const dropdownCloseDelay = () => 140;
+   这一拍里指针若又移回导航区（含面板），定时器会被 keep() 作废。 */
+export const dropdownCloseDelay = () => 160;
 
-function NavGroup({ item, label, active, onNavigate, onOpenChange }) {
-  const [open, setOpen] = useState(false);
-  const keepTimerRef = useRef(false);
+/* 下拉的开关状态统一收在这里，而不是每个 NavGroup 各自管一份。
+
+   原因很实在：面板要铺满整页宽，就必须挂在 .global-nav 上做定位参照
+   （它是 sticky，正好是整页宽的包含块）。面板一旦不再是触发项的后代，
+   「指针还在不在这一组里」就没法靠各自的 onMouseLeave 判断了——
+   触发项和面板变成兄弟，只能由外层记着当前展开的是哪一项，
+   两边的进入/离开都去动同一个状态。 */
+function useNavDropdown(path) {
+  const [openId, setOpenId] = useState(null);
   const timerRef = useRef(0);
+  const armedRef = useRef(false);
 
   const clear = () => {
     if (timerRef.current) {
@@ -97,116 +104,87 @@ function NavGroup({ item, label, active, onNavigate, onOpenChange }) {
     }
   };
 
-  /* open 的每次翻转都要同步给外层：导航栏要在面板展开时跟着换底色，
-     两者连成一片才没有接缝。 */
-  const commit = (next) => {
-    setOpen(next);
-    onOpenChange?.(next);
+  // 指针/焦点还在导航区里：取消待执行的收起
+  const keep = () => {
+    armedRef.current = false;
+    clear();
   };
 
-  const openNow = () => {
-    keepTimerRef.current = false;
-    clear();
-    commit(true);
-  };
-
-  const closeNow = () => {
-    keepTimerRef.current = false;
-    clear();
-    commit(false);
+  const open = (id) => {
+    keep();
+    setOpenId(id);
   };
 
   const closeLater = () => {
-    keepTimerRef.current = true;
+    armedRef.current = true;
     clear();
     timerRef.current = window.setTimeout(() => {
-      // 这一拍里指针又回来了（onMouseLeave → onMouseEnter）就作废
-      if (keepTimerRef.current) closeNow();
+      if (armedRef.current) setOpenId(null);
     }, dropdownCloseDelay());
   };
 
-  useEffect(
-    () => () => {
-      if (timerRef.current) window.clearTimeout(timerRef.current);
-      // 组件卸载时若面板还开着，得把外层状态一起复位，
-      // 否则切页后导航栏会停在面板的底色上
-      onOpenChange?.(false);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
+  const closeNow = () => {
+    keep();
+    setOpenId(null);
+  };
 
-  // 焦点离开整组（含面板）就收起，键盘用户不会留下一个悬空的面板
+  useEffect(() => () => clear(), []);
+
+  // 切页时收起，否则会留一个悬空的展开态
+  useEffect(() => {
+    armedRef.current = false;
+    clear();
+    setOpenId(null);
+  }, [path]);
+
+  // 焦点（含 Tab 走进面板）离开整个导航区就收起，键盘用户不会留下悬空面板
   const onBlur = (event) => {
     if (!event.currentTarget.contains(event.relatedTarget)) closeNow();
   };
 
-  return (
-    <div
-      className="nav-group"
-      data-open={open}
-      onMouseEnter={openNow}
-      onMouseLeave={closeLater}
-      onFocus={openNow}
-      onBlur={onBlur}
-      onKeyDown={(event) => {
-        if (event.key !== 'Escape' || !open) return;
-        // 停在这里，屏掉全局的 ESC 处理，否则会顺手把命令面板也关了
-        event.stopPropagation();
-        closeNow();
-      }}
-    >
-      <a
-        className="nav-group-trigger"
-        href={item.href}
-        data-active={active}
-        aria-expanded={open}
-        onClick={(event) => onNavigate(event, item)}
-      >
-        {label}
-        <ChevronDown className="nav-caret" size={12} aria-hidden="true" />
-      </a>
+  return { openId, open, keep, closeLater, closeNow, onBlur };
+}
 
-      <div className="nav-panel">
-        {/* --cols 告诉网格按几列铺开。不给的话它没法知道该占满多宽。 */}
-        <div className="nav-panel-inner" style={{ '--cols': item.columns.length }}>
-          {item.columns.map((column, colIndex) => (
-            <div className="nav-panel-col" key={column.title} style={{ '--c': colIndex }}>
-              <p className="nav-panel-title">{column.title}</p>
-              <ul>
-                {column.featured?.map((entry, i) => (
-                  <li key={`f-${entry.href}-${entry.label}`} style={{ '--i': i }}>
-                    <a
-                      className="nav-panel-featured"
-                      href={entry.href}
-                      target={entry.external ? '_blank' : undefined}
-                      rel={entry.external ? 'noreferrer noopener' : undefined}
-                      onClick={(event) => onNavigate(event, entry)}
-                    >
-                      {entry.label}
-                      {entry.external ? <ArrowUpRight size={15} aria-hidden="true" /> : null}
-                    </a>
-                  </li>
-                ))}
-                {column.links?.map((entry, i) => (
-                  <li
-                    key={`l-${entry.href}-${entry.label}`}
-                    style={{ '--i': (column.featured?.length || 0) + i }}
+/* 面板只管把内容铺出来，命中与开合都交给外层的 <header>。
+   它是 header 的直接子元素，指示展开的是哪一项就够。 */
+function NavPanel({ item, open, onNavigate }) {
+  return (
+    <div className="nav-panel" data-open={open}>
+      {/* --cols 告诉网格按几列铺开。不给的话它没法知道该占满多宽。 */}
+      <div className="nav-panel-inner" style={{ '--cols': item.columns.length }}>
+        {item.columns.map((column, colIndex) => (
+          <div className="nav-panel-col" key={column.title} style={{ '--c': colIndex }}>
+            <p className="nav-panel-title">{column.title}</p>
+            <ul>
+              {column.featured?.map((entry, i) => (
+                <li key={`f-${entry.href}-${entry.label}`} style={{ '--i': i }}>
+                  <a
+                    className="nav-panel-featured"
+                    href={entry.href}
+                    target={entry.external ? '_blank' : undefined}
+                    rel={entry.external ? 'noreferrer noopener' : undefined}
+                    onClick={(event) => onNavigate(event, entry)}
                   >
-                    <a
-                      href={entry.href}
-                      target={entry.external ? '_blank' : undefined}
-                      rel={entry.external ? 'noreferrer noopener' : undefined}
-                      onClick={(event) => onNavigate(event, entry)}
-                    >
-                      {entry.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+                    {entry.label}
+                    {entry.external ? <ArrowUpRight size={15} aria-hidden="true" /> : null}
+                  </a>
+                </li>
+              ))}
+              {column.links?.map((entry, i) => (
+                <li key={`l-${entry.href}-${entry.label}`} style={{ '--i': (column.featured?.length || 0) + i }}>
+                  <a
+                    href={entry.href}
+                    target={entry.external ? '_blank' : undefined}
+                    rel={entry.external ? 'noreferrer noopener' : undefined}
+                    onClick={(event) => onNavigate(event, entry)}
+                  >
+                    {entry.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -216,9 +194,8 @@ function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [scrollActive, setScrollActive] = useState('top');
-  // 有面板展开时，导航栏整体换成面板底色，两者连成一片
-  const [panelOpen, setPanelOpen] = useState(false);
   const menuRef = useRef(null);
+  const { openId, open, keep, closeLater, closeNow, onBlur } = useNavDropdown(path);
 
   // 首页时导航跟随滚动锚点，否则跟随路由
   const activeKey = path === 'top' ? scrollActive : path;
@@ -232,9 +209,6 @@ function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
   }, []);
 
   useEffect(() => setMenuOpen(false), [path]);
-
-  // 切换页面时收起面板，否则会留一个悬空的展开态
-  useEffect(() => setPanelOpen(false), [path]);
 
   // 滚动跟随：取视口中线所在的那一节作为当前节
   useEffect(() => {
@@ -264,7 +238,25 @@ function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
   };
 
   return (
-    <header className="global-nav" data-scrolled={scrolled} data-section={panelOpen}>
+    <header
+      className="global-nav"
+      data-scrolled={scrolled}
+      data-section={openId !== null}
+      /* leave 挂在整个 header 上，而不是导航项或面板上。
+         面板是 header 的子元素，指针从导航项走到面板的整条路径
+         都在这一个命中区内，结构上就不存在「掉出去」的缝隙 ——
+         之前一碰就弹跳，正是因为判定区被切成了互不相邻的两块。 */
+      onMouseEnter={keep}
+      onMouseLeave={closeLater}
+      onFocus={keep}
+      onBlur={onBlur}
+      onKeyDown={(event) => {
+        if (event.key !== 'Escape' || openId === null) return;
+        // 停在这里，屏掉全局的 ESC 处理，否则会顺手把命令面板也关了
+        event.stopPropagation();
+        closeNow();
+      }}
+    >
       <div className="nav-inner">
         <a
           className="nav-brand"
@@ -286,6 +278,10 @@ function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
                   key={id}
                   href={item.href}
                   data-active={isActive}
+                  // 移到没有下拉的那几项上时把面板收掉，
+                  // 否则它会挂在另一个 group's 面板上不消失
+                  onMouseEnter={() => closeNow()}
+                  onFocus={closeNow}
                   onClick={(e) => handleNav(e, item)}
                 >
                   {label}
@@ -293,14 +289,18 @@ function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
               );
             }
             return (
-              <NavGroup
-                key={id}
-                item={item}
-                label={label}
-                active={isActive}
-                onNavigate={(event, target) => handleNav(event, target)}
-                onOpenChange={setPanelOpen}
-              />
+              <div key={id} className="nav-group" data-open={openId === id} onMouseEnter={() => open(id)}>
+                <a
+                  className="nav-group-trigger"
+                  href={item.href}
+                  data-active={isActive}
+                  aria-expanded={openId === id}
+                  onClick={(e) => handleNav(e, item)}
+                >
+                  {label}
+                  <ChevronDown className="nav-caret" size={12} aria-hidden="true" />
+                </a>
+              </div>
             );
           })}
           <span className="nav-indicator" style={indicatorStyle} aria-hidden="true" />
@@ -340,6 +340,20 @@ function Navigation({ theme, onThemeChange, onCommandOpen, path }) {
           ))}
         </div>
       ) : null}
+
+      {/* 面板挂在 .global-nav 上而不是触发项内部：
+          sticky 的导航栏就是整页宽的定位参照，left:0;right:0 才能真的铺满。
+          挂在触发项里时，参照物是那个只有几十像素宽的项，面板永远缩在中间。 */}
+      {navItems.map((item) =>
+        item.columns?.length ? (
+          <NavPanel
+            key={item.id}
+            item={item}
+            open={openId === item.id}
+            onNavigate={(event, target) => handleNav(event, target)}
+          />
+        ) : null,
+      )}
     </header>
   );
 }

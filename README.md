@@ -49,6 +49,14 @@ scripts/        部署、图片处理与验证脚本
 
 **`<img>` 的 `width`/`height` 属性要配 `height: auto`**。这两个属性是给浏览器提前算宽高比、避免图片加载时页面抖动的；但如果 CSS 只写了 `width: 100%` 而没写高度，浏览器会把属性里的高度当成固定像素尺寸用，图片就被纵向拉伸。全局 `img` 规则里显式写了 `height: auto` 兜底。
 
+**导航下拉面板挂在 `.global-nav` 上，不挂在触发项里**。`position: absolute` 的定位参照物是最近的定位祖先——挂在触发项里时参照物只有几十像素宽，`left: 0; right: 0` 只能铺满那么点，面板永远缩在中间；挂在 sticky 的导航栏上，参照物才是整页宽。
+
+**面板开合的命中判定统一挂在 `<header>` 上**。触发项和面板是兄弟节点，中间还隔着导航栏剩下的一圈，指针斜着往下走时会在「导航栏空白 → 面板」之间掉出判定区，触发 leave 就把菜单收了，来回抖几下就成了弹跳。判定挂在 header 上（面板是它的子元素）之后，整条移动路径是一个连续命中区，结构上不可能断。`.nav-panel::before` 往上顶一条透明命中区作为双保险。
+
+**面板底色用不透明的 `--panel-bg`**，不用半透明。半透明色叠在毛玻璃导航栏上，首屏那行 66px 的大标题会从面板底下透出来，跟面板条目叠成鬼影。
+
+**列数由数据传给 CSS 变量**（`--cols`），配 `grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr))` 等比铺满整行。定死列宽会让 3 列只占左边一小块、右边空一大片。列与列之间用 1px 竖线分隔、整列悬停时整列亮起——条目挨得近，只靠条目自己的 hover 反馈，用户不知道自己在哪一列。
+
 ## 本地开发
 
 ```bash
@@ -84,13 +92,34 @@ GitHub Pages 首次启用需在仓库 Settings → Pages 里把 Source 设为 `D
 
 ## 验证
 
-前端验证走 SSR 渲染冒烟脚本——在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器截图。
+静态契约走 SSR 渲染冒烟脚本——在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器截图。
 
 ```bash
-node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约
-node scripts/smoke-nav.mjs         # 导航下拉：SSR 结构 + 数据 + 样式契约
-node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约
-node scripts/smoke-backtotop.mjs   # 回到顶部按钮显隐逻辑
+node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（54 条）
+node scripts/smoke-nav.mjs         # 导航下拉：SSR 结构 + 数据 + 样式契约（74 条）
+node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约（43 条）
+node scripts/smoke-backtotop.mjs   # 回到顶部按钮显隐逻辑（31 条）
 ```
 
-断言里既有「内容有没有渲染出来」，也有「实现契约有没有被改坏」——后者用来防止某次重构悄悄把已修好的问题带回来。
+断言分两种：一种是「内容有没有渲染出来」，另一种是「实现契约有没有被改坏」。后者防的是某次重构悄悄把已修好的问题带回来——比如「面板底色必须不透明」，一旦有人改回半透明，首屏那行大标题就会从面板底下透出来。
+
+**断言本身也要验证。** 不会失败的断言等于没有：
+
+```bash
+node scripts/mutation-check.mjs
+```
+
+这个脚本把每项修复临时改回坏写法（面板挪回触发项内部、分组设 `position: relative`、竖线删掉……），确认对应的断言真的会 FAIL、退出码非 0，然后还原。10 条反例全部被拦住，才说明上面那 200 多条断言是有效的。
+
+### 布局与交互实测
+
+有些问题静态断言答不了：「指针移进面板会不会又触发 leave」「面板到底铺满整页宽没有」——这类只能让真实布局引擎回答。本机装了 Edge，走 CDP 驱动：
+
+```bash
+# 起浏览器与预览服务后
+node scripts/cdp-probe.mjs http://127.0.0.1:5199/ 1440 900   # 量布局宽、找溢出元素
+node scripts/hover-trace.mjs http://127.0.0.1:5199/          # 模拟真实鼠标走两条路径，数开合翻转次数
+node scripts/shot-nav.mjs http://127.0.0.1:5199/ out.png 关于  # 悬停截图 + 量面板几何
+```
+
+`hover-trace.mjs` 走两条路径：触发项直线移到面板中部，以及在边界附近小幅抖动（真实用户的手不会走直线，抖一下就崩的交互等于不能用）。

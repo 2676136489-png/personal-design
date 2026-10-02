@@ -4,10 +4,14 @@ dist_bak/
 dist-verify/
 dist-v2/
 dist-v3/
+dist-v4*/
+dist-v5*/
 dist-pages/
 dist-pages-new/
 dist-pages-old*/
 screenshots/
+# CDP 实测时的临时截图
+.nav-*.png
 .vite/
 .vite-out.log
 .vite-error.log
@@ -27,3 +31,5 @@ backup-portfolio-v2/
 .verify.html
 build.log
 dist-verify/
+.mutation-check.mjs
+.shot-nav*.mjs

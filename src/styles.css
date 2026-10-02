@@ -10,6 +10,7 @@
   --faint: #64739b;
   --line: rgba(125, 158, 255, 0.14);
   --line-strong: rgba(125, 158, 255, 0.3);
+  --panel-divider: rgba(125, 158, 255, 0.22);
   --accent: #3d8bff;
   --accent-hover: #5aa0ff;
   --accent-2: #22e0d2;
@@ -24,6 +25,11 @@
   --code-ink: #d6e2f7;
   --code-faint: #7b8bb0;
   --nav-bg: rgba(6, 9, 20, 0.78);
+  /* 面板必须用实色。半透明的话，首屏那行 66px 的大标题会从面板底下
+     透出来，跟面板里的条目叠成一团鬼影（实测 0.78 的不透明度完全挡不住），
+     面板底下的内容本身还可能带渐变文字，透出来更乱。 */
+  --panel-bg: #070b16;
+  --panel-col-hover: rgba(125, 158, 255, 0.09);
   --overlay: rgba(2, 4, 12, 0.8);
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -57,6 +63,8 @@
   --faint: #7d8aa5;
   --line: rgba(11, 18, 32, 0.1);
   --line-strong: rgba(11, 18, 32, 0.2);
+  /* 面板是实色底，竖线得比页面上的分隔线更重一点才看得出分列 */
+  --panel-divider: rgba(11, 18, 32, 0.16);
   --accent: #1a6bff;
   --accent-hover: #0b57e0;
   --accent-2: #00b8a9;
@@ -70,6 +78,8 @@
   --code-ink: #d6e2f7;
   --code-faint: #8b9ac2;
   --nav-bg: rgba(255, 255, 255, 0.76);
+  --panel-bg: #f2f5fc;
+  --panel-col-hover: rgba(11, 18, 32, 0.04);
   --overlay: rgba(12, 20, 40, 0.5);
 }
 
@@ -197,9 +207,11 @@ img {
 }
 
 /* 面板展开时导航栏跟着换底色，和面板连成一片。
-   收起时底色再慢慢transition回去，接缝不会跳。 */
+   收起时底色再慢慢transition 回去，接缝不会跳。
+   底色要用不透明的 --panel-bg：导航栏本身是毛玻璃，
+   半透明色叠在半透明色上，面板展开那一瞬底下的大标题就透出来了。 */
 .global-nav[data-section="true"] {
-  background: var(--surface-alt);
+  background: var(--panel-bg);
   border-bottom-color: transparent;
 }
 
@@ -208,11 +220,12 @@ img {
   min-height: var(--nav-height);
   margin: 0 auto;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 28px;
 }
 
 .nav-brand {
+  align-self: center;
   display: inline-flex;
   align-items: baseline;
   gap: 7px;
@@ -232,6 +245,11 @@ img {
   display: flex;
   align-items: center;
   gap: 26px;
+  /* 撑满导航高度。指针从导航项往面板走的那一段，
+     必须仍然落在导航项自己的命中区内 —— 不然中途就触发 leave，
+     菜单反复开合。面板有 ::before 桥接条补上导航栏剩余那一圈，
+     两者合起来路径才不断。 */
+  align-self: stretch;
 }
 
 /* 顶部导航的每一项字号在手机上会大一点（触屏没有悬停，
@@ -274,12 +292,8 @@ img {
    - 导航栏本身也一起变色，两者连成一片，看不出接缝 */
 
 .nav-group {
-  /* 不设 position:relative —— 面板要相对 .global-nav 定位（整页宽），
-     而不是相对这个窄窄的触发项 */
   display: flex;
   align-items: center;
-  /* 撑满导航高度，让指针从触发项移到面板时不会掉出整组 */
-  align-self: stretch;
 }
 
 .nav-panel {
@@ -288,10 +302,12 @@ img {
   left: 0;
   right: 0;
   z-index: 110;
-  padding: 12px 0 40px;
-  background: var(--surface-alt);
+  padding: 14px 0 40px;
+  background: var(--panel-bg);
   border-bottom: 1px solid var(--line);
   opacity: 0;
+  /* 收起用 visibility 而不是 display:none —— 后者会让收起动画根本播不出来，
+     面板「啪」地消失。代价是必须靠 transition-delay 把隐藏推迟到淡出之后。 */
   visibility: hidden;
   transform: translate3d(0, -8px, 0);
   transition:
@@ -300,7 +316,21 @@ img {
     visibility 0s linear 200ms;
 }
 
-.nav-group[data-open="true"] .nav-panel {
+/* 指针桥梁：面板贴在导航栏下沿，触发项却在导航栏内部，
+   两者中间隔着导航栏剩下的那一圈。指针斜着往下走时会在
+   「导航栏空白 → 面板」之间断掉，触发 leave 就把菜单收了。
+   往上顶一条与面板同宽、透明的命中区，路径就不断了。
+   面板收起时它跟着 visibility 一起失效，不会挡住底下内容。 */
+.nav-panel::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -28px;
+  height: 28px;
+}
+
+.nav-panel[data-open="true"] {
   opacity: 1;
   visibility: visible;
   transform: translate3d(0, 0, 0);
@@ -315,22 +345,68 @@ img {
      之前用 minmax(210px, 1fr) 时，3 列只占约 700px，
      面板右边会空出很大一片——苹果的列是铺开的。 */
   grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
-  gap: 14px 56px;
+  /* 列间距交给列自己的 padding + 竖线，这里不再留 gap，
+     否则竖线和内容之间会空出两条缝，看起来像三个孤立的框。 */
+  gap: 0;
+  padding: 6px 0 2px;
+}
+
+/* 列与列之间用一条竖线分开，整列还能单独亮起来。
+   这两件事一起做，「哪一列管什么」才是明确的：
+   只靠留白的话，几列短文字会糊成一片，看不出分组的边界。 */
+.nav-panel-col {
+  position: relative;
+  padding: 10px 40px 14px;
+  border-left: 1px solid var(--panel-divider);
+  border-radius: 14px;
+  transition:
+    background-color 220ms var(--ease),
+    border-color 220ms var(--ease);
+}
+
+.nav-panel-col:first-child {
+  padding-left: 10px;
+  border-left: 0;
+}
+
+.nav-panel-col:last-child {
+  padding-right: 10px;
 }
 
 /* 视口不够宽时按内容自动减列，而不是把列压窄到读不下去 */
 @media (max-width: 1180px) {
   .nav-panel-inner {
     grid-template-columns: repeat(min(var(--cols, 3), 2), minmax(0, 1fr));
-    gap: 14px 40px;
+  }
+
+  .nav-panel-col {
+    padding: 10px 26px 14px;
   }
 }
 
 .nav-panel-title {
-  margin: 0 0 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
   color: var(--faint);
-  font-size: 12px;
-  font-weight: 400;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: color 220ms var(--ease);
+}
+
+/* 标题前的小方块：列的锚点，扫一眼就知道这里是一组的开头 */
+.nav-panel-title::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  flex: none;
+  border-radius: 1px;
+  background: var(--accent);
+  opacity: 0.7;
+  transition: opacity 220ms var(--ease);
 }
 
 .nav-panel-col ul {
@@ -350,7 +426,7 @@ img {
 
 /* 条目自上而下依次滑入：--i 是列内序号，--c 是列序号，
    让右边的列整体稍慢一点，扫视方向是左上 → 右下。 */
-.nav-group[data-open="true"] .nav-panel-col li {
+.nav-panel[data-open="true"] .nav-panel-col li {
   opacity: 1;
   transform: translate3d(0, 0, 0);
   transition-delay: calc(var(--c, 0) * 60ms + var(--i, 0) * 32ms + 60ms);
@@ -389,6 +465,7 @@ img {
 }
 
 .nav-tools {
+  align-self: center;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -2679,6 +2756,26 @@ main {
     transform: scale(1.03);
   }
 
+  /* 整列悬停时整列底色亮起来、竖线转亮。
+     列内条目挨得近，光靠条目自己的 hover 反馈范围太窄，
+     指针停在两行之间时用户不知道自己在哪一列。
+     这里用不透明的加亮层：面板底色已经是实色，
+     再叠半透明会透出面板下方的大标题。 */
+  .nav-panel-col:hover {
+    background: var(--panel-col-hover);
+    border-left-color: var(--line-strong);
+  }
+
+  .nav-panel-col:first-child:hover {
+    border-left-color: transparent;
+  }
+
+  .nav-panel-col:hover .nav-panel-title,
+  .nav-panel-col:hover .nav-panel-title::before {
+    opacity: 1;
+    color: var(--ink-soft);
+  }
+
   .nav-group:hover .nav-caret {
     opacity: 1;
   }
@@ -3410,13 +3507,15 @@ main {
     transition: opacity 160ms linear;
   }
 
+  /* 条目常驻可见（默认态是 opacity:0 + 下沉，靠 data-open 逐条点亮）。
+     reduced-motion 下不再逐条延迟，全部一起淡入。
+     选择器锚 .nav-panel[data-open] —— 面板已经不在 .nav-group 里面了，
+     写成 .nav-group[data-open] .nav-panel-col li 命中不到任何元素。 */
   .nav-panel-col li {
     opacity: 1;
   }
 
-  /* 逐条滑入整体取消，所有条目一起淡入 */
-  .nav-group[data-open="true"] .nav-panel-col li {
-    transform: none;
+  .nav-panel[data-open="true"] .nav-panel-col li {
     transition-delay: 0ms;
   }
 
