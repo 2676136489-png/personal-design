@@ -129,7 +129,7 @@ README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓线上界面，`sc
 四个 SSR 冒烟脚本。在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器。
 
 ```bash
-node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（69 条）
+node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（73 条）
 node scripts/smoke-nav.mjs         # 导航下拉：SSR 结构 + 数据 + 样式契约（74 条）
 node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约（43 条）
 node scripts/smoke-backtotop.mjs   # 回到顶部按钮显隐逻辑（31 条）
