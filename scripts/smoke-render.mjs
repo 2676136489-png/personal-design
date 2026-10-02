@@ -188,6 +188,44 @@ try {
   const gomoku = render('#/gomoku');
   expect('项目详情页仍正常', gomoku.includes('Gomoku'));
 
+  /* 每个项目都必须能通过 slug 打开自己的详情页。
+     之前只钉了 gomoku 一个，Projects 页靠 projects.find 取数据，
+     少写 slug 或写错就是空白页 —— 静态断言看不出来，只有逐个渲染能发现。 */
+  const { projects, IMAGE_SIZES } = data;
+  for (const p of projects) {
+    const page = render(`#/${p.slug}`);
+    const body = bodyOf(page);
+    expect(`项目详情页可打开：${p.title}`, body.includes(p.title));
+  }
+
+  /* 封面必须在 IMAGE_SIZES 里登记尺寸。
+     <img> 上的 width/height 属性会被当成呈现提示，尺寸写错或漏登记，
+     图片就会被垂直拉伸（2026-09-30 全站中招过一次）。 */
+  const missingSize = projects
+    .map((p) => p.image)
+    .filter((src) => src && !Object.keys(IMAGE_SIZES).some((k) => src.endsWith(k)));
+  expect('所有项目封面都在 IMAGE_SIZES 中登记', missingSize.length === 0);
+
+  /* 项目分类导航里的方向必须与项目实际分类对得上。
+     下拉里点「Agent 系统」应该能落到真有这类项目的页上，
+     写一个不存在的方向就是死链。 */
+  const cats = new Set(projects.map((p) => p.category));
+  const deadCat = (data.navItems || [])
+    .flatMap((item) => item.columns || [])
+    .flatMap((col) => col.links || [])
+    .filter((l) => l.href === '#/#work' && !cats.has(l.label));
+  expect('导航下拉里的方向都有对应项目', deadCat.length === 0);
+
+  /* 首屏的「收录作品」「线上运行中」必须与 projects 实际条数对得上。
+     这两个数字是纯手写的，加工项目时最容易忘改 —— 页面自己写着
+     「6 个」而下面列着 8 张卡片，读起来就是自相矛盾。
+     校园圈子独立成页（不在 projects 数组里），要单独算进去。 */
+  const factOf = (label) => Number((heroFacts.find((f) => f.label === label)?.value || '').replace(/\D/g, ''));
+  expect('首屏「收录作品」与项目实际条数一致',
+    factOf('收录作品') === projects.length + (data.campus ? 1 : 0));
+  expect('首屏「线上运行中」与有 site 的项目数一致',
+    factOf('线上运行中') === projects.filter((p) => p.site).length + (data.campus?.site ? 1 : 0));
+
   // 回到顶部按钮：所有页面都应渲染，且初始为隐藏态
   const hasBackToTop = (html) =>
     html.includes('class="back-to-top"') &&

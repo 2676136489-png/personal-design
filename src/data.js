@@ -29,9 +29,12 @@ export const IMAGE_SIZES = {
   '/media/campus/feed.webp': [2559, 1283],
   '/media/campus/login.webp': [2559, 1256],
   '/media/campus/students.webp': [2146, 1183],
+  '/media/project-checkin.webp': [1400, 933],
   '/media/project-dashboard.webp': [1400, 960],
   '/media/project-gomoku.webp': [1216, 832],
   '/media/project-identity.webp': [1400, 960],
+  '/media/project-opspilot.webp': [1400, 933],
+  '/media/project-research.webp': [1400, 933],
   '/media/project-station.webp': [1400, 960],
   '/media/project-wiki.webp': [1385, 950],
   '/media/resume/resume-900.webp': [900, 1421],
@@ -77,8 +80,8 @@ export const profile = {
 /* 首屏数据条讲的是「做出来了什么」。
    成绩、学校、排名不放这里——那些属于简历和关于页（关于页的个人名片里已有教育信息）。 */
 export const heroFacts = [
-  { label: '收录作品', value: '6 个' },
-  { label: '线上运行中', value: '2 个' },
+  { label: '收录作品', value: '9 个' },
+  { label: '线上运行中', value: '4 个' },
   { label: '校园圈子用户', value: '19 位' },
   { label: '自动化测试', value: '4 类' },
 ];
@@ -171,23 +174,28 @@ export const navItems = [
     columns: [
       {
         title: '作品',
-        featured: [{ label: '全部作品', href: '#/#work' }],
-        links: [
-          { label: 'Transformer Gomoku 对弈 Bot', href: '#/gomoku' },
-          { label: '菜鸟驿站快递管理系统', href: '#/station' },
-          { label: 'iGEM Glass Wiki 插件', href: '#/wiki' },
-          { label: '个人作品集', href: '#/portfolio' },
-          { label: '校园服务视觉系统', href: '#/identity' },
-        ],
-      },
-      {
-        title: '按方向',
-        links: [
-          { label: '算法系统', href: '#/#work' },
-          { label: '系统设计', href: '#/#work' },
-          { label: 'Web 组件', href: '#/#work' },
-          { label: '前端开发', href: '#/#work' },
-          { label: '品牌视觉', href: '#/#work' },
+    featured: [{ label: '全部作品', href: '#/#work' }],
+    links: [
+      { label: 'OpsPilot · AI 事故响应系统', href: '#/opspilot' },
+      { label: 'AI 研究工作台', href: '#/research' },
+      { label: 'Transformer Gomoku 对弈 Bot', href: '#/gomoku' },
+      { label: '菜鸟驿站快递管理系统', href: '#/station' },
+      { label: 'iGEM Glass Wiki 插件', href: '#/wiki' },
+      { label: '学习目标管理台', href: '#/checkin' },
+      { label: '个人作品集', href: '#/portfolio' },
+      { label: '校园服务视觉系统', href: '#/identity' },
+    ],
+  },
+  {
+    title: '按方向',
+    links: [
+      { label: 'Agent 系统', href: '#/#work' },
+      { label: '算法系统', href: '#/#work' },
+      { label: '系统设计', href: '#/#work' },
+      { label: 'Web 应用', href: '#/#work' },
+      { label: 'Web 组件', href: '#/#work' },
+      { label: '前端开发', href: '#/#work' },
+      { label: '品牌视觉', href: '#/#work' },
         ],
       },
       {
@@ -574,6 +582,444 @@ export const campus = {
    ============================================================ */
 
 export const projects = [
+  {
+    id: 'opspilot',
+    slug: 'opspilot',
+    title: 'OpsPilot · AI 事故响应系统',
+    category: 'Agent 系统',
+    year: '2026',
+    period: '2026.09 — 2026.10',
+    image: asset('/media/project-opspilot.webp'),
+    tag: 'LangGraph · FastAPI · React',
+    description: '状态机驱动的 AI 事故响应 Agent，跑完发现到复盘的九个环节，每一步都落库可查。',
+    role: '独立开发 · 架构与实现',
+    stack: 'Python · LangGraph · FastAPI · React 19 · MCP',
+    site: 'https://opspilot-v2.app.workbuddy.host/',
+    github: 'https://github.com/2676136489-png/OpsPilot',
+    lede: '把值班工程师处理告警的那段流程交给一个状态机驱动的 Agent，同时要求它把每一步都落库。它允许输出「我没查出来」——诊断能输出 UNKNOWN、验证失败就是失败，一个会说「不知道」的系统比总能给出漂亮答案的系统更适合放在生产旁边。',
+    metrics: [
+      { value: '15', label: '图节点' },
+      { value: '22', label: '工具' },
+      { value: '4', label: '权限档位' },
+      { value: '12', label: '评测场景' },
+      { value: '135', label: '后端测试' },
+      { value: '9', label: '前端页面' },
+    ],
+    note: '线上可点「注入故障」跑完整流程，12 个场景的评测报告也在站内。',
+    chapters: [
+      {
+        id: 'problem',
+        nav: '要解决的问题',
+        kicker: '01',
+        title: '告警响应的难处不在查，而在留痕',
+        blocks: [
+          {
+            type: 'text',
+            body: '值班工程师遇到告警时的真实流程是：看指标、翻日志、查最近部署、凭经验猜、试一下、反复。每一步都要人做，而且中间过程不留痕——事后复盘时没人说得清当初为什么排除了某个假设。',
+          },
+          {
+            type: 'text',
+            body: 'OpsPilot 把这段流程交给一个状态机驱动的 Agent，并且要求它把每一步都落库：调了哪个工具、拿到什么证据、提出哪些假设、哪些被否掉、为什么否掉、诊断置信度多少、恢复动作有没有生效。',
+          },
+          {
+            type: 'points',
+            items: [
+              { k: '不许编', v: '证据不足时诊断允许输出 UNKNOWN，这条路径计入「已升级」而不是失败' },
+              { k: '要能查', v: '被否掉的假设和否掉的理由都留档，复盘时能看到推理链而不只是结论' },
+              { k: '要能验', v: '恢复动作返回成功不等于环境真的修好了，两件事分开统计' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'graph',
+        nav: '状态机',
+        kicker: '02',
+        title: '十五个节点，跑在 LangGraph 上',
+        blocks: [
+          {
+            type: 'text',
+            body: '每个节点声明自己的 stage、超时、预算和失败语义，不是把工具从头到尾调一遍。规划节点先决定要采哪些证据，验证节点主动找反驳证据——能证伪就退回重新规划。',
+          },
+          {
+            type: 'table',
+            head: ['阶段', '做什么'],
+            rows: [
+              ['load_context / triage', '拉服务拓扑与健康态，定级 SEV1–4，划时间窗'],
+              ['investigation_planner', '规划要采哪些证据，而不是把工具全调一遍'],
+              ['parallel_investigation', '并发跑工具调用，任一超时不阻塞其余'],
+              ['evidence_aggregation', '证据归一化、去重、标注可信度与时效'],
+              ['hypothesis_generation', '生成候选假设并给出置信度'],
+              ['hypothesis_verification', '主动找反驳证据，能证伪就退回重新规划'],
+              ['root_cause_diagnosis', '出根因与把握程度；证据不足就如实弃权'],
+              ['recovery_planner / risk_assessment', '生成分步恢复方案，按动作风险定审批策略'],
+              ['human_approval', '人在环闸门（LangGraph interrupt）'],
+              ['recovery_executor / rollback', '逐步执行并记录环境是否真的改变，失败按方案回退'],
+              ['verification / postmortem', '回查指标判断是否真恢复，生成复盘'],
+            ],
+          },
+          {
+            type: 'text',
+            body: '循环不是装饰。评测里 12 次运行全部发生了重新规划，平均 4.92 轮、18.92 步、14 个不同 stage。一个只会一条道走到黑的流程不需要 15 个节点。',
+          },
+          {
+            type: 'points',
+            items: [
+              { k: '节点只返回增量', v: 'IncidentState 不原地改，合并交给 LangGraph' },
+              { k: '检查点落自己的仓储层', v: '进程重启后能继续，人审批打断的流程能从 human_approval恢复' },
+              { k: '每次运行有预算', v: 'token / 工具调用 / 墙钟三重上限，越界即停并记明原因' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'tools',
+        nav: '工具层',
+        kicker: '03',
+        title: '二十二个工具，权限分四档',
+        blocks: [
+          {
+            type: 'text',
+            body: '工具是声明式的，不是散落的函数。每个 ToolSpec 声明输入输出模型、超时、重试次数、风险等级、可预期的错误类型和所属 MCP server。',
+          },
+          {
+            type: 'table',
+            head: ['权限', '数量', '代表工具'],
+            rows: [
+              ['read_only', '10', 'query_logs · query_metrics · get_deployments · search_runbooks'],
+              ['mutate_infra', '8', 'restart_service · scale_service · flush_cache · clear_deadlock'],
+              ['destructive', '2', 'rollback_deployment · restart_postgres'],
+              ['write_external', '2', 'switch_payment_provider · create_github_issue'],
+            ],
+          },
+          {
+            type: 'text',
+            body: '权限分四档而不是两档，是因为「改自己的基础设施」和「动外部支付通道」要走的审批和审计路径不一样。回滚也算 destructive：它会改变线上流量走向，需要真正的回滚点，而不只是「再部署一次」。',
+          },
+          {
+            type: 'points',
+            items: [
+              { k: '超时是工具的属性', v: '查日志 5 秒、重启服务 30 秒，一个全局常量要么误杀要么白等' },
+              { k: '幂等键', v: '带请求指纹，重复调用返回首次结果而不是再重启一次服务' },
+              { k: '钩子无法绕过', v: '审计和指标写在调用前后，写操作的调用点绕不过去' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'recovery',
+        nav: '恢复安全',
+        kicker: '04',
+        title: '分级审批，以及真的回滚',
+        blocks: [
+          {
+            type: 'table',
+            head: ['风险', '典型动作', '行为'],
+            rows: [
+              ['low', '单实例重启、临时扩容', '自动执行'],
+              ['medium', '滚动重启、配置热更新、清缓存', '自动执行，留审计'],
+              ['high', '回滚部署、切换支付通道', '挂起等人工批准，拒绝即终止'],
+              ['critical', '数据变更、删除类动作', '直接拦下，不进审批队列'],
+            ],
+          },
+          {
+            type: 'text',
+            body: '执行完必须验证：verification 回查指标，没回基线就走 rollback。评测里把 effective_action_rate 和 environment_fixed_rate 分开统计，就是为了区分「动作返回成功」和「环境真的被修好了」——很多恢复系统把这两件事混为一谈。',
+          },
+          {
+            type: 'points',
+            items: [
+              { k: '诚实度单独一项指标', v: '统计「自信地给出了错误根因」和「宣称成功但环境仍然坏着」' },
+              { k: '这两项比准确率重要', v: '它们决定的是系统能不能被放在生产旁边' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'evals',
+        nav: '评测',
+        kicker: '05',
+        title: '十二个场景，每个都能追到证据',
+        blocks: [
+          {
+            type: 'text',
+            body: 'evals 是独立的一层，不依赖后端进程，直接跑运行时并出报告。指标里最值得看的不是满分项，而是没满分的那些。',
+          },
+          {
+            type: 'table',
+            head: ['指标', '值'],
+            rows: [
+              ['场景数 / 错误数', '12 / 0'],
+              ['根因准确率', '1.00'],
+              ['诊断类别准确率', '1.00（7 个类别全对）'],
+              ['恢复成功率', '1.00（回滚率 0.00）'],
+              ['误诊断率', '0.00'],
+              ['证据召回 / 利用率 / 可追溯', '0.701 / 0.292 / 0.332'],
+              ['平均步数 / stage 数', '18.92 / 14.0'],
+              ['平均重新规划轮数', '4.92（12/12 次都重规划过）'],
+              ['延迟 p50 / p95', '1193 / 1787 ms'],
+            ],
+          },
+          {
+            type: 'text',
+            body: '根因、工具选择、恢复、验证四项是满分，说明在已定义的场景上闭环是稳的。证据利用率只有 0.29 才是真问题：Agent 采到的证据里有七成没被写进最终诊断的引用里。这不是「低分」，是「还没查明白」，也是下一步要改的地方。',
+          },
+        ],
+      },
+      {
+        id: 'concurrency',
+        nav: '并发',
+        kicker: '06',
+        title: '并发任务取消与 SSE 的两个坑',
+        blocks: [
+          {
+            type: 'text',
+            body: '这个项目的复杂度有一半来自「一个长任务从头跑到尾」这件事本身：它要能被审批打断、能从前端断开再接回来、能在进程重启后继续。',
+          },
+          {
+            type: 'points',
+            items: [
+              { k: 'SSE 从落库回放', v: '先按 seq 回放完整事件日志再转实时，断线带 Last-Event-ID 从游标续传' },
+              { k: '已结束的运行也能看', v: '回放读数据库，不是内存里的环形缓冲' },
+              { k: '两个时间线页签', v: '「步骤」来自节点执行记录，「事件」来自 SSE 日志，没有一份是从快照反推的' },
+              { k: '健康度未知画灰色', v: '拓扑图节点颜色只编码健康度，不知道就画灰，不画成绿色' },
+            ],
+          },
+          {
+            type: 'text',
+            body: '反推出来的时间线无法展示重新规划、被否掉的假设或回滚，而这三样恰好是证明 Agent 在思考而不是在背稿的地方。',
+          },
+        ],
+      },
+      {
+        id: 'lessons',
+        nav: '工程复盘',
+        kicker: '07',
+        title: '本地跑得起来，不等于部署跑得起来',
+        blocks: [
+          {
+            type: 'text',
+            body: '踩的坑大多有共同特征：它们只在特定环境下暴露，而且暴露时看起来像别的问题。以下几条留在仓库里是因为它们真实发生过。',
+          },
+          {
+            type: 'points',
+            items: [
+              { k: '传递依赖', v: '干净 venv 只装 requirements 时 SQLAlchemy 异步引擎 import 就报缺 greenlet——本地 .venv 里被别的包带进来了' },
+              { k: '路径硬编码', v: 'parents[5] 把六层目录写死，沙箱里少一层直接 IndexError 崩在 import，连日志都来不及打' },
+              { k: '.env 对 import 期隐形', v: '在 pydantic 加载 .env 之前读了 os.environ，读到 None，所有 provider 503，而日志指向一个不存在的进程' },
+              { k: '代理劫持回环', v: 'httpx 默认 trust_env=True，后端调自己的 /__sim 被送给代理返回 404，同一 URL curl 是 200' },
+              { k: '元数据说谎', v: 'reasoning_mode 只在创建时写一次，用了模型的运行也对外宣称 deterministic——比没有元数据更糟' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'research',
+    slug: 'research',
+    title: 'AI 研究工作台',
+    category: 'Agent 系统',
+    year: '2026',
+    period: '2026.09 — 2026.10',
+    image: asset('/media/project-research.webp'),
+    tag: 'LangGraph · FastAPI · RAG',
+    description: '证据优先的 AI 研究工作台，自动拆解任务、检索取证、核查后产出带来源的报告。',
+    role: '独立开发 · 架构与实现',
+    stack: 'Python · LangGraph · FastAPI · React 18 · SQLite',
+    site: 'https://ebed98754f5b4e4abafe591d754aff06.app.workbuddy.host/',
+    github: 'https://github.com/2676136489-png/Personal-agent-development-flow',
+    lede: '用户输入一个复杂研究任务，工作流自动理解、规划、调用工具收集证据、分析、验证，在写报告之前中断等人工确认，最终产出每条结论都标了来源的报告。它把「证据不足时多查一轮」和「写报告前停下来」当成默认行为，而不是可选项。',
+    metrics: [
+      { value: '7', label: '工作流节点' },
+      { value: '4', label: '类工具' },
+      { value: '237', label: '后端测试' },
+      { value: '9', label: '前端模块' },
+      { value: '4', label: '防失控闸门' },
+      { value: '7 步', label: '研究流水线' },
+    ],
+    note: '线上可直接用，模型接智谱 GLM-4-Flash、检索接 Tavily，无需配置环境。',
+    chapters: [
+      {
+        id: 'problem',
+        nav: '要解决的问题',
+        kicker: '01',
+        title: '研究型任务最容易出的两类错',
+        blocks: [
+          {
+            type: 'text',
+            body: '让模型做研究，最容易出的两类错是：证据不足也硬写出一个像样的结论，以及把「看起来合理」当成「查过了」。前者是幻觉，后者是无法复核——报告读起来头头是道，但读者没法判断哪句话有依据。',
+          },
+          {
+            type: 'points',
+            items: [
+              { k: '要可溯源', v: '每条结论都标来源，没来源的句子不该出现在报告里' },
+              { k: '要可打断', v: '写报告前必须人工确认，不能一路自动跑到底' },
+              { k: '要能复核', v: '证据不足时多查一轮，而不是用剩下的凑数' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'graph',
+        nav: '工作流',
+        kicker: '02',
+        title: '七个节点，一条带回流的流水线',
+        blocks: [
+          {
+            type: 'code',
+            lang: 'text',
+            caption: '工作流图：两条回流边是核心——证据不足就再查一轮，核对不通过就回炉。',
+            lines: [
+              'START',
+              '  ↓',
+              'understand_task拆解研究目标与关键问题',
+              '  ↓',
+              'plan生成研究计划',
+              '  ↓',
+              'research←───────────────┐   ← 条件边：证据不足 → 再来一轮（≤ max_iterations）',
+              '  ↓                       │',
+              'retrieve           查自己的知识库补证据',
+              '  ↓',
+              'analyze从证据提炼结论 + 缺口',
+              '  ↓',
+              'verify   ─────────────────┘   ← 条件边：verdict=needs_more → 回炉（≤ max_verify_attempts）',
+              '  ↓',
+              '[中断]  等待人工批准（interrupt_before=["write"]）',
+              '  ↓',
+              'write              生成最终报告',
+              '  ↓',
+              'END',
+            ],
+          },
+          {
+            type: 'text',
+            body: '每个节点读 ResearchState、返回一个局部更新，由 LangGraph 合并回去。两个回流边是这套图的核心：research 循环补证据，verify 回炉重查。verify 的判断结果不是「通过 / 不通过」这种二元值，而是带缺口说明的结论——「这两条结论还缺什么」会被显式写下来。',
+          },
+          {
+            type: 'points',
+            items: [
+              { k: '节点只做一件事', v: '7 个节点各自职责单一，这是能不能单独测的前提' },
+              { k: '提示词与代码分离', v: 'prompts.py 独立，改提示词不用碰图的结构' },
+              { k: '数据契约显式', v: 'schemas.py 定义节点之间的契约，加节点时漏字段会立刻暴露' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'gates',
+        nav: '防失控',
+        kicker: '03',
+        title: '四道闸，各自防不同的失控',
+        blocks: [
+          {
+            type: 'table',
+            head: ['闸', '位置', '作用'],
+rows: [
+              ['max_iterations', '条件边 route_after_research', 'research 循环上限'],
+              ['max_verify_attempts', '条件边 route_after_verify', '验证回炉上限'],
+              ['MAX_FAILURE_STREAK', '条件边', '连续工具失败 2 次就不再重试'],
+              ['recursion_limit=50', 'invoke config', 'LangGraph 层面最后保险'],
+            ],
+          },
+          {
+            type: 'text',
+            body: '四道闸不是为了「限制 Agent」，是为了让失控有明确的停止点。上面两条管循环次数，第三条管单个工具反复失败，第四条是框架层面的兜底——任何一层改动导致前三条失效时，还有一道能拦住。',
+          },
+        ],
+      },
+      {
+        id: 'interrupt',
+        nav: '中断与恢复',
+        kicker: '04',
+        title: '写报告前必须停下来',
+        blocks: [
+          {
+            type: 'text',
+            body: 'interrupt_before=["write"] 把人工确认放在出报告之前。这不是「加个确认弹窗」，而是把确认放在图里——被打断后恢复，流程从 write 继续，不会重新跑一遍前面的检索。',
+          },
+          {
+            type: 'points',
+            items: [
+              { k: '终态不可复活', v: 'completed / cancelled / failed 三种终态下再调 resume 返回 409' },
+              { k: '恢复范围要说清', v: 'checkpointer 用 InMemorySaver，覆盖同进程内的两次请求；跨进程恢复切 SQLite 是配置级改动' },
+              { k: '派生状态一起落库', v: '落库时把 awaiting_approval 之类的状态一并写入，重启后读到的与中断时一致' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'scope',
+        nav: '范围边界',
+        kicker: '05',
+        title: '有意识划出去的部分',
+        blocks: [
+          {
+            type: 'text',
+            body: '这几条是不做的决定，不是待办。写清楚「为什么不做」比列一堆待办更有用——后来者至少知道这是判断，不是遗漏。',
+          },
+          {
+            type: 'table',
+            head: ['不做', '原因'],
+            rows: [
+              ['Multi-Agent', '7 个节点共享同一份 State 和同一个 LLM client，它们是一个 Agent 的阶段。拆开只多一层消息传递与状态同步，职责没变'],
+              ['复杂 Memory', 'messages 加 State 里的 evidence 列表够用。向量记忆是另一个问题，和「结论能不能溯源」无关'],
+              ['并行子问题检索', '检索只占整轮耗时的零头，省不下时间，却要为状态合并与部分失败收敛多加一层判断'],
+              ['跨进程恢复', '换成 SQLite checkpointer 是配置级改动，等真有多实例需求再上'],
+            ],
+          },
+          {
+            type: 'text',
+            body: '判据同样简单：新需求如果不同时增强「证据可溯源 / 过程可观察 / 结论可复核」这三条之一，就不进这一版。',
+          },
+        ],
+      },
+      {
+        id: 'lessons',
+        nav: '工程复盘',
+        kicker: '06',
+        title: '被跳过的那次测试，比失败的测试更危险',
+        blocks: [
+          {
+            type: 'text',
+            body: '写这个项目时最值得记的一条，是关于测试本身的。Vitest 默认按文件并行跑，在某些受限环境里并行 worker 写模块缓存会被拒绝，结果第二个测试文件被静默跳过，整个 run 却依然报绿。',
+          },
+          {
+            type: 'points',
+            items: [
+              { k: '假绿比挂掉危险', v: '挂掉你会去看，假绿你不会——所以「只跑了一个文件还说全部通过」要当失败处理' },
+              { k: '修法写进配置注释', v: '关掉文件级并行后 51 个用例不到4 秒；注释写清原因，免得以后有人觉得多余又打开' },
+              { k: '断言要限定范围', v: '搜整页会被导航栏污染——下拉菜单里列着所有项目名' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'checkin',
+    slug: 'checkin',
+    title: '学习目标管理台',
+    category: 'Web 应用',
+    year: '2026',
+    period: '2026.09',
+    image: asset('/media/project-checkin.webp'),
+    tag: '单文件 · React 工程化版',
+    description: '以打卡驱动目标推进的个人工作台。核心算法回答「还剩几天」，而不是「连续几天」。',
+    role: '独立开发',
+    stack: '单文件 HTML · React 18 · TypeScript · Tailwind',
+    github: 'https://github.com/2676136489-png/Check-in-activity',
+    lede: '做这个是因为自己管不住学习计划。习惯打卡 App 只关心「你连续打了 12 天」，从来不回答「按现在的速度，这本书还要几天读完」——前者能判断今晚要不要多花一小时，后者只能让人自我感觉良好。整个页面的核心就一个算法：取最近 7 天、按休息日规则剔掉不该算的天、算出日均速度，再拿「还剩多少」除以它。',
+    metrics: [
+      { value: '2338', label: '行单文件版' },
+      { value: '51', label: '算法单测' },
+      { value: '46', label: 'UI 断言' },
+      { value: '7', label: '尺寸实拍' },
+      { value: '4', label: '状态判定' },
+      { value: '3', label: '张数据表' },
+    ],
+    note: '仓库里放了两套功能对齐的实现：日常在用单文件版，工程化版可给别人直接打开。',
+  },
   {
     id: 'gomoku',
     slug: 'gomoku',
@@ -1349,7 +1795,7 @@ export const achievements = [
   { title: '数学建模竞赛省级三等奖', meta: '2025' },
   { title: '大学英语四级 CET-4', meta: '已通过' },
   { title: '专业排名前 30%', meta: 'GPA 3.1 / 4' },
-  { title: '开源项目持续维护', meta: 'GitHub 6 个仓库' },
+  { title: '开源项目持续维护', meta: 'GitHub 9 个仓库' },
 ];
 
 export const timeline = [

@@ -13,14 +13,17 @@
 
 | 项目 | 方向 | 时间 |
 | --- | --- | --- |
+| [OpsPilot · AI 事故响应系统](https://opspilot-v2.app.workbuddy.host/) | Agent 系统 | 2026.09 — 2026.10 |
+| [AI 研究工作台](https://ebed98754f5b4e4abafe591d754aff06.app.workbuddy.host/) | Agent 系统 | 2026.09 — 2026.10 |
 | [校园圈子](https://www.lucky-campus.top) | 全栈 · 校园社交平台 | 2026.05 — 2026.08 |
 | Transformer Gomoku 对弈 Bot | 算法系统 | 2026.04 — 2026.06 |
 | iGEM Glass Wiki 插件 | Web 组件 | 2026.07 |
 | 个人作品集 | 前端开发 | 2026.07 — 2026.08 |
+| 学习目标管理台 | Web 应用 | 2026.09 |
 | 菜鸟驿站快递管理系统 | 系统设计 | 2024.09 — 2024.12 |
 | 校园服务视觉系统 | 品牌视觉 | 探索性设计 |
 
-除首页外，每个项目都有独立详情页，正文分章节讲清设计取舍。校园圈子体量最大，独立成一套六章详解。
+OpsPilot 与 AI 研究工作台体量最大，各有一套多章详解；其余项目除校园圈子外都有独立详情页，正文分章节讲清设计取舍。校园圈子独立成一套六章。
 
 ## 结构
 
@@ -39,6 +42,7 @@ public/media/   图片素材（全部 WebP），campus/ 为校园圈子真实界
 media-src/      截图源图（PNG），不进产物
 plans/          动效审计计划与执行记录
 scripts/        部署、图片处理、验证脚本
+                （shoot-site.mjs 抓线上界面截图，make-project-covers.py 转封面）
 ```
 
 ## 几个设计取舍
@@ -109,7 +113,7 @@ GitHub Pages 首次启用需在仓库 Settings → Pages 里把 Source 设为 `D
 静态契约走 SSR 渲染冒烟脚本——在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器截图。
 
 ```bash
-node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（54 条）
+node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（66 条）
 node scripts/smoke-nav.mjs         # 导航下拉：SSR 结构 + 数据 + 样式契约（74 条）
 node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约（43 条）
 node scripts/smoke-backtotop.mjs   # 回到顶部按钮显隐逻辑（31 条）
@@ -134,6 +138,11 @@ node scripts/mutation-check.mjs
 node scripts/cdp-probe.mjs http://127.0.0.1:5199/ 1440 900   # 量布局宽、找溢出元素
 node scripts/hover-trace.mjs http://127.0.0.1:5199/          # 模拟真实鼠标走两条路径，数开合翻转次数
 node scripts/shot-nav.mjs http://127.0.0.1:5199/ out.png 关于  # 悬停截图 + 量面板几何
+node scripts/verify-projects.mjs 5267 9333                    # 逐个详情页量真实几何 + 截图留证
 ```
+
+`verify-projects.mjs` 专门盯作品数据：把每个 slug 都打开一遍，确认封面图真的加载了、没被 CSS 拉变形、导航下拉里列得全。静态断言只能证明「数据里有这个 slug」，证明不了图加载了、布局没塌。
+
+两处踩过的坑记在脚本注释里：CDP 必须用 `/json/new` 另开标签页（别拿日常浏览器里的 target 直接导航），以及 React 的 `onMouseEnter` 由 mouseout/mouseover 合成、手动派发 `mouseenter` 事件不触发它。
 
 `hover-trace.mjs` 走两条路径：触发项直线移到面板中部，以及在边界附近小幅抖动（真实用户的手不会走直线，抖一下就崩的交互等于不能用）。
