@@ -133,7 +133,7 @@ README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓线上界面，`sc
 四个 SSR 冒烟脚本。在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器。
 
 ```bash
-node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（79 条）
+node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（88 条）
 node scripts/smoke-nav.mjs         # 导航下拉：SSR 结构 + 数据 + 样式契约（74 条）
 node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约（43 条）
 node scripts/smoke-backtotop.mjs   # 回到顶部按钮显隐逻辑（31 条）
@@ -162,9 +162,14 @@ node scripts/caption-probe.mjs http://127.0.0.1:5199/         # 扫多个宽度�
 node scripts/shot-captions.mjs http://127.0.0.1:5199/ 9333 1080  # 截图注，用于肉眼确认
 node scripts/verify-projects.mjs 5267 9333                    # 逐个详情页量真实几何
 node scripts/space-probe.mjs 9333 http://127.0.0.1:5270/  # 量详情页纵向间距，找贴太近的地方
+node scripts/about-balance.mjs http://127.0.0.1:5199/ 1440 # 量关于区两列高度差
+node scripts/about-link-contrast.mjs http://127.0.0.1:5199/  # 名片链接在两套主题下的对比度
+node scripts/shot-about.mjs http://127.0.0.1:5199/ 9333 1440   # 截关于区两列
 node scripts/shoot-docs.mjs 9333                              # 抓 README 配图
 ```
 
 `hover-trace.mjs` 走两条路径：触发项直线移到面板中部，以及在边界附近小幅抖动。真实用户的手不会走直线，抖一下就崩的交互等于不能用。
 
 `verify-projects.mjs` 把每个项目 slug 都打开一遍，确认封面图真的加载了、没被 CSS 拉变形、导航下拉里列得全。静态断言只能证明「数据里有这个 slug」，证明不了图加载了、布局没塌。
+
+`about-link-contrast.mjs` 按 WCAG 公式算前景与背景的亮度比。切主题必须点导航栏那个按钮 —— 主题存在 React state 里，直接改 `data-theme` 属性的话 state 没变，下一次 effect 就把属性写回去，量出来的数据会自相矛盾。
