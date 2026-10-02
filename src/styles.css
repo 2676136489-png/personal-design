@@ -1,18 +1,30 @@
 :root {
-  color-scheme: light;
-  --page: #ffffff;
-  --surface: #ffffff;
-  --surface-alt: #f5f5f7;
-  --ink: #1d1d1f;
-  --ink-soft: #424245;
-  --muted: #6e6e73;
-  --faint: #86868b;
-  --line: rgba(0, 0, 0, 0.09);
-  --line-strong: rgba(0, 0, 0, 0.16);
-  --accent: #0071e3;
-  --accent-hover: #0077ed;
-  --nav-bg: rgba(255, 255, 255, 0.72);
-  --overlay: rgba(0, 0, 0, 0.42);
+  color-scheme: dark;
+  --page: #05070f;
+  --page-deep: #02030a;
+  --surface: rgba(17, 24, 45, 0.82);
+  --surface-alt: rgba(10, 15, 30, 0.78);
+  --ink: #e8eefc;
+  --ink-soft: #bdc9e6;
+  --muted: #8b9ac2;
+  --faint: #64739b;
+  --line: rgba(125, 158, 255, 0.14);
+  --line-strong: rgba(125, 158, 255, 0.3);
+  --accent: #3d8bff;
+  --accent-hover: #5aa0ff;
+  --accent-2: #22e0d2;
+  --accent-warm: #ff7a45;
+  --glow: rgba(61, 139, 255, 0.45);
+  --grid-line: rgba(120, 160, 255, 0.055);
+  --halo-1: rgba(61, 139, 255, 0.22);
+  --halo-2: rgba(34, 224, 210, 0.14);
+  --halo-3: rgba(124, 92, 255, 0.16);
+  /* 代码块两套主题都用深底（浅底配浅色代码文字会看不清） */
+  --code-bg: #01030a;
+  --code-ink: #d6e2f7;
+  --code-faint: #7b8bb0;
+  --nav-bg: rgba(6, 9, 20, 0.78);
+  --overlay: rgba(2, 4, 12, 0.8);
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 18px;
@@ -33,21 +45,32 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --page: #000000;
-  --surface: #1d1d1f;
-  --surface-alt: #161617;
-  --ink: #f5f5f7;
-  --ink-soft: #d2d2d7;
-  --muted: #a1a1a6;
-  --faint: #86868b;
-  --line: rgba(255, 255, 255, 0.11);
-  --line-strong: rgba(255, 255, 255, 0.2);
-  --accent: #2997ff;
-  --accent-hover: #4aa8ff;
-  --nav-bg: rgba(22, 22, 23, 0.72);
-  --overlay: rgba(0, 0, 0, 0.68);
+:root[data-theme="light"] {
+  color-scheme: light;
+  --page: #f4f7fd;
+  --page-deep: #e7edfa;
+  --surface: rgba(255, 255, 255, 0.78);
+  --surface-alt: rgba(237, 242, 252, 0.9);
+  --ink: #0b1220;
+  --ink-soft: #26324b;
+  --muted: #56637e;
+  --faint: #7d8aa5;
+  --line: rgba(11, 18, 32, 0.1);
+  --line-strong: rgba(11, 18, 32, 0.2);
+  --accent: #1a6bff;
+  --accent-hover: #0b57e0;
+  --accent-2: #00b8a9;
+  --accent-warm: #f5611f;
+  --glow: rgba(26, 107, 255, 0.24);
+  --grid-line: rgba(30, 60, 140, 0.05);
+  --halo-1: rgba(26, 107, 255, 0.14);
+  --halo-2: rgba(0, 184, 169, 0.1);
+  --halo-3: rgba(110, 80, 240, 0.12);
+  --code-bg: #0d1526;
+  --code-ink: #d6e2f7;
+  --code-faint: #8b9ac2;
+  --nav-bg: rgba(255, 255, 255, 0.76);
+  --overlay: rgba(12, 20, 40, 0.5);
 }
 
 * {
@@ -64,8 +87,46 @@ body {
   min-width: 320px;
   margin: 0;
   overflow-x: hidden;
-  background: var(--page);
   color: var(--ink);
+  /* 底色叠三团光晕。用 fixed 让光晕钉在视口上，页面滚动时内容像浮在一片光里 ——
+     大厂官网（阿里云、字节）都是这个做法，纯色底撑不起"科技感"。 */
+  background:
+    radial-gradient(1100px 620px at 12% -8%, var(--halo-1), transparent 62%),
+    radial-gradient(900px 520px at 88% 4%, var(--halo-2), transparent 60%),
+    radial-gradient(1000px 700px at 50% 108%, var(--halo-3), transparent 62%),
+    var(--page);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* 网格纹理：一层 64px 的细格，往下渐隐。只挂在 body 伪元素上，
+   不往 JSX 里加背景层节点，DOM 结构保持原样。z-index:-1 让它落在内容之下。 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(ellipse 120% 70% at 50% 0%, #000 18%, transparent 78%);
+  mask-image: radial-gradient(ellipse 120% 70% at 50% 0%, #000 18%, transparent 78%);
+}
+
+/* 顶边一道渐变高光带，1px，随内容滚动常驻 */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.55;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
 }
 
 body[data-overlay-open="true"] {
@@ -1651,13 +1712,14 @@ section {
   margin: 32px 0 0;
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: #1d1d1f;
+  background: var(--code-bg);
+  border: 1px solid var(--line);
 }
 
 .doc-code-lang {
   margin: 0;
   padding: 10px 18px 0;
-  color: #86868b;
+  color: var(--code-faint);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -1672,7 +1734,7 @@ section {
 
 .doc-code code {
   display: block;
-  color: #f5f5f7;
+  color: var(--code-ink);
   font-size: 13px;
   line-height: 1.7;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
@@ -1688,8 +1750,8 @@ section {
 .doc-code figcaption:not(.doc-code-lang) {
   margin: 0;
   padding: 12px 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  color: #a1a1a6;
+  border-top: 1px solid var(--line);
+  color: var(--code-faint);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -3098,6 +3160,181 @@ main {
       transform: translateY(10px);
     }
   }
+}
+
+/* ============ 科技质感层 ============ */
+/* 配色换成深空底之后，容器不能还是"一块死板的半透明色"——大厂的做法是
+   半透明玻璃 + 顶部高光边 + 悬停时描边发光。这段统一补上，
+   放在文件末尾以覆盖前面的静态底色。 */
+
+/* 玻璃质感：卡片底本来就是 var(--surface)（半透明），这里补背景模糊与内高光 */
+.work-card,
+.pillar,
+.skill,
+.chapter-card,
+.achievement-panel,
+.campus-metrics,
+.about-profile,
+.stage-shot,
+.resume-paper {
+  position: relative;
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 24px 60px -36px rgba(0, 0, 0, 0.9);
+}
+
+/* 顶部渐变高光边：静止时几乎看不见，指针移上去才亮起来 */
+.work-card::before,
+.skill::before,
+.pillar::before,
+.chapter-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
+  transition: opacity 260ms var(--ease);
+}
+
+.work-card,
+.skill,
+.pillar,
+.chapter-card {
+  transition: border-color 220ms var(--ease), transform 220ms var(--ease),
+    box-shadow 260ms var(--ease);
+}
+
+.work-card:hover,
+.skill:hover,
+.pillar:hover,
+.chapter-card:hover {
+  border-color: rgba(125, 158, 255, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 0 0 1px var(--glow),
+    0 30px 70px -30px var(--glow);
+}
+
+.work-card:hover::before,
+.skill:hover::before,
+.pillar:hover::before,
+.chapter-card:hover::before {
+  opacity: 0.9;
+}
+
+/* 主按钮：蓝青渐变 + 外发光 */
+.btn--solid {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  box-shadow: 0 10px 30px -12px var(--glow);
+  transition: filter 180ms var(--ease), box-shadow 180ms var(--ease),
+    transform 180ms var(--ease);
+}
+
+.btn--solid:hover {
+  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-2) 100%);
+  box-shadow: 0 16px 42px -12px var(--glow);
+  filter: brightness(1.08);
+}
+
+.btn--plain:hover {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 1px var(--glow), 0 10px 30px -14px var(--glow);
+}
+
+/* 小标签改成等宽大写字，像终端里的 section 标记 */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.eyebrow::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  flex: none;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+/* 首屏与区块标题：渐变文字。用 @supports 包住，
+   万一浏览器不认 background-clip: text，文字仍然是 --ink 色而不是隐形。 */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .hero h1,
+  .section-head h2,
+  .page-hero h1 {
+    background-image: linear-gradient(
+      112deg,
+      var(--ink) 8%,
+      var(--accent) 52%,
+      var(--accent-2) 96%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-facts strong,
+  .metrics-strip strong,
+  .campus-metrics strong {
+    background-image: linear-gradient(180deg, var(--ink) 20%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* 数字对齐：等宽数字，滚动/跳动时不会左右抖 */
+.hero-facts strong,
+.metrics-strip strong,
+.campus-metrics strong,
+.page-hero-meta span,
+.work-meta,
+.resume-period {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 首屏数据条：顶部换成一道渐变细线，中间透出一点光 */
+.hero-facts {
+  position: relative;
+  border-top: 0;
+}
+
+.hero-facts::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(125, 158, 255, 0.5) 35%,
+    var(--accent-2) 50%,
+    rgba(125, 158, 255, 0.5) 65%,
+    transparent
+  );
+}
+
+/* 图片容器：描边在深色底上要能立住 */
+.stage-item img,
+.page-hero-shot img,
+.shot-frame {
+  border-color: rgba(125, 158, 255, 0.18);
+  box-shadow: 0 30px 70px -40px rgba(0, 0, 0, 0.95);
 }
 
 /* ============ 无障碍偏好 ============ */

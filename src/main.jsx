@@ -1513,15 +1513,19 @@ function Toast({ toast, onDismiss }) {
 
 /* ============ 应用根 ============ */
 
+/* 存储 key 带一版号：整体视觉换过一次之后，旧 key 里存的偏好属于上一套外观，
+   继续沿用会让访客看不到新样式。默认深色，与大厂官网的基调一致。 */
+const THEME_KEY = 'portfolio-theme-v2';
+
 function App() {
   const route = useRoute();
-  const [theme, setTheme] = useState(() => localStorage.getItem('portfolio-theme') || 'light');
+  const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'dark');
   const [commandOpen, setCommandOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    localStorage.setItem('portfolio-theme', theme);
+    localStorage.setItem(THEME_KEY, theme);
   }, [theme]);
 
   useEffect(() => {
