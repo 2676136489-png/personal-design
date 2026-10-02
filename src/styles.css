@@ -1926,6 +1926,27 @@ section {
   line-height: 1.6;
 }
 
+/* 方向聚合页的 hero 下方没有截图。
+   .page-hero-inner 的 padding-bottom: 84px 是专门给
+   .page-hero-shot 往上 translateY(34px) 预留的（84 - 34 = 50px，
+   按钮才不贴住图片上沿）—— 没有截图时这84px 就是一段无意义的空档，
+   标题和下面的项目卡片之间能空出小半屏。压到 56px。 */
+.page-hero--plain .page-hero-inner {
+  padding-bottom: 56px;
+}
+
+/* 聚合页里 .work 不是独立区块，是「标题 → 卡片 → 换方向」的中间一环。
+   .work 自带上下 120px，叠上 .other-projects 的 88px，
+   卡片和下面的「其他方向」之间空了 230px（实测）——
+   独立区块之间这个量级合理，但这里读起来是断了一截。 */
+.category-work {
+  padding: 76px 0 0;
+}
+
+.category-work .work-grid {
+  margin-top: 0;
+}
+
 .doc-end {
   padding: 40px 0 0;
   border-top: 1px solid var(--line);
@@ -1969,6 +1990,27 @@ section {
   margin: 0;
   font-size: clamp(1.8rem, 4vw, 2.6rem);
   font-weight: 600;
+}
+
+.not-found-lede {
+  margin: -8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* slug 打错时的兜底：把现有方向全列出来。
+   只给一个「返回首页」等于把问题原样丢回给用户 ——
+   他多半就是不知道有哪些方向才点错的。 */
+.not-found-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  max-width: 620px;
+}
+
+.not-found-links .btn {
+  gap: 6px;
 }
 
 /* ============ 简历页 ============ */

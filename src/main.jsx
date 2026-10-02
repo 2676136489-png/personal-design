@@ -29,6 +29,8 @@ import {
   asset,
   campus,
   capabilities,
+  categories,
+  categoryBySlug,
   heroFacts,
   imgAttrs,
   mailServices,
@@ -1251,6 +1253,134 @@ function ProjectPage({ project, onCopyEmail }) {
   );
 }
 
+/* ============ 方向聚合页 ============ */
+
+/* 某个方向下有多个项目时，导航指到这里让用户自己选。
+   卡片直接复用 .work-grid / .work-card —— 同一套样式，
+   不为聚合页另立一套外观，作品列表和方向页看起来是一体的。 */
+function CategoryPage({ category, onCopyEmail }) {
+  usePageMotion([category?.slug]);
+  useAnchorScroll();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [category?.slug]);
+
+  if (!category) {
+    /* slug 写错时（手输URL 或旧链接）不要只丢一个「返回首页」把人撵走 ——
+       他多半是从导航点进来的，直接把所有方向摆出来让他挑。 */
+    return (
+      <div className="not-found">
+        <h1>没有找到这个方向</h1>
+        <p className="not-found-lede">下面是现有的全部方向，选一个看看。</p>
+        <div className="not-found-links">
+          {categories.filter((c) => c.projects.length > 0).map((c) => (
+            <a
+              key={c.slug}
+              className="btn btn--plain"
+              href={c.projects.length === 1 ? `#/${c.projects[0].slug}` : `#/category/${c.slug}`}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(c.projects.length === 1 ? `/${c.projects[0].slug}` : `/category/${c.slug}`);
+              }}
+            >
+              {c.name}
+              <ChevronRight size={15} />
+            </a>
+          ))}
+        </div>
+        <a className="btn btn--solid" href="#/" onClick={(e) => { e.preventDefault(); navigate('/'); }}>
+          返回首页
+        </a>
+      </div>
+    );
+  }
+
+  const others = categories.filter((c) => c.slug !== category.slug && c.projects.length > 0);
+
+  return (
+    <>
+      <header className="page-hero page-hero--plain">
+        <div className="page-hero-inner">
+          <a className="back-link" href="#/" onClick={(e) => { e.preventDefault(); navigate('/'); }}>
+            <ArrowLeft size={15} />
+            返回首页
+          </a>
+          <p className="eyebrow">方向 · {category.projects.length} 个项目</p>
+          <h1>{category.name}</h1>
+          <p className="page-hero-lede">{category.blurb}</p>
+        </div>
+      </header>
+
+      <section className="work category-work">
+        <div className="work-grid">
+          {category.projects.map((p, i) => (
+            <article className="work-card" key={p.id} data-reveal data-tilt style={{ '--i': i % 2 }}>
+              <a href={`#/${p.slug}`} onClick={(e) => { e.preventDefault(); navigate(`/${p.slug}`); }}>
+                <div className="work-media">
+                  <img
+                    src={p.image}
+                    alt={`${p.title} 项目视觉`}
+                    loading="lazy"
+                    decoding="async"
+                    {...imgAttrs(p.image)}
+                  />
+                </div>
+                <div className="work-body">
+                  <p className="work-meta">
+                    <span>{p.category}</span>
+                    <time>{p.year}</time>
+                  </p>
+                  <h3>{p.title}</h3>
+                  <p className="work-desc">{p.description}</p>
+                  <span className="work-more">
+                    查看详情
+                    <ChevronRight size={15} />
+                  </span>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* 顺带把其他方向列出来：用户从某个方向进来，
+          大概率会想看看别的方向有哪些项目。 */}
+      <div className="other-projects">
+        <div className="section-head section-head--center" data-reveal="mask">
+          <p className="eyebrow">其他方向</p>
+          <h2>换个方向看看</h2>
+        </div>
+        <div className="chapter-cards">
+          {others.map((c) => (
+            <a
+              className="chapter-card"
+              key={c.slug}
+              href={c.projects.length === 1 ? `#/${c.projects[0].slug}` : `#/category/${c.slug}`}
+              data-reveal
+              data-tilt
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(c.projects.length === 1 ? `/${c.projects[0].slug}` : `/category/${c.slug}`);
+              }}
+            >
+              <span className="chapter-index">{String(c.projects.length).padStart(2, '0')}</span>
+              <h3>{c.name}</h3>
+              <p className="chapter-title">{c.blurb}</p>
+              <span className="chapter-more">
+                {c.projects.length === 1 ? c.projects[0].title : `${c.projects.length} 个项目`}
+                <ChevronRight size={15} />
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <SiteFooter onCopyEmail={onCopyEmail} />
+    </>
+  );
+}
+
 /* ============ 简历页 ============ */
 
 function ResumePage({ onCopyEmail }) {
@@ -1583,6 +1713,13 @@ function App() {
   const path = route.path.replace(/^\//, '');
   const project = projects.find((p) => p.slug === path);
 
+  /* 方向聚合页：#/category/<slug>。
+     parseHash 按第一个 # 切分，category/agent 完整留在 path 里，
+     这里直接前缀匹配即可。必须在 projects 之前判断 ——
+     万一某个项目 slug 恰好以 category/ 开头，详情页优先。 */
+  const categoryMatch = path.match(/^category\/([\w-]+)$/);
+  const category = categoryMatch ? categoryBySlug(categoryMatch[1]) : null;
+
   let page;
   if (!path) {
     page = <HomePage onCopyEmail={handleCopyEmail} />;
@@ -1592,6 +1729,8 @@ function App() {
     page = <ResumePage onCopyEmail={handleCopyEmail} />;
   } else if (project) {
     page = <ProjectPage project={project} onCopyEmail={handleCopyEmail} />;
+  } else if (categoryMatch) {
+    page = <CategoryPage category={category} onCopyEmail={handleCopyEmail} />;
   } else {
     page = <ProjectPage project={null} onCopyEmail={handleCopyEmail} />;
   }

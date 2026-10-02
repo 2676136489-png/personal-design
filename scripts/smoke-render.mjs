@@ -282,15 +282,67 @@ try {
     .filter((src) => src && !Object.keys(IMAGE_SIZES).some((k) => src.endsWith(k)));
   expect('所有项目封面都在 IMAGE_SIZES 中登记', missingSize.length === 0);
 
-  /* 项目分类导航里的方向必须与项目实际分类对得上。
-     下拉里点「Agent 系统」应该能落到真有这类项目的页上，
-     写一个不存在的方向就是死链。 */
-  const cats = new Set(projects.map((p) => p.category));
-  const deadCat = (data.navItems || [])
+  /* 导航下拉「按方向」那一列：每个方向都得有能打开的落点。
+     ⚠️ 原来是「链接指向 #/#work 就查 label 有没有对应项目」——
+        那样七个写死的占位链接全都能通过（label 都在），
+        正好放过了用户报的那个 bug：点了只跳到全部作品概览。
+        现在改成逐条打开验证：
+        单项目方向必须直接落到该项目详情页，
+        多项目方向必须落到 #/category/<slug> 且该页列全了这个方向的项目。 */
+  const catCol = (data.navItems || [])
     .flatMap((item) => item.columns || [])
-    .flatMap((col) => col.links || [])
-    .filter((l) => l.href === '#/#work' && !cats.has(l.label));
-  expect('导航下拉里的方向都有对应项目', deadCat.length === 0);
+    .find((col) => col.title === '按方向');
+  const catLinks = catCol?.links || [];
+  expect('导航有「按方向」分组', catLinks.length > 0);
+
+  const placeholders = catLinks.filter((l) => l.href === '#/#work' || l.href === '#/');
+  expect('「按方向」里没有占位链接（不能都指向作品概览）', placeholders.length === 0);
+
+  for (const c of data.categories || []) {
+    if (c.projects.length === 0) {
+      expect(`方向「${c.name}」至少有一个项目`, false);
+      continue;
+    }
+    if (c.projects.length === 1) {
+      /* 单项目：导航直接指到它的详情页，少一次点击 */
+      const only = c.projects[0];
+      const link = catLinks.find((l) => l.label === c.name);
+      expect(`方向「${c.name}」链接指向唯一的项目详情`, link?.href === `#/${only.slug}`);
+      const page = render(`#/${only.slug}`);
+      expect(`方向「${c.name}」的目标页能打开`, page.includes(only.title));
+    } else {
+      /* 多项目：单独建聚合页，页面上要列全 */
+      const link = catLinks.find((l) => l.label === c.name);
+      expect(`方向「${c.name}」链接指向聚合页`, link?.href === `#/category/${c.slug}`);
+      const page = render(`#/category/${c.slug}`);
+      expect(`聚合页「${c.name}」标题正确`, page.includes(c.name));
+      const missingOnPage = c.projects.filter((p) => !page.includes(p.title)).map((p) => p.title);
+      expect(`聚合页「${c.name}」列全了所有项目`, missingOnPage.length === 0);
+      if (missingOnPage.length) console.log('    页面上没有的:', missingOnPage.join(', '));
+    }
+  }
+
+  /* 每个项目的 category 都得在方向索引里有对应条目 ——
+     新增项目忘了在 CATEGORY_META 里登记，导航里就少一项。 */
+  const indexedCats = new Set((data.categories || []).map((c) => c.name));
+  const unindexed = projects.map((p) => p.category).filter((name) => !indexedCats.has(name));
+  expect('所有项目的分类都在方向索引里', unindexed.length === 0);
+  if (unindexed.length) console.log('    没登记的分类:', [...new Set(unindexed)].join(', '));
+
+  /* 方向 slug 不能和项目 slug 撞 —— 撞了路由分不清 */
+  const projectSlugs = new Set(projects.map((p) => p.slug));
+  const collide = (data.categories || []).filter((c) => projectSlugs.has(c.slug)).map((c) => c.slug);
+  expect('方向 slug 不与项目 slug 冲突', collide.length === 0);
+
+  /* 聚合页的间距要单独收。
+     .page-hero-inner 的 padding-bottom: 84px 是给 .page-hero-shot
+     往上 translateY(34px) 预留的，聚合页没有截图就是一段空档；
+     .work 的 120px 上下留白用在独立区块之间，放在「标题 → 卡片」中间
+     同样会空出小半屏。两条钉住这个收敛。 */
+  expect('聚合页 hero 没有截图，底部留白收窄',
+    /padding-bottom\s*:\s*5\dpx/.test(rule(/\.page-hero--plain\s+\.page-hero-inner\s*\{([^}]*)\}/)));
+  expect('聚合页的作品区不是独立区块，上下留白收窄',
+    /padding\s*:\s*7\dpx\s+0\s+0/.test(rule(/\.category-work\s*\{([^}]*)\}/)));
 
   /* 首屏的「收录作品」「线上运行中」必须与 projects 实际条数对得上。
      这两个数字是纯手写的，加工项目时最容易忘改 —— 页面自己写着

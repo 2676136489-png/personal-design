@@ -123,6 +123,64 @@ export const resume = {
   projectSlugs: ['campus', 'gomoku', 'station', 'portfolio'],
 };
 
+/* ============================================================
+   方向索引
+   ------------------------------------------------------------
+   放在 navItems 之前：导航「按方向」那一列的链接从这里取。
+   之前七项全写死成 '#/#work'（纯占位），点了只跳到全部作品概览。
+   手写的问题不只是链接错：往后新增项目改了 category，
+   导航那一列不会跟着变，两边就会不一致 ——
+   这种「同一份信息写两遍」的地方必须收敛到一处。
+
+   slug 用 category 的拼音式短名（agent / web / algo…），
+   一眼能对上，且与项目 slug 不会撞。
+   ============================================================ */
+
+/* 方向 → 展示名与一句话说明。
+   中文只在这里写，路由和链接都从这里推。 */
+const CATEGORY_META = {
+  'Agent 系统': { slug: 'agent', blurb: '让模型真正参与交付，而不只是补全代码。' },
+  'Web 应用': { slug: 'web', blurb: '能注册、能登录、能存数据的完整应用。' },
+  '算法系统': { slug: 'algo', blurb: '以棋形库与搜索为基础的 C++ 对弈程序。' },
+  '系统设计': { slug: 'system', blurb: '从数据结构到业务闭环的独立系统实现。' },
+  'Web 组件': { slug: 'component', blurb: '为已有平台补上缺失的那一块能力。' },
+  '前端开发': { slug: 'frontend', blurb: '把信息层级和操作路径设计清楚。' },
+  '品牌视觉': { slug: 'brand', blurb: '围绕场景建立克制的视觉方向。' },
+};
+
+/* projects 还没定义，先占位；下面 projects 导出之后再补上 projects 字段。 */
+
+export const categories = Object.entries(CATEGORY_META)
+  .map(([name, meta]) => ({ name, slug: meta.slug, blurb: meta.blurb, projects: [] }))
+  .sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+
+export const categoryBySlug = (slug) => categories.find((c) => c.slug === slug);
+
+/* projects 定下来之后回填，并按项目数排序（多的在前）。 */
+const fillCategories = (list) => {
+  for (const c of categories) c.projects = list.filter((p) => p.category === c.name);
+  categories.sort((a, b) => b.projects.length - a.projects.length || a.name.localeCompare(b.name, 'zh'));
+};
+
+/* 导航「按方向」那一列的条目。
+   单项目方向直接指到详情页（少一次点击），
+   多项目方向指到聚合页让用户自己选 ——
+   全塞进一个页面等于没有分类。
+
+   ⚠️ 这必须是**函数**而不是常量数组。
+      navItems 在模块加载时就求值，那时 projects 还没定义完，
+      直接 `links: categoryNavLinks` 绑的是空数组（后来补上也绑不上，
+      变量赋值不会改掉已绑定的引用）。
+      所以 navItems 里存getter，读取时才现算。 */
+export const getCategoryNavLinks = () =>
+  categories
+    .filter((c) => c.projects.length > 0)
+    .map((c) => ({
+      label: c.name,
+      href: c.projects.length === 1 ? `#/${c.projects[0].slug}` : `#/category/${c.slug}`,
+      count: c.projects.length,
+    }));
+
 /* 导航结构。
    有 columns 的项在悬停/聚焦时展开全宽面板（苹果官网那种）。
    面板由若干列组成，每列一个标题 + 一组条目；每组再细分成
@@ -188,16 +246,11 @@ export const navItems = [
   },
   {
     title: '按方向',
-    links: [
-      { label: 'Agent 系统', href: '#/#work' },
-      { label: '算法系统', href: '#/#work' },
-      { label: '系统设计', href: '#/#work' },
-      { label: 'Web 应用', href: '#/#work' },
-      { label: 'Web 组件', href: '#/#work' },
-      { label: '前端开发', href: '#/#work' },
-      { label: '品牌视觉', href: '#/#work' },
-        ],
-      },
+    /* getter：见getCategoryNavLinks 上面的说明 */
+    get links() {
+      return getCategoryNavLinks();
+    },
+  },
       {
         title: '源码',
         links: [
@@ -1765,6 +1818,10 @@ rows: [
     ],
   },
 ];
+
+/* projects 定义完了，现在把方向索引补上真实项目。
+   必须在这里调：categories 在模块加载时建的是空壳。 */
+fillCategories(projects);
 
 export const capabilities = [
   {
