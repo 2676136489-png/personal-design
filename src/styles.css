@@ -314,6 +314,22 @@ img {
     opacity 200ms var(--ease),
     transform 380ms var(--ease-out-expo),
     visibility 0s linear 200ms;
+
+  /* 关键：面板本体不参与命中。
+     面板是 .global-nav 的子元素、top:100% 铺满整页宽，
+     下面那条 ::before 桥梁又往上顶了 28px，正好盖住整条导航栏。
+     面板一旦展开，「全部作品 / 关于 / 能力」这几个触发项就被压在下面 ——
+     鼠标移过去命中的是面板，mouseover 到不了导航项，
+     于是只能停在第一个展开的面板上，表现为「放第二个就不弹了」。
+
+     命中判定本来就挂在 <header> 上（onMouseEnter / onMouseLeave），
+     不依赖导航项自己收到事件，所以面板整块关掉指针命中不影响开合；
+     真正要点的链接与列由 .nav-panel-inner 恢复。 */
+  pointer-events: none;
+}
+
+.nav-panel-inner {
+  pointer-events: auto;
 }
 
 /* 指针桥梁：面板贴在导航栏下沿，触发项却在导航栏内部，

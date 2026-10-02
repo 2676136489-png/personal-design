@@ -37,3 +37,5 @@ backup-portfolio-v2/
 build.log
 .mutation-check.mjs
 .shot-nav*.mjs
+dist-nav2/
+dist-nav3/

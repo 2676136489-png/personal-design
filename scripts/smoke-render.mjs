@@ -411,6 +411,28 @@ expect(
     '面板列数由数据传入并等比铺满',
     /--cols/.test(navRaw) && /grid-template-columns:\s*repeat\(var\(--cols/.test(cssRaw),
   );
+
+  /* 防回归：面板不能挡住其他导航项。
+     面板是 .global-nav 的子元素、top:100% 铺满整页宽，
+     加上 ::before 往上顶了 28px 的透明桥梁，正好盖住整条导航栏。
+     面板一展开，「全部作品 / 关于 / 能力」就被压在下面，
+     鼠标移过去命中的是面板而不是导航项 ——
+     表现就是「放到第二个选项就不弹了，而且永远停在第一个」。
+     修复是面板本体 pointer-events: none、只让 .nav-panel-inner 恢复 auto。
+     命中判定本来就挂在 <header> 上，不依赖导航项自己收到事件。 */
+  const panelRule2 = (cssRaw.match(/\.nav-panel\s*\{([^}]*)\}/) || [])[1] || '';
+  const panelInnerRule = (cssRaw.match(/\.nav-panel-inner\s*\{([^}]*)\}/) || [])[1] || '';
+  expect('面板本体不参与命中（否则会盖住其他导航项）',
+    /pointer-events\s*:\s*none/.test(panelRule2));
+  expect('面板内容区恢复命中（否则链接点不动）',
+    /pointer-events\s*:\s*auto/.test(panelInnerRule));
+
+  /* 开合判定必须在 header 上：面板不接收指针事件后，
+     唯一能让 mouseenter 生效的就是 header 自己的处理器。 */
+  const headerBlock = navBody.slice(0, navBody.indexOf('<div className="nav-inner">'));
+  expect('开合判定挂在 header 上（面板不收指针事件时唯一入口）',
+    /className="global-nav"[\s\S]*?onMouseEnter=\{keep\}/.test(headerBlock));
+
   /* 防回归：详情页 hero 的纵向间距。
 
      .page-hero-shot 带 translateY(34px) 把截图往上提，

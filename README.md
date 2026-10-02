@@ -73,6 +73,8 @@ scripts/        构建部署、图片处理、验证脚本
 
 **面板开合的命中判定挂在 `<header>` 上**。触发项和面板是兄弟节点，中间隔着导航栏剩下的一圈，指针斜着往下走时会在「导航栏空白 → 面板」之间掉出判定区，来回抖几下就成弹跳。判定挂在 header 上之后，整条移动路径是一个连续命中区。`.nav-panel::before` 再往上顶一条透明命中区作双保险。
 
+**面板本体 `pointer-events: none`，只有内容区 `auto`**。面板铺满整页宽，那条 `::before` 桥梁又往上顶了 28px —— 面板一展开就把整条导航栏盖住，鼠标移过去命中的是面板而不是导航项，于是只能停在第一个展开的面板上。命中判定本来就在 `<header>` 上，不依赖导航项自己收到事件，所以面板整块关掉指针命中不影响开合。
+
 **面板底色用不透明的 `--panel-bg`**。半透明色叠在毛玻璃导航栏上，首屏那行大标题会从面板底下透出来。
 
 **列数由数据传给 CSS 变量**（`--cols`），配 `grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr))` 等比铺满整行。定死列宽会让 3 列挤在左边、右边空一大片。
@@ -129,7 +131,7 @@ README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓线上界面，`sc
 四个 SSR 冒烟脚本。在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器。
 
 ```bash
-node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（73 条）
+node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（76 条）
 node scripts/smoke-nav.mjs         # 导航下拉：SSR 结构 + 数据 + 样式契约（74 条）
 node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约（43 条）
 node scripts/smoke-backtotop.mjs   # 回到顶部按钮显隐逻辑（31 条）
@@ -151,6 +153,8 @@ node scripts/mutation-check.mjs
 # 起浏览器与预览服务后
 node scripts/cdp-probe.mjs http://127.0.0.1:5199/ 1440 900   # 量布局宽、找溢出元素
 node scripts/hover-trace.mjs http://127.0.0.1:5199/          # 真实鼠标走两条路径，数开合翻转次数
+node scripts/nav-switch-trace.mjs http://127.0.0.1:5199/       # 连续切换下拉项，看每次是否都弹得出来
+node scripts/nav-panel-links.mjs http://127.0.0.1:5199/        # 面板展开后链接还能不能点
 node scripts/shot-nav.mjs http://127.0.0.1:5199/ out.png 关于  # 悬停截图 + 量面板几何
 node scripts/verify-projects.mjs 5267 9333                    # 逐个详情页量真实几何
 node scripts/space-probe.mjs 9333 http://127.0.0.1:5270/  # 量详情页纵向间距，找贴太近的地方
