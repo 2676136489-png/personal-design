@@ -732,12 +732,28 @@ function AboutSection() {
               <BookOpen size={16} />
               <span>数据结构 · 算法 · 操作系统 · 计算机组成原理</span>
             </li>
+            {/* 邮箱和电话一直在数据里，但只有页脚在用 —— 名片上缺了这两行，
+                找联系方式的人得先滚到最底下。 */}
+            <li>
+              <Mail size={16} />
+              <a href={`mailto:${profile.email}`}>{profile.email}</a>
+            </li>
+            <li>
+              <Phone size={16} />
+              <a href={`tel:${profile.phone}`}>{profile.phone}</a>
+            </li>
           </ul>
-          <a className="btn btn--plain about-github" href={profile.github} target="_blank" rel="noreferrer noopener">
-            <Github size={16} />
-            github.com/2676136489-png
-          </a>
+          {/* 这层wrapper 存在的理由：卡片被拉到与右栏等高后，
+              facts 到按钮之间会空 180px 左右，纯空白看着像漏了内容。
+              分隔线画在 wrapper 上，空白就读成「上面是信息、下面是动作」的分段。*/}
+          <div className="about-actions">
+            <a className="btn btn--plain about-github" href={profile.github} target="_blank" rel="noreferrer noopener">
+              <Github size={16} />
+              github.com/2676136489-png
+            </a>
+          </div>
         </div>
+
 
         <ol className="about-timeline" data-reveal>
           {timeline.map((item) => (

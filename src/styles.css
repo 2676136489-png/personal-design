@@ -1137,13 +1137,17 @@ section {
   padding: 120px 0;
 }
 
+/* align-items: stretch（默认）而不是 start ——
+   左边名片只有 474px、右边时间线 778px，start 会让左卡底边悬在半空，
+   两列差 300px 上下，看起来像没对齐。改成 stretch 后左卡拉到与右栏等高。
+   内部用 flex + margin-top:auto 把 GitHub 按钮压到底部，
+   空白留在 facts 列表下方而不是散在中间。 */
 .about-grid {
   width: min(var(--wide), calc(100% - 44px));
   margin: 56px auto 0;
   display: grid;
   grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
   gap: 26px;
-  align-items: start;
 }
 
 .about-profile {
@@ -1151,6 +1155,8 @@ section {
   border-radius: var(--radius-lg);
   background: var(--surface-alt);
   text-align: center;
+  display: flex;
+  flex-direction: column;
 }
 
 .about-avatar {
@@ -1206,8 +1212,42 @@ section {
   flex: 0 0 auto;
 }
 
-.about-github {
-  margin-top: 26px;
+/* 邮箱和电话是能点的：mailto / tel。
+   用 --ink-soft 而不是继承 li 的 --muted ——
+   ① 可交互元素本来就该比静态文本醒目，否则没人看得出这行能点；
+   ② --muted 在深色主题下只有 3.21:1，擦着 WCAG 4.5:1 的线不够
+      （--muted 全站 40 多处在用，不能为了这两行去动它）。
+   hover 才提亮并加下划线 —— 常驻下划线在窄列里换行会错位。 */
+.about-facts a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color 160ms var(--ease);
+}
+
+.about-facts a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* 「联系」分组：被剩余空间顶到卡片底部。
+   分隔线画在这一层而不是按钮上 —— .btn--plain 自己有 border 和圆角，
+   直接给按钮加 border-top 会和它打架。 */
+.about-actions {
+  margin-top: auto;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+}
+
+/* 名片里的 GitHub 按钮：--accent 在两套主题下都不够 WCAG 的 4.5:1
+   （深色 4.23、浅色 4.09），14px 的文字按正文算。换 --accent-hover
+   （深色 #5aa0ff、浅色 #0b57e0）两套都过线。
+   两条选择器内容相同，写在一起省得以后只改一条。
+   只在这一个组件里覆盖，不动全局的 --accent。 */
+:root[data-theme='dark'] .about-github,
+:root[data-theme='light'] .about-github {
+  color: var(--accent-hover);
 }
 
 .about-timeline {
@@ -1216,11 +1256,13 @@ section {
   list-style: none;
 }
 
+/* 行距 26 → 20px。7 条各省12px，时间线从 778px 收到 694px，
+   和拉满后的左卡（474 + 两行联系方式 ≈ 560）差距明显收窄。 */
 .about-timeline li {
   display: grid;
   grid-template-columns: 74px minmax(0, 1fr);
   gap: 22px;
-  padding: 26px 0;
+  padding: 20px 0;
   border-bottom: 1px solid var(--line);
 }
 

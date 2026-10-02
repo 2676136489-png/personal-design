@@ -153,6 +153,51 @@ try {
   expect('关于区含时间线', home.includes('about-timeline'));
   expect('能力区含成绩与荣誉', home.includes('achievement-panel'));
 
+  /* 关于区两列曾经差304px（名片 474 / 时间线 778），底边不齐看着像没对齐。
+     修法是让 grid 默认的 stretch 生效 + 卡片内flex 把「联系」组顶到底部。
+     这里钉的是「不能设 align-items: start」—— 设了左卡就缩回内容高度，
+     台阶立刻回来。 */
+  const aboutGrid = rule(/\.about-grid\s*\{([^}]*)\}/);
+  expect('关于区两列底部对齐（不能设 align-items: start）',
+    !/align-items\s*:\s*start/.test(aboutGrid));
+  expect('个人名片是 flex 列（才能把联系组顶到底部）',
+    /flex-direction\s*:\s*column/.test(rule(/\.about-profile\s*\{([^}]*)\}/)));
+  expect('联系组由剩余空间顶下去',
+    /margin-top\s*:\s*auto/.test(rule(/\.about-actions\s*\{([^}]*)\}/)));
+
+  /* 名片上原本没有邮箱和电话 —— 数据里一直有，但只有页脚在用，
+     找联系方式的人得先滚到页面最底下。这两条钉住它们回到名片上，
+     且必须是能点的（mailto / tel），不是纯文本。
+
+     ⚠️ 必须限定在名片范围内找：联系区和页脚都有邮箱，
+     搜整页 HTML 的话把名片上的删掉照样 PASS（我第一版就踩了，
+     页脚那句「复制邮箱地址」旁边就是 mailto 链接）。 */
+  const cardAt = home.indexOf('class="about-profile"');
+  const cardEnd = home.indexOf('</div>', home.indexOf('about-actions'));
+  const card = cardAt > -1 && cardEnd > cardAt ? home.slice(cardAt, cardEnd) : '';
+  expect('名片上列出邮箱', card.includes(profile.email));
+  expect('名片上列出电话', card.includes(profile.phone));
+  expect('名片邮箱可点（mailto）', card.includes(`href="mailto:${profile.email}"`));
+  expect('名片电话可点（tel）', card.includes(`href="tel:${profile.phone}"`));
+
+  /* 名片里新加的两行是链接，用了 --ink-soft 而不是继承 li 的 --muted。
+     真实对比度（14px 正文阈值 4.5:1）：
+       深色 --muted 3.21 不足 / --ink-soft 11.66 够
+       浅色 --muted 5.40 够 / --ink-soft 更高
+     钉住「不退回 --muted」，两套主题下都不够线的那个。
+     精确值用 scripts/about-link-contrast.mjs 量（需真浏览器）。 */
+  expect('名片链接用 --ink-soft（--muted 在深色下只有 3.21:1）',
+    /color\s*:\s*var\(--ink-soft\)/.test(rule(/\.about-facts a\s*\{([^}]*)\}/)));
+
+  /* GitHub 按钮：--accent 两套主题都差一点（深色 4.23 / 浅色 4.09），
+     单独覆盖成 --accent-hover（7.28 / 5.44）。
+     选择器两条内容相同，钉住它们都在。 */
+  const ghRule = cssRaw.match(
+    /:root\[data-theme='dark'\]\s*\.about-github,\s*:root\[data-theme='light'\]\s*\.about-github\s*\{([^}]*)\}/
+  ) || [];
+  expect('GitHub 按钮两套主题都用 --accent-hover（--accent 都不够 4.5:1）',
+    /color\s*:\s*var\(--accent-hover\)/.test(ghRule[1] || ''));
+
   // 导航顺序应与区块顺序一致
   const navAbout = home.indexOf('关于');
   const navSkills = home.indexOf('>能力<');
