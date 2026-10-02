@@ -67,6 +67,8 @@ scripts/        构建部署、图片处理、验证脚本
 
 **`--base` 只在构建时传参**。主站在根目录、镜像站在子路径，前缀不同，所以不能写死在 `vite.config.js` 里。镜像站的构建由 `scripts/deploy-pages.mjs` 带上 `--base=/personal-design/`。
 
+**导航「按方向」那一列的链接从 `projects` 派生，不手写**。之前七项全写死成 `#/#work`（纯占位），点了只跳到全部作品概览。改成从 `categories` 现算：单个项目的方向直接指到详情页，多个项目的方向落到 `#/category/<slug>` 聚合页摆出全部项目。手写的坏处不只是链接错——往后新增项目改了 `category`，手写的那一列不会跟着变，两边就不一致了。`navItems` 里存的是 getter 而不是数组，因为模块加载时 `projects` 还没定义完，直接绑定拿到的是空数组。
+
 **`public/` 下的图片路径要用 `asset()` 包一层**（`src/data.js` 导出）。Vite 只改写 HTML 和 `import` 的路径，不碰 JS 字符串字面量，所以得自己拼 `import.meta.env.BASE_URL`。写死绝对路径在主站看着正常，到子路径下就整片 404。
 
 **下拉面板挂在 `.global-nav` 上，不挂在触发项里**。`position: absolute` 的定位参照物是最近的定位祖先——挂在触发项里参照物只有几十像素宽，`left: 0; right: 0` 只铺得满那么点；挂在 sticky 的导航栏上，参照物才是整页宽。
@@ -133,7 +135,7 @@ README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓线上界面，`sc
 四个 SSR 冒烟脚本。在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器。
 
 ```bash
-node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（88 条）
+node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（108 条）
 node scripts/smoke-nav.mjs         # 导航下拉：SSR 结构 + 数据 + 样式契约（74 条）
 node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约（43 条）
 node scripts/smoke-backtotop.mjs   # 回到顶部按钮显隐逻辑（31 条）
@@ -165,6 +167,9 @@ node scripts/space-probe.mjs 9333 http://127.0.0.1:5270/  # 量详情页纵向�
 node scripts/about-balance.mjs http://127.0.0.1:5199/ 1440 # 量关于区两列高度差
 node scripts/about-link-contrast.mjs http://127.0.0.1:5199/  # 名片链接在两套主题下的对比度
 node scripts/shot-about.mjs http://127.0.0.1:5199/ 9333 1440   # 截关于区两列
+node scripts/category-nav-trace.mjs http://127.0.0.1:5199/      # 逐条真点「按方向」，验证落点
+node scripts/category-guard.mjs http://127.0.0.1:5199/          # 聚合页边界：不存在的 slug、点卡片跳转
+node scripts/shot-category.mjs http://127.0.0.1:5199/ 9333 agent 1440  # 截方向聚合页
 node scripts/shoot-docs.mjs 9333                              # 抓 README 配图
 ```
 
@@ -173,3 +178,5 @@ node scripts/shoot-docs.mjs 9333                              # 抓 README 配�
 `verify-projects.mjs` 把每个项目 slug 都打开一遍，确认封面图真的加载了、没被 CSS 拉变形、导航下拉里列得全。静态断言只能证明「数据里有这个 slug」，证明不了图加载了、布局没塌。
 
 `about-link-contrast.mjs` 按 WCAG 公式算前景与背景的亮度比。切主题必须点导航栏那个按钮 —— 主题存在 React state 里，直接改 `data-theme` 属性的话 state 没变，下一次 effect 就把属性写回去，量出来的数据会自相矛盾。
+
+`category-nav-trace.mjs` 走真实鼠标事件点导航下拉里的每一项，读 URL 和落地页标题。SSR 断言只能证明「按这个 hash 渲染的 HTML 里有那个标题」，证明不了真点下去会跳。
