@@ -1,6 +1,9 @@
 node_modules/
 dist/
 dist_bak/
+dist-verify/
+dist-v2/
+dist-v3/
 dist-pages/
 dist-pages-new/
 dist-pages-old*/
