@@ -15,6 +15,7 @@ import { execSync } from 'node:child_process';
 import { existsSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { pickIp, pushWithFallback } from './github-push.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = path.join(root, 'dist-pages');
@@ -75,12 +76,16 @@ if (!inited) {
    缺了它时走代理会 502，直连又 21 秒超时，两个方向都不通。
    每次重建 dist-pages 都会丢一次配置，所以在这里补上。
 
-   ⚠️ 这个 IP 会失效。GitHub 的边缘节点换过几轮，写死的那个（140.82.112.3）
-   已经连不上了 —— 表现是直连 21 秒超时、代理 502，两个方向同时不通，
-   很容易误判成「网络坏了」。换 IP 前先用这个确认新地址通不通：
-     curl -o /dev/null -w "%{http_code}" --resolve github.com:443:<IP> --noproxy '*' https://github.com/
-   实测可用：20.27.177.113 / 140.82.113.3 / 140.82.114.3 / 20.233.83.145 */
-run('git config http.curloptResolve "github.com:443:20.27.177.113"', outDir);
+   ⚠️ 写死的 IP 一定会失效，而且失效时的表现极具误导性 ——
+   直连 21 秒超时、代理 502，两个方向同时不通，
+   很容易被当成「网络坏了」放弃，其实只是那个 IP 过期了。
+   探测与换址逻辑放在 github-push.js 里，主仓库推送也用同一套。 */
+const ghIp = pickIp(REMOTE, root);
+if (!ghIp) {
+  console.log('⚠️ 候选 IP 全都不通，交给推送重试环节处理');
+} else {
+  run(`git config http.curloptResolve "github.com:443:${ghIp}"`, outDir);
+}
 
 run(`git checkout -B ${BRANCH}`, outDir);
 run('git add -A', outDir);
@@ -92,7 +97,12 @@ try {
   console.log('· 没有内容变化，跳过提交');
 }
 
-run(`git push -f origin ${BRANCH}`, outDir);
+if (!pushWithFallback(REMOTE, BRANCH, outDir, {
+  onIp: (ip) => run(`git config http.curloptResolve "github.com:443:${ip}"`, outDir),
+})) {
+  console.log('\n❌ 推送失败：所有解析地址与代理路径都不通，稍后重试');
+  process.exit(1);
+}
 
 clear(oldDir);
 

@@ -132,13 +132,19 @@ node scripts/deploy-pages.mjs
 
 Pages 首次启用需在仓库 Settings → Pages 里把 Source 设为 `Deploy from a branch`，分支选 `gh-pages`、目录选 `/(root)`。
 
-**推到 GitHub 前先确认解析地址还通**。`scripts/deploy-pages.mjs` 与主仓库都配了 `http.curloptResolve`，把 `github.com` 固定到一个 IP 上——直连时绕开本地 DNS，避免解析到走不通的地址。但写死的 IP 会被 GitHub 换掉：固定的那个失效后，现象是**直连 21 秒超时、代理 502，两个方向同时不通**，很容易误判成网络故障。换地址前先单独验一下新 IP 通不通：
+**推到 GitHub 前先确认解析地址还通**。`http.curloptResolve` 把 `github.com` 固定到一个 IP 上——直连时绕开本地 DNS，避免解析到走不通的地址。但写死的 IP 会被 GitHub 换掉：固定的那个失效后，现象是**直连 21 秒超时、代理 502，两个方向同时不通**，很容易误判成网络故障。
+
+所以不写死地址，改为挨个探测：`scripts/github-push.js` 维护一个候选池，用 `git ls-remote` 挨个试，探到能用的就写进配置；推送失败还会换地址、换代理/直连继续重试。
 
 ```bash
-curl -o /dev/null -w "%{http_code}\n" --resolve github.com:443:<IP> --noproxy '*' https://github.com/
+node scripts/push-main.mjs      # 跑完测试再推 main，失败自动换地址重试
 ```
 
-能返回 200 才写进配置。同时 `api.github.com` 与 `raw.githubusercontent.com` 走的是另一套解析，它们通不代表 git 那条路通——判断依据要分开看。
+探测要用 **git 自己**探，不能用 curl：curl 走 OpenSSL，git 走 schannel（Windows TLS），两者对边缘节点的兼容性不一样，实测出现过同一批地址里 curl 返回 200 而 git 连不上的情况。
+
+还有两处容易踩的坑：**同一个地址会间歇性抖动**（同一条命令隔几秒可能一次通一次不通），所以探针要连试两次再判死；**代理端口还在 LISTENING 不代表上游通**（表现是 `CONNECT tunnel failed` / 502），探针前要先清掉代理环境变量。
+
+另外 `api.github.com` 与 `raw.githubusercontent.com` 走的是另一套解析，它们通不代表 git 那条路通——判断依据要分开看。
 
 ## 图片处理
 
@@ -205,6 +211,7 @@ node scripts/shot-category.mjs http://127.0.0.1:5199/ 9333 agent 1440  # 截方�
 node scripts/shot-resume.mjs http://127.0.0.1:5199/#/resume 9222 1440  # 截简历页与预览图
 node scripts/probe-resume.mjs http://127.0.0.1:5199/#/resume          # 量简历页：章节、优势条数、分点数、链接数、横向溢出
 node scripts/shoot-docs.mjs 9333                              # 抓 README 配图
+node scripts/push-main.mjs                                   # 跑完测试推 main，失败自动换地址
 ```
 
 `cdp-probe.mjs` 导航时会自动带一个时间戳参数，并关掉 HTTP 缓存。资源清单写在 `index.html` 里，浏览器缓存了它就会连着用旧的 `assets/index-<hash>.js` —— 表现是「代码改了但页面上没有」，而 `curl` 拿到的是新文件，两边对不上。带缓存的参数要插在 `#` 之前，`#` 后面的内容浏览器根本不发给服务器。
