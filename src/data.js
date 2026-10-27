@@ -67,7 +67,7 @@ export const profile = {
   initials: 'LKY',
   welcome: '欢迎来到我的个人网站',
   tagline: '把还在纸上的想法，做成能跑起来的东西。',
-  heroIntro: '从算法到界面，从第一行代码到线上运行。我更在意它有没有被人真的用上。',
+  heroIntro: '从算法到界面，从第一行代码到线上运行，关注实现最终是否被真实使用。',
   email: 'luky2124@mails.jlu.edu.cn',
   phone: '15144167675',
   city: '重庆',
@@ -91,7 +91,7 @@ export const heroFacts = [
 export const resume = {
   updated: '2026 年 10 月',
   summary:
-    '计算机科学与技术本科。后端以 PHP / MySQL 与 Python / FastAPI 为主，独立做过表结构设计、接口开发与线上排障；前端用 React、TypeScript 与 Vite。AI 应用侧做过 LangGraph 状态机、Dify 工具接入与 RAG 降级；规则与搜索这类确定性部分坚持用可验证的实现兜底。',
+    '计算机科学与技术本科。后端以 PHP / MySQL 与 Python / FastAPI 为主，具备表结构设计、接口开发与线上问题定位经验；AI 应用侧具备 LangGraph 状态机编排、Dify 自定义工具接入与 RAG 检索降级的设计经验。确定性模块以可验证实现兜底、模型仅承担候选取舍，方案以实测数据判定；验证借助 pytest、PHPUnit、Playwright 与浏览器 DevTools 协议，界面问题以量化指标判定。',
   education: [
     {
       school: '吉林大学',
@@ -374,7 +374,7 @@ export const campus = {
   role: '独立开发 · AI 辅助工程',
   stack: 'PHP · MySQL · SSE · Docker',
   headline: '一个真正在运行的校园社交平台。',
-  lede: '从实名认证到实时私信，从敏感词过滤到运营后台。它有真实用户、完整业务闭环，此刻仍在线运行。',
+  lede: '覆盖实名认证、实时私信、敏感词过滤与运营后台，业务闭环完整，目前仍在线上运行。',
   cover: asset('/media/campus/dashboard-1960.webp'),
 
   /* 首页精选网格里用的 AI 助手整屏截图。
@@ -615,7 +615,7 @@ export const campus = {
           type: 'points',
           items: [
             { k: '安全要前置', v: '预处理语句和 CSRF 不是"以后再加"，是写第一行代码时就要有的习惯' },
-            { k: '实时要留退路', v: 'SSE 很好用，但不是所有网络环境都稳定，轮询回退让消息不会真的丢' },
+            { k: '实时要留退路', v: 'SSE 并非在所有网络环境下都稳定，轮询回退保证消息不丢' },
             { k: '管理要留痕', v: '审计日志加回滚，比事后道歉有用得多' },
             { k: 'AI 要有边界', v: '让助手查真实数据、明确说自己能力范围，比让它自由发挥更可信' },
           ],
@@ -679,7 +679,7 @@ export const projects = [
             items: [
               { k: '不许编', v: '证据不足时诊断允许输出 UNKNOWN，这条路径计入「已升级」而不是失败' },
               { k: '要能查', v: '被否掉的假设和否掉的理由都留档，复盘时能看到推理链而不只是结论' },
-              { k: '要能验', v: '恢复动作返回成功不等于环境真的修好了，两件事分开统计' },
+              { k: '要能验', v: '恢复动作返回成功不等于环境已修复，两件事分开统计' },
             ],
           },
         ],
@@ -707,7 +707,7 @@ export const projects = [
               ['root_cause_diagnosis', '出根因与把握程度；证据不足就如实弃权'],
               ['recovery_planner / risk_assessment', '生成分步恢复方案，按动作风险定审批策略'],
               ['human_approval', '人在环闸门（LangGraph interrupt）'],
-              ['recovery_executor / rollback', '逐步执行并记录环境是否真的改变，失败按方案回退'],
+              ['recovery_executor / rollback', '逐步执行并记录环境是否实际改变，失败按方案回退'],
               ['verification / postmortem', '回查指标判断是否真恢复，生成复盘'],
             ],
           },
@@ -763,7 +763,7 @@ export const projects = [
         id: 'recovery',
         nav: '恢复安全',
         kicker: '04',
-        title: '分级审批，以及真的回滚',
+        title: '分级审批与可回滚执行',
         blocks: [
           {
             type: 'table',
@@ -777,7 +777,7 @@ export const projects = [
           },
           {
             type: 'text',
-            body: '执行完必须验证：verification 回查指标，没回基线就走 rollback。评测里把 effective_action_rate 和 environment_fixed_rate 分开统计，就是为了区分「动作返回成功」和「环境真的被修好了」——很多恢复系统把这两件事混为一谈。',
+            body: '执行完必须验证：verification 回查指标，没回基线就走 rollback。评测里把 effective_action_rate 和 environment_fixed_rate 分开统计，用于区分「动作返回成功」与「环境已修复」——多数恢复系统把这两件事混为一谈。',
           },
           {
             type: 'points',
@@ -882,7 +882,7 @@ export const projects = [
     stack: 'Python · LangGraph · FastAPI · React 18 · SQLite',
     site: 'https://ebed98754f5b4e4abafe591d754aff06.app.workbuddy.host/',
     github: 'https://github.com/2676136489-png/Personal-agent-development-flow',
-    lede: '用户输入一个复杂研究任务，工作流自动理解、规划、调用工具收集证据、分析、验证，在写报告之前中断等人工确认，最终产出每条结论都标了来源的报告。它把「证据不足时多查一轮」和「写报告前停下来」当成默认行为，而不是可选项。',
+    lede: '输入一个研究任务后，工作流完成理解、规划、工具调用、证据分析与验证，在生成报告前中断等待人工确认，最终产出逐条标注来源的报告。证据不足时重新检索、报告生成前暂停确认，均由流程强制而非可选项。',
     metrics: [
       { value: '7', label: '工作流节点' },
       { value: '4', label: '类工具' },
@@ -908,7 +908,7 @@ export const projects = [
             items: [
               { k: '要可溯源', v: '每条结论都标来源，没来源的句子不该出现在报告里' },
               { k: '要可打断', v: '写报告前必须人工确认，不能一路自动跑到底' },
-              { k: '要能复核', v: '证据不足时多查一轮，而不是用剩下的凑数' },
+              { k: '要能复核', v: '证据不足时重新检索，不以剩余证据充数' },
             ],
           },
         ],
@@ -985,7 +985,7 @@ rows: [
         id: 'interrupt',
         nav: '中断与恢复',
         kicker: '04',
-        title: '写报告前必须停下来',
+        title: '报告生成前强制中断',
         blocks: [
           {
             type: 'text',
@@ -1584,7 +1584,7 @@ rows: [
     description: '从零搭建的响应式作品集，包含项目分页、主题切换、命令面板与实时状态组件。',
     role: '独立开发 · AI 辅助工程',
     stack: 'React 19 · Vite 6 · 手写 CSS',
-    lede: '你现在正在看的这个站点。它同样是一次完整交付：多页面信息架构、手写设计系统、自建动效层，以及一条打通两个不同域名的一键同步流程。',
+    lede: '本站本身同样是一次完整交付：多页面信息架构、手写设计系统、自建动效层，以及两个不同域名下的一键同步流程。',
     metrics: [
       { value: '6', label: '动效子系统' },
       { value: '23', label: '张 WebP 素材' },
@@ -1783,7 +1783,7 @@ rows: [
         blocks: [
           {
             type: 'text',
-            body: '校园产品容易被做成两种极端：要么是学生会海报式的活泼撞色，一眼就显得不专业；要么过度克制，端着一副办事大厅的冷面孔，学生根本不想点开。真正的难点在于两边都要——既要有人愿意用，也要让人相信上面的信息是真的。',
+            body: '校园产品容易被做成两种极端：要么是学生会海报式的活泼撞色，一眼就显得不专业；要么过度克制，端着一副办事大厅的冷面孔，学生根本不想点开。难点在于同时满足两端：既要有使用意愿，也要让人相信信息真实可信。',
           },
           {
             type: 'points',
@@ -1896,7 +1896,7 @@ export const timeline = [
   {
     year: '2026',
     title: 'AI 研究工作台',
-    text: '把「读论文—找证据—写综述」这条流程做成 7 步流水线，237 个后端测试守着四道防失控闸门。',
+    text: '将「读论文—找证据—写综述」的流程拆为 7 步流水线，237 个后端测试覆盖四道失控防护闸门。',
   },
   {
     year: '2026',
@@ -1911,7 +1911,7 @@ export const timeline = [
   {
     year: '2026',
     title: '个人作品集',
-    text: '这个站点本身。双站部署，214 条自动化断言守着布局与交互契约。',
+    text: '本站本身。同一份构建产物发布至 GitHub Pages 子路径与云托管根路径，两处内容保持一致。',
   },
   {
     year: '2024',
