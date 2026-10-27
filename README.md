@@ -144,7 +144,7 @@ curl -o /dev/null -w "%{http_code}\n" --resolve github.com:443:<IP> --noproxy '*
 
 截图源图放 `media-src/`（PNG），由 `scripts/optimize-images.py` 统一转成 WebP 写到 `public/media/`，产物里不留 PNG。整站图片从 14.6MB 压到 1.9MB。
 
-README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓线上界面，`scripts/make-docs-images.py` 压成 WebP（`docs/images/`，5 张 444KB）。抓的是线上而不是本地构建——README 是给别人看的，展示的应该是访客实际打开的样子。
+README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓线上界面，`scripts/make-docs-images.py` 压成 WebP（`docs/images/`，5 张 472KB）。抓的是线上而不是本地构建——README 是给别人看的，展示的应该是访客实际打开的样子。
 
 ## 简历
 
@@ -160,12 +160,14 @@ PDF 是最终版，放在 `public/media/resume/lukeyu-resume.pdf`；页面上那
 
 所以 `smoke-render.mjs` 里另有一组字段契约断言，放在**渲染之前**跑：先确认 `resume` 上被 `main.jsx` 用到的每个字段都存在，再去渲染。顺序很关键——契约断言放在渲染之后的话，字段缺失时脚本已经跳进 catch 了，后面的断言一条都跑不到。
 
+**README 引用的配图也要断言存在**。这类坏图在本地和线上都看不出来：页面照跑，测试照过，只有真的打开 README 才发现图裂了。所以断言会扫一遍 README 里所有 `docs/images/*.webp`，逐个确认文件在仓库里——同样放在渲染之前，渲染崩了也要照样报出来。
+
 ## 验证
 
 四个 SSR 冒烟脚本。在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器。
 
 ```bash
-node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（146 条）
+node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（147 条）
 node scripts/smoke-nav.mjs         # 导航下拉：SSR 结构 + 数据 + 样式契约（75 条）
 node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约（43 条）
 node scripts/smoke-backtotop.mjs   # 回到顶部按钮显隐逻辑（31 条）

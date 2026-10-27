@@ -13,10 +13,15 @@ import { execFileSync } from 'node:child_process';
 const CSS = 'src/styles.css';
 const JSX = 'src/main.jsx';
 const DATA = 'src/data.js';
+const README = 'README.md';
 
 const css = readFileSync(CSS, 'utf8');
 const jsx = readFileSync(JSX, 'utf8');
 const data = readFileSync(DATA, 'utf8');
+/* README 也要顶层留一份：反例会改它，
+   循环里的 writeFileSync(original) 只在正常走完时兜底，
+   进程被中断时靠 finally 里的这行还原。 */
+const readme = readFileSync(README, 'utf8');
 
 /* 每条：名字 / 目标文件 / 坏写法（要匹配原文，可为正则）/ 换成的坏写法 / 预期 FAIL 的断言名 */
 const mutations = [
@@ -183,6 +188,17 @@ const mutations = [
     expectFail: '时间线的项目标题与作品列表逐字一致',
     script: 'smoke-render',
   },
+  {
+    /* README 引用了仓库里没有的配图 —— GitHub 上那张图就是坏的。
+       踩过的坑：resume-page.webp 被 README 引用了却从没进过仓库。
+       这个坏图在本地和线上都看不出来，只有真的打开 README 才发现。 */
+    name: 'README 引用了一张仓库里没有的图',
+    file: 'README.md',
+    from: 'docs/images/resume-page.webp',
+    to: 'docs/images/resume-page-missing.webp',
+    expectFail: 'README 引用的配图都在仓库里（缺一张就是坏图）',
+    script: 'smoke-render',
+  },
 ];
 
 /* from 可以是字符串或正则。正则带 g 标志时 lastIndex 会残留，
@@ -243,6 +259,7 @@ try {
   writeFileSync(CSS, css);
   writeFileSync(JSX, jsx);
   writeFileSync(DATA, data);
+  writeFileSync(README, readme);
 }
 
 console.log(bad ? `\n${bad} 条反例没被拦住，断言有问题` : '\n全部反例都被拦住了');

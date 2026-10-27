@@ -7,7 +7,7 @@
 import { createServer } from 'vite';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 /* SSR 下没有浏览器 API，先打最小桩。
@@ -251,6 +251,26 @@ try {
     contractSlugs.every((s) => typeof data.resume.projectMeta?.[s] === 'string'));
   /* profile.hometown 是名片上渲染的一行，缺了会显示 undefined。 */
   expect('profile 有 hometown（名片要显示现居地 + 籍贯）', !!data.profile.hometown);
+
+  /* README 引用的每张配图都必须真的在仓库里。
+     踩过的坑：README 里写了 <img src="docs/images/resume-page.webp">，
+     那张图却从没进过仓库（git log --diff-filter=A 查不到），
+     页面在 GitHub 上就是个坏图 —— 本地和线上都看不出来，
+     只有真的打开 README 才发现。
+
+     这条断言放在渲染之前：渲染崩了也要照样报出来，
+     否则又变成「报告里只剩一句渲染抛错」。 */
+  const readmeRaw = readFileSync(fileURLToPath(new URL('../README.md', import.meta.url)), 'utf8');
+  const readmeImgs = [...readmeRaw.matchAll(/docs\/images\/([\w-]+\.webp)/g)].map((m) => m[1]);
+  const missingImgs = readmeImgs.filter((f) => !existsSync(fileURLToPath(new URL(`../docs/images/${f}`, import.meta.url))));
+  expect('README 引用的配图都在仓库里（缺一张就是坏图）', missingImgs.length === 0);
+  if (missingImgs.length) console.log('    缺失的配图:', missingImgs.join(', '));
+  /* 反过来也查一下：docs/images/ 里的图没被 README 用上的，留在仓库里只是白占体积。
+     这一条不算硬失败（多一张备用图不算错），只是提醒。 */
+  const repoImgs = readdirSync(fileURLToPath(new URL('../docs/images', import.meta.url)))
+    .filter((f) => f.endsWith('.webp'));
+  const unusedImgs = repoImgs.filter((f) => !readmeImgs.includes(f));
+  if (unusedImgs.length) console.log('    仓库里有 README 没用上的配图:', unusedImgs.join(', '));
 
   const resumeHtml = render('#/resume');
   /* 导航是全站共享的，下拉里也列着所有项目名。
