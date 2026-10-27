@@ -28,10 +28,10 @@
 | --- | --- | --- |
 | [OpsPilot · AI 事故响应系统](https://opspilot-v2.app.workbuddy.host/) | Agent 系统 | 2026.09 — 2026.10 |
 | [AI 研究工作台](https://ebed98754f5b4e4abafe591d754aff06.app.workbuddy.host/) | Agent 系统 | 2026.09 — 2026.10 |
-| [校园圈子](https://www.lucky-campus.top) | 全栈 · 校园社交平台 | 2026.05 — 2026.08 |
-| Transformer Gomoku 对弈 Bot | 算法系统 | 2026.04 — 2026.06 |
+| [校园圈子](https://www.lucky-campus.top) | Web 应用 | 2026.05 — 2026.08 |
+| 五子棋对弈 Bot | 算法系统 | 2026.04 — 2026.06 |
 | iGEM Glass Wiki 插件 | Web 组件 | 2026.07 |
-| 个人作品集 | 前端开发 | 2026.07 — 2026.08 |
+| 个人作品集 | 前端开发 | 2026.07 — 2026.10 |
 | 学习目标管理台 | Web 应用 | 2026.09 |
 | 菜鸟驿站快递管理系统 | 系统设计 | 2024.09 — 2024.12 |
 | 校园服务视觉系统 | 品牌视觉 | 探索性设计 |
@@ -130,12 +130,22 @@ Pages 首次启用需在仓库 Settings → Pages 里把 Source 设为 `Deploy f
 
 README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓线上界面，`scripts/make-docs-images.py` 压成 WebP（`docs/images/`，289KB）。抓的是线上而不是本地构建——README 是给别人看的，展示的应该是访客实际打开的样子。
 
+## 简历
+
+简历页与 PDF 是同一份材料的两份形态，改一处要改另一处。
+
+PDF 是最终版，放在 `public/media/resume/lukeyu-resume.pdf`；页面上那张预览图由 `scripts/make-resume-preview.py` 从 PDF 直接渲染（`resume.webp` 1588 宽、`resume-900.webp` 900 宽），保证「预览所见 = 下载所得」。从 HTML 截图会与 PDF 有出入——HTML 里那版内容比 A4 一页长。
+
+网页上的内容全部来自 `src/data.js` 的 `resume` 字段，分三份：个人优势与项目分点技术描述（`advantages` / `projectHighlights`）、每个项目的标注行（`projectMeta`，写的是参与方式如「Vibe Coding」）、技能分组与证书。它们与 PDF 逐条一致，不用项目详情页的 `lede`——那是详情页的引子，讲的是「为什么做这个」，语气是散文，跟简历要的「做了什么、怎么做的」不是一回事。
+
+项目列表由 `resume.projectSlugs` 决定，不要在页面上写死关键词。断言也从这个字段派生，改简历时只改数据不改断言。
+
 ## 验证
 
 四个 SSR 冒烟脚本。在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器。
 
 ```bash
-node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（108 条）
+node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（142 条）
 node scripts/smoke-nav.mjs         # 导航下拉：SSR 结构 + 数据 + 样式契约（74 条）
 node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约（43 条）
 node scripts/smoke-backtotop.mjs   # 回到顶部按钮显隐逻辑（31 条）
@@ -170,8 +180,11 @@ node scripts/shot-about.mjs http://127.0.0.1:5199/ 9333 1440   # 截关于区两
 node scripts/category-nav-trace.mjs http://127.0.0.1:5199/      # 逐条真点「按方向」，验证落点
 node scripts/category-guard.mjs http://127.0.0.1:5199/          # 聚合页边界：不存在的 slug、点卡片跳转
 node scripts/shot-category.mjs http://127.0.0.1:5199/ 9333 agent 1440  # 截方向聚合页
+node scripts/shot-resume.mjs http://127.0.0.1:5199/#/resume 9222 1440  # 截简历页与预览图
 node scripts/shoot-docs.mjs 9333                              # 抓 README 配图
 ```
+
+`cdp-probe.mjs` 导航时会自动带一个时间戳参数，并关掉 HTTP 缓存。资源清单写在 `index.html` 里，浏览器缓存了它就会连着用旧的 `assets/index-<hash>.js` —— 表现是「代码改了但页面上没有」，而 `curl` 拿到的是新文件，两边对不上。带缓存的参数要插在 `#` 之前，`#` 后面的内容浏览器根本不发给服务器。
 
 `hover-trace.mjs` 走两条路径：触发项直线移到面板中部，以及在边界附近小幅抖动。真实用户的手不会走直线，抖一下就崩的交互等于不能用。
 

@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronRight,
   Copy,
+  ExternalLink,
   Github,
   GraduationCap,
   Mail,
@@ -728,7 +729,7 @@ function AboutSection() {
             </li>
             <li>
               <MapPin size={16} />
-              <span>{profile.city}</span>
+              <span>{profile.city} · {profile.hometown}</span>
             </li>
             <li>
               <BookOpen size={16} />
@@ -1445,6 +1446,18 @@ function ResumePage({ onCopyEmail }) {
             ))}
           </section>
 
+          <section className="resume-block" id="resume-advantages" data-reveal>
+            <h2>个人优势</h2>
+            <ul className="resume-points">
+              {resume.advantages.map((a) => (
+                <li key={a}>
+                  <span className="resume-dot" aria-hidden="true" />
+                  <span>{a}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
           <section className="resume-block" id="resume-skills" data-reveal>
             <h2>专业技能</h2>
             <ul className="resume-skills">
@@ -1460,7 +1473,10 @@ function ResumePage({ onCopyEmail }) {
           <section className="resume-block" id="resume-projects" data-reveal>
             <h2>项目经历</h2>
             <ul className="resume-projects">
-              {resumeProjects.map((p) => (
+              {resumeProjects.map((p) => {
+                /* 分点描述用简历 PDF 那份，与项目详情页的引子（lede）不是一回事 */
+                const highlights = resume.projectHighlights?.[p.slug] || [];
+                return (
                 <li key={p.slug}>
                   <div className="resume-row">
                     <a
@@ -1473,10 +1489,38 @@ function ResumePage({ onCopyEmail }) {
                     </a>
                     <span className="resume-period">{p.period}</span>
                   </div>
-                  <p className="resume-sub">{p.role}</p>
-                  {p.lede ? <p className="resume-desc">{p.lede}</p> : null}
+                  {/* 标注行用简历 PDF 的口径（技术栈 + 参与方式），
+                      与 details 页那句「独立开发 · 架构与实现」不是一回事。 */}
+                  <p className="resume-sub">
+                    {resume.projectMeta?.[p.slug] || p.role}
+                  </p>
+                  {highlights.length ? (
+                    <ul className="resume-points resume-points--tight">
+                      {highlights.map((h) => (
+                        <li key={h}>
+                          <span className="resume-dot" aria-hidden="true" />
+                          <span>{h}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {/* 仓库与线上地址：投递简历时这两个是必查项，
+                      只在页面上放个标题链接，投递方还得自己去 GitHub 找。 */}
+                  <p className="resume-links">
+                    {p.github ? (
+                      <a href={p.github} target="_blank" rel="noreferrer noopener">
+                        <Github size={14} />GitHub
+                      </a>
+                    ) : null}
+                    {p.site ? (
+                      <a href={p.site} target="_blank" rel="noreferrer noopener">
+                        <ExternalLink size={14} />在线站点
+                      </a>
+                    ) : null}
+                  </p>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </section>
 
@@ -1538,7 +1582,7 @@ function ResumePage({ onCopyEmail }) {
           srcSet={`${media.resume.previewSmall} 900w, ${media.resume.preview} 1588w`}
           sizes="92vw"
           alt="卢柯宇简历"
-          caption="卢柯宇简历 · 2026 年 9 月"
+          caption={`卢柯宇简历 · ${resume.updated}`}
           onClose={() => setLightboxOpen(false)}
         />
       )}

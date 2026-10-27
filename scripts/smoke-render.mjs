@@ -248,15 +248,103 @@ try {
   expect('简历页含证书与校园', resumeHtml.includes('证书与校园'));
   expect('简历页含预览图', resumeHtml.includes('resume.webp'));
   expect('简历页含 PDF 链接', resumeHtml.includes('lukeyu-resume.pdf'));
-  expect(
-    '简历页含 4 个项目',
-    ['校园圈子', 'Gomoku', '菜鸟驿站', '个人作品集'].every((k) => resumeBody.includes(k)),
-  );
+
+  /* ⚠️ 解构必须提前：下面简历断言直接用了 projects。
+     声明写在后面会撞 TDZ（Cannot access 'projects' before initialization）。 */
+  const { projects, IMAGE_SIZES } = data;
+
+  /* 简历页列哪几个项目，必须由 resume.projectSlugs 决定，不能手写关键词。
+     原来写死了 ['校园圈子', 'Gomoku', '菜鸟驿站', '个人作品集']——
+     简历改成「校园圈子 → AI 研究 → 五子棋 → 个人作品集」后，
+     菜鸟驿站不在了，断言就 FAIL。
+     手写关键词列表的坏处不是这次才暴露：换一次简历就得改一次断言，
+     而断言理应反映「简历页 = projectSlugs 里的项目」这条契约本身。 */
+  const resumeSlugs = data.resume.projectSlugs || [];
+  /* ⚠️ campus 不在 projects 数组里 —— 它是独立数据源（data.campus），
+     在 main.jsx 的 ResumePage 里也是特殊处理的：
+       slug === campus.slug ? campus : projects.find(...)
+     断言必须跟实现用同一套查找，否则 campus 会被误判成「slug 不存在」。
+     ⚠️ campus 的标题字段叫 name 不叫 title，页面上渲染的是
+     `${p.name} ${p.en}`（见 main.jsx），所以这里要算同样的显示名。 */
+  const displayNameOf = (p) => (p.title ? p.title : `${p.name} ${p.en}`);
+  const slugOf = (s) => (s === data.campus?.slug ? data.campus : projects.find((p) => p.slug === s));
+  const resumeTitles = resumeSlugs.map((s) => slugOf(s)).filter(Boolean).map(displayNameOf);
+  expect('简历项目 slug 都对应真实项目', resumeTitles.length === resumeSlugs.length);
+  const missingInBody = resumeTitles.filter((t) => !resumeBody.includes(t));
+  expect('简历页列全了 projectSlugs 里的每个项目', missingInBody.length === 0);
+  if (missingInBody.length) console.log('    页面上没有的:', missingInBody.join(', '));
+
+  /* 简历页只列 projectSlugs 里的项目 —— 作品区可以有更多，
+     但简历是投递用的精简版，多列会让人以为简历写乱了。 */
+  const extraInBody = projects
+    .filter((p) => !resumeSlugs.includes(p.slug))
+    .filter((p) => resumeBody.includes(p.title))
+    .map((p) => p.title);
+  expect('简历页不多列 projectSlugs 之外的项目', extraInBody.length === 0);
+  if (extraInBody.length) console.log('    多列出来的:', extraInBody.join(', '));
+
   expect('简历正文不含 Wiki 插件', !resumeBody.includes('iGEM'));
   expect('简历页含学校', resumeHtml.includes('吉林大学'));
   // 成绩从首屏拿掉后，简历页仍要保留——否则就是把信息弄丢了
   expect('简历页仍含 GPA 与排名', /GPA|排名/.test(resumeBody));
   expect('简历页含技能分组', resumeHtml.includes('LangGraph'));
+
+  /* 简历上每个项目的标注行与链接。
+     标注行来自 resume.projectMeta —— 与 PDF 上的「技术栈 · 参与方式」同一份，
+     不能退回 projects[].role（那是详情页口径：「独立开发 · 架构与实现」）。 */
+  const metaMap = data.resume.projectMeta || {};
+  for (const s of resumeSlugs) {
+    const meta = metaMap[s];
+    expect(`简历项目「${s}」有标注行`, typeof meta === 'string' && meta.length > 0);
+    if (meta) {
+      expect(`简历页显示「${s}」的标注行`, resumeBody.includes(meta));
+    }
+    const proj = slugOf(s);
+    expect(`简历项目「${s}」有仓库地址`, !!proj?.github);
+    if (proj?.github) {
+      expect(`简历页链到「${s}」的仓库`, resumeBody.includes(proj.github));
+    }
+  }
+  expect('简历项目标注行覆盖所有 projectSlugs',
+    resumeSlugs.every((s) => !!metaMap[s]));
+
+  /* 「个人优势」与项目分点：必须与 PDF 同口径。
+     原来项目条目渲染的是 projects[].lede —— 那是详情页的引子（散文），
+     跟 PDF 上的分点技术描述不是一回事，招聘方对照网站与 PDF 会发现对不上。 */
+  expect('简历页有「个人优势」章节', resumeBody.includes('个人优势'));
+  expect('个人优势有内容', (data.resume.advantages || []).length >= 3);
+  const missingAdv = (data.resume.advantages || []).filter((a) => !resumeBody.includes(a));
+  expect('个人优势四条都渲染出来了', missingAdv.length === 0);
+  if (missingAdv.length) console.log('    没渲染的个人优势:', missingAdv.join(' | '));
+
+  const hlMap = data.resume.projectHighlights || {};
+  for (const s of resumeSlugs) {
+    const hl = hlMap[s];
+    expect(`简历项目「${s}」有分点描述`, Array.isArray(hl) && hl.length > 0);
+    if (Array.isArray(hl)) {
+      const miss = hl.filter((h) => !resumeBody.includes(h));
+      expect(`简历页渲染全了「${s}」的分点`, miss.length === 0);
+      if (miss.length) console.log(`    ${s} 漏掉的分点:`, miss.join(' | '));
+    }
+  }
+  expect('每个 projectSlugs 都有分点描述',
+    resumeSlugs.every((s) => Array.isArray(hlMap[s]) && hlMap[s].length > 0));
+
+  /* 现在校地与籍贯是两回事：简历 PDF 写的是「吉林 长春（籍贯 重庆）」，
+     网站名片只写「重庆」会被读成人在重庆，而学校在长春。
+     ⚠️ 名片在首页的「关于」区，不在简历页上 —— 断言要查对页面。 */
+  expect('名片同时写现居地与籍贯',
+    home.includes(data.profile.city) && home.includes(data.profile.hometown));
+
+  /* 灯箱标题里的月份必须跟着简历走，写死过一次「2026 年 9 月」，
+     简历更新到 10 月后那行就与 PDF 对不上了。
+     ⚠️ 灯箱是点开才渲染的（lightboxOpen 初始 false），SSR 输出里没有它，
+     所以只能查源码里有没有写死月份。 */
+  const mainRaw = readFileSync(fileURLToPath(new URL('../src/main.jsx', import.meta.url)), 'utf8');
+  expect('灯箱标题跟着 resume.updated 走（不能写死月份）',
+    /caption=\{`卢柯宇简历 · \$\{resume\.updated\}`\}/.test(mainRaw));
+  expect('源码里没有写死的简历月份',
+    !/caption="卢柯宇简历 · \d{4} 年 \d{1,2} 月"/.test(mainRaw));
 
   const campusHtml = render('#/campus');
   expect('校园圈子页仍正常', campusHtml.includes('校园圈子'));
@@ -267,7 +355,6 @@ try {
   /* 每个项目都必须能通过 slug 打开自己的详情页。
      之前只钉了 gomoku 一个，Projects 页靠 projects.find 取数据，
      少写 slug 或写错就是空白页 —— 静态断言看不出来，只有逐个渲染能发现。 */
-  const { projects, IMAGE_SIZES } = data;
   for (const p of projects) {
     const page = render(`#/${p.slug}`);
     const body = bodyOf(page);

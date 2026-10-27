@@ -42,3 +42,6 @@ dist-nav3/
 dist-cap/
 dist-cap2/
 dist-cap3/
+
+# 从简历 PDF 渲染出来的中间图（PDF 本身已入库，这个每次跑脚本都会重生成）
+media-src/resume-preview.png

@@ -71,6 +71,13 @@ await new Promise((resolve) => {
 });
 
 await send('Page.enable');
+/* ⚠️ 必须关掉缓存，而且要在 Page.navigate 之前：
+   资源清单写在 index.html 里，浏览器缓存了 index.html 就会连着用旧的
+   assets/index-<hash>.js —— 表现为「代码改了但页面上没有」。
+   setCacheDisabled 只管后续请求，管不住已缓存的 index.html，
+   所以导航时还要带一个时间戳强制回源。 */
+await send('Network.enable');
+await send('Network.setCacheDisabled', { cacheDisabled: true });
 /* 锁定视口尺寸，与命令行传入的一致；不锁的话结果没有可比性 */
 await send('Emulation.setDeviceMetricsOverride', {
   width: Number(w),
@@ -78,12 +85,21 @@ await send('Emulation.setDeviceMetricsOverride', {
   deviceScaleFactor: 1,
   mobile: Number(w) < 900,
 });
-await send('Page.navigate', { url });
+/* 时间戳参数：绕开 index.html 的缓存。
+   ⚠️ 必须插在 hash 之前 —— `#` 后面的内容浏览器根本不会发给服务器，
+   `.../#/resume?cb=123` 里的 cb 属于 hash 片段，服务器收不到。 */
+const [beforeHash, afterHash = ''] = url.split('#');
+const bust = beforeHash.includes('?')
+  ? `${beforeHash}&cb=${Date.now()}`
+  : `${beforeHash}?cb=${Date.now()}`;
+await send('Page.navigate', { url: afterHash ? `${bust}#${afterHash}` : bust });
 
 /* 等页面加载 + 首屏入场动画跑完 */
 await new Promise((r) => setTimeout(r, 3000));
 
-const out = await send('Runtime.evaluate', { expression, returnByValue: true });
+/* ⚠️ awaitPromise 必须开：表达式返回 Promise 时，不开这个只能拿到空壳
+   （{ } 之类），async 探针会静默什么都不做。 */
+const out = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
 console.log(JSON.stringify(out?.result?.value ?? out, null, 2));
 
 /* 可选：在锁定的视口下截图。headless 的 --window-size 与真实布局视口并不等价

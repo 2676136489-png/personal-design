@@ -100,6 +100,47 @@ const mutations = [
     expectFail: '分组不设 position（否则面板定位参照物变窄）',
     script: 'smoke-nav',
   },
+  {
+    /* 简历标注行退回项目详情页口径 —— 与 PDF 上的
+       「PHP / MySQL 全栈 · Vibe Coding」对不上，投递时会露馅。 */
+    name: '简历标注行退回 p.role（与 PDF 口径不一致）',
+    file: JSX,
+    from: '{resume.projectMeta?.[p.slug] || p.role}',
+    to: '{p.role}',
+    expectFail: '简历页显示「campus」的标注行',
+  },
+  {
+    name: '灯箱标题写死月份（简历更新后就不对上了）',
+    file: JSX,
+    from: 'caption={`卢柯宇简历 · ${resume.updated}`}',
+    to: 'caption="卢柯宇简历 · 2026 年 9 月"',
+    expectFail: '灯箱标题跟着 resume.updated 走（不能写死月份）',
+  },
+  {
+    name: '简历项目去掉 GitHub 链接（投递方得自己去搜仓库）',
+    file: JSX,
+    from: /\{p\.github \? \([\s\S]*?\) : null\}/,
+    to: '{null}',
+    expectFail: '简历页链到「campus」的仓库',
+  },
+  {
+    /* 分点描述退回项目详情页的引子 —— 与 PDF 上的技术描述不是一回事，
+       招聘方对照网站与 PDF 会发现对不上。 */
+    name: '简历分点退回 lede（与 PDF 口径不一致）',
+    file: JSX,
+    from: /\{highlights\.length \? \([\s\S]*?\) : null\}/,
+    to: '{p.lede ? <p className="resume-desc">{p.lede}</p> : null}',
+    expectFail: '简历页渲染全了「campus」的分点',
+  },
+  {
+    name: '删掉「个人优势」章节（PDF 里有，网站上没有）',
+    file: JSX,
+    /* ⚠️ 结尾不能锚死 \n\n —— 仓库里的行尾可能是 CRLF，
+       锚死换行会匹配不上（这一条最初就是这么写的，一直报「没匹配上原文」）。 */
+    from: /\s*<section className="resume-block" id="resume-advantages"[\s\S]*?<\/section>/,
+    to: '',
+    expectFail: '简历页有「个人优势」章节',
+  },
 ];
 
 /* from 可以是字符串或正则。正则带 g 标志时 lastIndex 会残留，

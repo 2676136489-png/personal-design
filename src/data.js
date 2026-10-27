@@ -37,8 +37,8 @@ export const IMAGE_SIZES = {
   '/media/project-research.webp': [1400, 933],
   '/media/project-station.webp': [1400, 960],
   '/media/project-wiki.webp': [1385, 950],
-  '/media/resume/resume-900.webp': [900, 1421],
-  '/media/resume/resume.webp': [1588, 2508],
+  '/media/resume/resume-900.webp': [900, 1274],
+  '/media/resume/resume.webp': [1588, 2248],
 };
 
 /* 传给 <img> 的 width/height；查不到就什么都不给，宁可缺也不要写错的比例。 */
@@ -70,10 +70,16 @@ export const profile = {
   heroIntro: '从算法到界面，从第一行代码到线上运行。我更在意它有没有被人真的用上。',
   email: 'luky2124@mails.jlu.edu.cn',
   phone: '15144167675',
-  city: '重庆',
+  /* 现在在校地与籍贯是两回事：简历上写的是「吉林 长春（籍贯 重庆）」。
+     只写「重庆」会被读成人在重庆，而学校在长春 —— 投递时这是个会被追问的点。 */
+  city: '吉林 长春',
+  hometown: '籍贯 重庆',
   school: '吉林大学',
   education: '吉林大学 · 计算机科学与技术',
   github: 'https://github.com/2676136489-png',
+  /* 简历里给的作品集地址是 GitHub Pages 那一版（自己托管、长期有效），
+     与站内作品集项目卡片上的链接保持一致。 */
+  portfolio: 'https://2676136489-png.github.io/personal-design/',
   status: '本科在读',
 };
 
@@ -81,17 +87,17 @@ export const profile = {
    成绩、学校、排名不放这里——那些属于简历和关于页（关于页的个人名片里已有教育信息）。 */
 export const heroFacts = [
   { label: '收录作品', value: '9 个' },
-  { label: '线上运行中', value: '4 个' },
+  { label: '线上运行中', value: '5 个' },
   { label: '校园圈子用户', value: '19 位' },
   { label: '自动化测试', value: '4 类' },
 ];
 
-/* 简历页数据：与 D:\UserData\Desktop\简历制作\简历\卢柯宇简历_2026新版 保持一致。
+/* 简历页数据：与 简历/卢柯宇简历_2026.md 逐条对齐。
    改简历时这里要同步改，否则线上简历页会和 PDF 对不上。 */
 export const resume = {
-  updated: '2026 年 9 月',
+  updated: '2026 年 10 月',
   summary:
-    '计算机科学与技术本科，独立交付多个 GitHub 项目，熟悉 C/C++ 算法系统，了解 HTML、CSS、JavaScript 与 React/TypeScript 等前端内容与 PHP/MySQL 全栈；熟练使用 GPT、DeepSeek、Kimi 等大模型完成需求拆解、架构设计、代码实现、测试与迭代，形成 AI 原生开发工作流。',
+    '计算机科学与技术本科。后端以 PHP / MySQL 与 Python / FastAPI 为主，独立完成过数据库设计、接口开发与服务器部署；前端使用 React、TypeScript 与 Vite。具备 AI Agent 工程经验，基于 LangGraph 实现过 7 节点研究工作流。',
   education: [
     {
       school: '吉林大学',
@@ -105,22 +111,68 @@ export const resume = {
     },
   ],
   skillGroups: [
-    ['Python 工程化', 'FastAPI、PostgreSQL/MySQL、Redis、Docker'],
-    ['LLM / RAG', 'Embedding、向量数据库、Rerank、Prompt Engineering'],
-    ['Agent', 'LangGraph、MCP、Tool Calling、Evaluation'],
-    ['算法 / 系统', 'C/C++、数据结构、机器学习、PyTorch、Transformer'],
-    ['后端', 'PHP、MySQL、REST API、Docker Compose、GitHub Actions'],
-    ['前端', 'HTML/CSS/JS、TypeScript、Vite、SSE'],
+    ['Agent / LLM', 'LangGraph（StateGraph、条件边、interrupt 中断）、Tool Calling、RAG（文档切块与检索）、提示词设计'],
+    ['语言', 'Python、PHP、C / C++、TypeScript / JavaScript、SQL'],
+    ['后端', 'FastAPI、MySQL、SQLite、REST API、SSE、Docker Compose、GitHub Actions'],
+    ['前端', 'React、TypeScript、Vite、Tailwind CSS、HTML / CSS / JavaScript'],
+    ['测试与部署', 'pytest、Vitest、PHPUnit、Playwright；Linux、Nginx / Apache、数据库迁移与备份'],
   ],
   honors: [
     { title: '大学英语四级（CET-4）', period: '' },
     { title: '吉林大学三等奖学金', period: '2024.09 - 2025.09' },
     { title: '吉林大学校优秀学生干部', period: '2024.09 - 2025.09' },
-    { title: '数学建模省三', period: '2025.08 - 2025.09' },
+    { title: '数学建模省三', period: '2025.09' },
   ],
   /* 简历页只列 PDF 里出现过的那几个项目，与投递版本保持一致。
-     顺序按简历原文：校园圈子 → Gomoku → 菜鸟驿站 → 个人作品集。 */
-  projectSlugs: ['campus', 'gomoku', 'station', 'portfolio'],
+     顺序按简历原文：校园圈子 → AI 研究 → 五子棋 → 个人作品集。 */
+  projectSlugs: ['campus', 'research', 'gomoku', 'portfolio'],
+  /* 简历上每个项目那一行「技术栈 · 参与方式」，与 PDF 逐字一致。
+     为什么不让简历页直接用 projects[].role：
+     那个字段是项目详情页的口径，讲清自己干了什么（「独立开发 · 架构与实现」）；
+     简历上写的是参与方式（「Vibe Coding」）。两边刻意不同，单列一份。 */
+  projectMeta: {
+    campus: 'PHP / MySQL 全栈 · Vibe Coding',
+    research: 'LangGraph + RAG · Vibe Coding',
+    gomoku: 'C++17 · jsoncpp',
+    portfolio: 'React 19 + Vite 6 · 独立开发',
+  },
+  /* 每个项目下的分点技术描述，与 PDF 上的项目经历逐条一致。
+     为什么不用 projects[].lede：
+     lede 是项目详情页的引子，讲的是「为什么做这个」，语气是散文；
+     简历要的是「做了什么、怎么做的」，读者是 HR 与面试官。
+     两份材料用同一段话，招聘方对照网站与 PDF 会发现对不上。 */
+  projectHighlights: {
+    campus: [
+      '独立完成前后端开发，包含实名审核、动态广场、站内私信、举报处理与运营后台，共 30 余个 PHP 文件。',
+      '在 Dify 上搭建校园问答助手，将站内查询接口注册为自定义工具，通过 Tool Calling 返回真实数据；对无结果的问题直接说明未找到，不生成虚构内容。',
+      '部署于自购云服务器（Nginx + PHP-FPM + MySQL），配置按环境分离；数据库采用版本化 SQL 迁移（001-018），并提供健康检查接口与每日备份脚本。',
+      '通过 Nginx 访问日志与 PHP 错误日志定位线上问题，完成登录限流、图片重编码、单设备登录等改进；CI 执行安全回归与 Playwright 端到端测试。',
+    ],
+    research: [
+      '针对反向代理缓存 SSE 响应导致进度停滞的问题，新增按事件 id 增量拉取的 JSON 接口；前端 6 秒未收到事件即切换为 2.5 秒轮询，保证进度持续更新。',
+      '实测发现本地哈希向量无法区分相关与无关内容（无关片段相似度达 0.47），因此取消按相似度阈值过滤的做法，改为在向量具备语义能力时才启用知识库检索，否则回退联网检索。',
+      '排查发现测试未隔离 SQLite 路径，且部署时将运行库一并打包，导致线上 942 条记录中 923 条来自测试；随后将测试库路径统一指向临时目录，并补充断言防止回归。',
+      '实现 7 节点研究流程（拆解、计划、检索、分析、验证、写作），证据不足时通过条件边回到检索节点；后端 237 个 pytest 用例通过。',
+    ],
+    gomoku: [
+      '采用棋形模板匹配评估落点：将活二、活三、冲四、活四、连五编码为 0/1 模式串并赋予分值，沿横、竖及两条斜线方向匹配棋形，计算候选点得分。',
+      '对每个候选点分别计算己方与对手落子得分，按「己方得分 + 对方得分 × 1.2」加权，兼顾进攻与防守。',
+      '候选点仅取已有棋子周围 2 格，将评估范围由 225 个格点缩小至十余个；对双活三、四三、双冲四等组合威胁单独加权，开局从四角 2×2 池中随机选取。',
+    ],
+    portfolio: [
+      '独立设计并开发个人作品集，收录 9 个项目，内容按问题背景、技术方案、实测数据与踩坑记录分章组织。',
+      '基于 React 19 与 Vite 6 实现，路由与页面转场为手写逻辑；图片经 WebP 压缩后整站体积控制在 1 MB 以内。',
+    ],
+  },
+  /* 「个人优势」四条，与 PDF 上的同名章节一致。
+     改简历时这四条要跟着改 —— 它替代了早期版本里
+     「9 个项目 / 237 个 pytest」那类自评数字。 */
+  advantages: [
+    '后端以 PHP / MySQL 与 Python / FastAPI 为主，独立完成过数据库设计、接口开发、服务器部署与日常运维。',
+    '前端使用 React、TypeScript 与 Vite，能独立完成多页面站点的开发、构建与双环境部署。',
+    '具备 AI Agent 工程经验：基于 LangGraph 实现状态机工作流、条件边回流与循环上限控制。',
+    '项目中使用 pytest、PHPUnit、Vitest、Playwright 编写单元测试与端到端测试，改动后先跑测试再提交。',
+  ],
 };
 
 /* ============================================================
@@ -141,7 +193,7 @@ export const resume = {
 const CATEGORY_META = {
   'Agent 系统': { slug: 'agent', blurb: '让模型真正参与交付，而不只是补全代码。' },
   'Web 应用': { slug: 'web', blurb: '能注册、能登录、能存数据的完整应用。' },
-  '算法系统': { slug: 'algo', blurb: '以棋形库与搜索为基础的 C++ 对弈程序。' },
+  '算法系统': { slug: 'algo', blurb: '以棋形库与加权估值为基础的 C++ 对弈程序。' },
   '系统设计': { slug: 'system', blurb: '从数据结构到业务闭环的独立系统实现。' },
   'Web 组件': { slug: 'component', blurb: '为已有平台补上缺失的那一块能力。' },
   '前端开发': { slug: 'frontend', blurb: '把信息层级和操作路径设计清楚。' },
@@ -236,7 +288,7 @@ export const navItems = [
     links: [
       { label: 'OpsPilot · AI 事故响应系统', href: '#/opspilot' },
       { label: 'AI 研究工作台', href: '#/research' },
-      { label: 'Transformer Gomoku 对弈 Bot', href: '#/gomoku' },
+      { label: '五子棋对弈 Bot', href: '#/gomoku' },
       { label: '菜鸟驿站快递管理系统', href: '#/station' },
       { label: 'iGEM Glass Wiki 插件', href: '#/wiki' },
       { label: '学习目标管理台', href: '#/checkin' },
@@ -370,6 +422,9 @@ export const campus = {
   name: '校园圈子',
   en: 'Campus Circle',
   site: 'https://www.lucky-campus.top',
+  /* 简历页要链到仓库，校园圈子是独立数据源，不在 projects 数组里，
+     所以 github 得自己带一份。 */
+  github: 'https://github.com/2676136489-png/campus',
   period: '2026.05 — 2026.08',
   role: '独立开发 · AI 辅助工程',
   stack: 'PHP · MySQL · SSE · Docker',
@@ -476,7 +531,7 @@ export const campus = {
       blocks: [
         {
           type: 'text',
-          body: '站内集成了一个 AI 助手，用自然语言就能查同学、查动态、查公告。它不是一个挂在页面角落的装饰——底层通过工具调用（Tool Calling）去查真实数据库，回答里会显示「已使用 queryCampusInfo」这样的调用痕迹。',
+          body: '站内的 AI 小助手用 Dify 搭建：把站内的查询接口注册成自定义工具，模型通过工具调用（Tool Calling）去查真实数据库，回答里会显示「已使用 queryCampusInfo」这样的调用痕迹。用自然语言就能查同学、查动态、查公告，查不到就直说没有。',
         },
         {
           type: 'shot',
@@ -1061,6 +1116,7 @@ rows: [
     description: '以打卡驱动目标推进的个人工作台。核心算法回答「还剩几天」，而不是「连续几天」。',
     role: '独立开发',
     stack: '单文件 HTML · React 18 · TypeScript · Tailwind',
+    site: 'https://study-goal-console-59328.app.workbuddy.host/',
     github: 'https://github.com/2676136489-png/Check-in-activity',
     lede: '做这个是因为自己管不住学习计划。习惯打卡 App 只关心「你连续打了 12 天」，从来不回答「按现在的速度，这本书还要几天读完」——前者能判断今晚要不要多花一小时，后者只能让人自我感觉良好。整个页面的核心就一个算法：取最近 7 天、按休息日规则剔掉不该算的天、算出日均速度，再拿「还剩多少」除以它。',
     metrics: [
@@ -1076,7 +1132,7 @@ rows: [
   {
     id: 'gomoku',
     slug: 'gomoku',
-    title: 'Transformer Gomoku 对弈 Bot',
+    title: '五子棋对弈 Bot',
     category: '算法系统',
     year: '2026',
     period: '2026.04 — 2026.06',
@@ -1549,7 +1605,7 @@ rows: [
     title: '个人作品集',
     category: '前端开发',
     year: '2026',
-    period: '2026.07 — 2026.08',
+    period: '2026.07 — 2026.10',
     image: asset('/media/project-dashboard.webp'),
     tag: 'React 19 · Vite 6',
     description: '从零搭建的响应式作品集，包含项目分页、主题切换、命令面板与实时状态组件。',
@@ -1876,7 +1932,7 @@ export const timeline = [
   },
   {
     year: '2026',
-    title: 'Transformer Gomoku 对弈 Bot',
+    title: '五子棋对弈 Bot',
     text: 'C++ 五子棋对弈 Bot，以棋形库加权估值覆盖复合威胁，并接入蒙特卡洛搜索。',
   },
   {
