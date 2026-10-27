@@ -149,6 +149,17 @@ const mutations = [
     expectFail: '简历页有「个人优势」章节',
   },
   {
+    /* 跨源契约的反例：网页简历与 PDF 讲同一件事，但说法不同。
+       改文案时漏改一边，两边测试都过，招聘方对照网站与 PDF 才发现对不上。
+       这条断言直接读 PDF 副本抽文字比对，所以改一边就会露馅。 */
+    name: '网页简历分点与 PDF 说法不一致（改一边漏一边）',
+    file: 'src/data.js',
+    from: '兼容反向代理环境，前端实时交互不再断。',
+    to: '兼容反向代理环境，保障前端实时交互稳定。',
+    expectFail: '简历分点与 PDF 逐条一致（网页不能多也不能少）',
+    script: 'smoke-render',
+  },
+  {
     /* 导航「作品」那一列改回手写 —— 改名后忘了同步就会露馅
        （作品列表叫「五子棋对弈引擎 Gomoku Match」，导航写「五子棋引擎」）。 */
     name: '作品导航列改回手写标签（改名后不同步）',
@@ -183,8 +194,12 @@ const mutations = [
     /* 时间线标题与作品列表标题不一致 —— 读者会以为是两个项目。 */
     name: '时间线标题与作品列表不一致',
     file: 'src/data.js',
-    from: "    title: '五子棋对弈引擎 Gomoku Match',\n    text: '从单文件 C++ Bot",
-    to: "    title: '五子棋对弈引擎',\n    text: '从单文件 C++ Bot",
+    /* ⚠️ 锚点必须落在**时间线**那一条上，不能只锚 title ——
+       作品列表里也有一条同名标题，String.replace 只替换首个匹配，
+       改到作品列表那条虽然也能让断言失配，但验的不是时间线这一处。
+       时间线条目前面有 year: '2026',，作品列表那条没有，用它定位。 */
+    from: "    year: '2026',\n    title: '五子棋对弈引擎 Gomoku Match',",
+    to: "    year: '2026',\n    title: '五子棋对弈引擎',",
     expectFail: '时间线的项目标题与作品列表逐字一致',
     script: 'smoke-render',
   },
@@ -198,6 +213,47 @@ const mutations = [
     to: 'docs/images/resume-page-missing.webp',
     expectFail: 'README 引用的配图都在仓库里（缺一张就是坏图）',
     script: 'smoke-render',
+  },
+  {
+    /* 禁用词回来了 —— 「打造」「助力」这类词是 AI 腔的直接信号。
+       反例挂在 src/data.js 的界面上，不动简历正文（简历要跟 PDF 逐字一致）。 */
+    name: '界面文案混入禁用词（AI 腔）',
+    file: 'src/data.js',
+    from: /tagline:\s*'([^']*)'/,
+    to: "tagline: '助力打造$1'",
+    expectFail: '文案禁用词',
+    script: 'check-copy',
+  },
+  {
+    /* 破折号当停顿号用 —— 中文技术文案里出现「——」说明作者没想好怎么断句。 */
+    name: '界面文案用破折号当停顿号',
+    file: 'src/data.js',
+    from: /tagline:\s*'([^']*)'/,
+    to: "tagline: '$1 —— 站点持续维护中'",
+    expectFail: '文案破折号',
+    script: 'check-copy',
+  },
+  {
+    /* 三段排比：「读需求、读代码、读文档」这种三句同头。
+       塞进 tagline 里，规则应该抓住。 */
+    name: '界面文案写成三段排比',
+    file: 'src/data.js',
+    from: /tagline:\s*'([^']*)'/,
+    to: "tagline: '读需求、读代码、读文档，三件事都做完了。'",
+    expectFail: '文案三段排比',
+    script: 'check-copy',
+  },
+  {
+    /* 简历正文里塞一个超长分句 —— 整句长是正常的，
+       但一个逗号之间超过 32 字读者要读两遍才断得开。
+       ⚠️ 反例必须真的超过阈值：只多写两三个字，
+       分句还是 26 字，规则当然不报，反例就白写了。 */
+    name: '简历分点塞进超长分句',
+    file: 'src/data.js',
+    from: '优化首屏性能：图片统一转 WebP 并输出两档尺寸，首屏资源体积控制在 1 MB 以内。',
+    to: '优化首屏性能：图片统一转 WebP 并输出两档尺寸，同时保证首屏加载的全部静态资源体积整体控制在 1 MB 以内以避免任何不必要的网络往返。',
+    expectFail: '文案分句过长',
+    script: 'check-copy',
   },
 ];
 

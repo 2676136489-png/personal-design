@@ -374,6 +374,43 @@ try {
   expect('每个 projectSlugs 都有分点描述',
     resumeSlugs.every((s) => Array.isArray(hlMap[s]) && hlMap[s].length > 0));
 
+  /* ⚠️ 跨源契约：网页简历与 PDF 必须逐条一致。
+     之前只查了 data.js 内部自洽（网页有这些字），没查 PDF 里有没有这些字 ——
+     改文案时漏改一处，两边就悄悄对不上了，而两边测试都过。
+     这条断言直接读站点里的 PDF 副本，抽出文字后逐条比对。 */
+  const PDF_PATH = fileURLToPath(new URL('../public/media/resume/lukeyu-resume.pdf', import.meta.url));
+  if (existsSync(PDF_PATH)) {
+    let pdfText = '';
+    try {
+      const { execFileSync } = await import('node:child_process');
+      pdfText = execFileSync('python', ['-c',
+        'import pymupdf,sys;d=pymupdf.open(sys.argv[1]);print("\\n".join(p.get_text() for p in d))',
+        PDF_PATH], { encoding: 'utf8' });
+    } catch (err) {
+      console.log('    （读 PDF 失败，跳过跨源比对:', err.message.slice(0, 80), '）');
+    }
+    if (pdfText) {
+      /* PDF 抽出来的文字里没有换行连着的地方，跨行会被拆开，
+         所以比对前把 PDF 文字里的所有空白去掉，网页侧也去掉。 */
+      const squash = (t) => t.replace(/\s+/g, '');
+      const pdfFlat = squash(pdfText);
+      const missInPdf = [];
+      for (const s of resumeSlugs) {
+        for (const h of (hlMap[s] || [])) {
+          if (!pdfFlat.includes(squash(h))) missInPdf.push(`${s}: ${h.slice(0, 24)}…`);
+        }
+      }
+      expect('简历分点与 PDF 逐条一致（网页不能多也不能少）', missInPdf.length === 0);
+      if (missInPdf.length) console.log('    PDF 里没有的分点:', missInPdf.join(' | '));
+
+      const advMiss = (data.resume.advantages || []).filter((a) => !pdfFlat.includes(squash(a)));
+      expect('个人优势与 PDF 逐条一致', advMiss.length === 0);
+      if (advMiss.length) console.log('    PDF 里没有的优势:', advMiss.join(' | '));
+    }
+  } else {
+    expect('站点里有简历 PDF 可供比对', false);
+  }
+
   /* 现在校地与籍贯是两回事：简历 PDF 写的是「吉林 长春（籍贯 重庆）」，
      网站名片只写「重庆」会被读成人在重庆，而学校在长春。
      ⚠️ 名片在首页的「关于」区，不在简历页上 —— 断言要查对页面。 */

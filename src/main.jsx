@@ -620,9 +620,9 @@ function WorkSection() {
     <section id="work" className="work">
       <div className="section-head section-head--center" data-reveal="mask">
         <p className="eyebrow">全部作品</p>
-        <h2>每一个都做完了。</h2>
+        <h2>九个作品，都写完了。</h2>
         <p className="section-lede">
-          算法、系统、Web 与视觉，覆盖从底层逻辑到最终呈现的完整链路。
+          算法、后端、前端、视觉各做了一些，能点开的都还在线上。
         </p>
       </div>
 
@@ -664,9 +664,9 @@ function SkillsSection() {
     <section id="skills" className="skills">
       <div className="section-head" data-reveal="mask">
         <p className="eyebrow">能力</p>
-        <h2>四个方向，一套做事方式。</h2>
+        <h2>四个方向，动手顺序一样。</h2>
         <p className="section-lede">
-          算法与工程打底，前端负责呈现，协作把想法推到落地。
+          算法和工程是底子，前端负责呈现，剩下的靠协作。
         </p>
       </div>
 
@@ -709,9 +709,9 @@ function AboutSection() {
     <section id="about" className="about">
       <div className="section-head" data-reveal>
         <p className="eyebrow">关于</p>
-        <h2>正在成为一个能独立交付的人。</h2>
+        <h2>想做一个能自己交付的人。</h2>
         <p className="section-lede">
-          从 2024 年进入吉林大学起，课堂之外的时间基本都花在了把想法做成项目上。
+          2024 年进吉林大学以后，课余时间基本都在把想法做成能跑的项目。
         </p>
       </div>
 
