@@ -229,6 +229,29 @@ try {
   expect('裁切落在图片容器上',
     /overflow\s*:\s*hidden/.test(rule(/\.stage-shot\s*\{([^}]*)\}/)));
 
+  /* ⚠️ 字段契约：main.jsx 里 resume.<字段>.map(...) 全部要求字段存在。
+     这一组断言必须放在**渲染之前** —— 字段整个没了的话，
+     resume.advantages.map(...) 会当场抛异常，脚本直接跳进 catch，
+     后面所有断言都跑不到，报告里只剩一句「渲染抛错」，
+     看不出到底是哪个字段缺失。
+
+     下面那些内容断言都带 `|| []` 兜底，字段整个没了也只会「内容为空」，
+     不一定拦得住 —— 所以这里单独钉一条：resume 上被 main.jsx 用到的字段必须真的存在。
+     改 data.js 时如果把某段整个删了，页面直接白屏。 */
+  const requiredResumeFields = ['advantages', 'education', 'skillGroups', 'honors', 'projectSlugs'];
+  const missingFields = requiredResumeFields.filter((k) => !Array.isArray(data.resume[k]));
+  expect('resume 上被渲染用到的字段都存在（缺一个就是白屏）', missingFields.length === 0);
+  if (missingFields.length) console.log('    缺失的字段:', missingFields.join(', '));
+  /* projectHighlights / projectMeta 是可选的（页面里有 ?.[...] 兜底），
+     但 projectSlugs 里每个 slug 都得有 —— 否则对应项目少一段内容。 */
+  const contractSlugs = data.resume.projectSlugs || [];
+  expect('projectHighlights 覆盖 projectSlugs',
+    contractSlugs.every((s) => Array.isArray(data.resume.projectHighlights?.[s])));
+  expect('projectMeta 覆盖 projectSlugs',
+    contractSlugs.every((s) => typeof data.resume.projectMeta?.[s] === 'string'));
+  /* profile.hometown 是名片上渲染的一行，缺了会显示 undefined。 */
+  expect('profile 有 hometown（名片要显示现居地 + 籍贯）', !!data.profile.hometown);
+
   const resumeHtml = render('#/resume');
   /* 导航是全站共享的，下拉里也列着所有项目名。
      所以「简历正文里没有某个项目」这类断言必须把 <main> 摘出来看，
@@ -316,6 +339,7 @@ try {
   const missingAdv = (data.resume.advantages || []).filter((a) => !resumeBody.includes(a));
   expect('个人优势四条都渲染出来了', missingAdv.length === 0);
   if (missingAdv.length) console.log('    没渲染的个人优势:', missingAdv.join(' | '));
+
 
   const hlMap = data.resume.projectHighlights || {};
   for (const s of resumeSlugs) {

@@ -29,7 +29,7 @@
 | [OpsPilot · AI 事故响应系统](https://opspilot-v2.app.workbuddy.host/) | Agent 系统 | 2026.09 — 2026.10 |
 | [AI 研究工作台](https://ebed98754f5b4e4abafe591d754aff06.app.workbuddy.host/) | Agent 系统 | 2026.09 — 2026.10 |
 | [校园圈子](https://www.lucky-campus.top) | Web 应用 | 2026.05 — 2026.08 |
-| 五子棋对弈 Bot | 算法系统 | 2026.04 — 2026.06 |
+| 五子棋对弈引擎 Gomoku Match | 算法系统 | 2026.04 — 2026.10 |
 | iGEM Glass Wiki 插件 | Web 组件 | 2026.07 |
 | 个人作品集 | 前端开发 | 2026.07 — 2026.10 |
 | 学习目标管理台 | Web 应用 | 2026.09 |
@@ -40,6 +40,12 @@
 
 <p align="center">
   <img src="docs/images/project-opspilot.webp" alt="项目详情页">
+</p>
+
+简历页与 PDF 是同一份材料的两份形态：网页上能直接读到项目要点，点开灯箱看排好版的原版。
+
+<p align="center">
+  <img src="docs/images/resume-page.webp" alt="简历页">
 </p>
 
 ## 结构
@@ -68,6 +74,8 @@ scripts/        构建部署、图片处理、验证脚本
 **`--base` 只在构建时传参**。主站在根目录、镜像站在子路径，前缀不同，所以不能写死在 `vite.config.js` 里。镜像站的构建由 `scripts/deploy-pages.mjs` 带上 `--base=/personal-design/`。
 
 **导航「按方向」那一列的链接从 `projects` 派生，不手写**。之前七项全写死成 `#/#work`（纯占位），点了只跳到全部作品概览。改成从 `categories` 现算：单个项目的方向直接指到详情页，多个项目的方向落到 `#/category/<slug>` 聚合页摆出全部项目。手写的坏处不只是链接错——往后新增项目改了 `category`，手写的那一列不会跟着变，两边就不一致了。`navItems` 里存的是 getter 而不是数组，因为模块加载时 `projects` 还没定义完，直接绑定拿到的是空数组。
+
+**导航「作品」那一列同样从 `projects` 派生**。手写过一版，项目改名后忘了同步：作品列表里叫「五子棋对弈引擎 Gomoku Match」，导航里还写着「五子棋引擎」，读者会以为是两个项目。断言只查 label 存在的话这一条照样通过 —— 所以额外加了一条逐字比对，标签与项目标题对不上就报出具体是哪一个。
 
 **`public/` 下的图片路径要用 `asset()` 包一层**（`src/data.js` 导出）。Vite 只改写 HTML 和 `import` 的路径，不碰 JS 字符串字面量，所以得自己拼 `import.meta.env.BASE_URL`。写死绝对路径在主站看着正常，到子路径下就整片 404。
 
@@ -124,11 +132,19 @@ node scripts/deploy-pages.mjs
 
 Pages 首次启用需在仓库 Settings → Pages 里把 Source 设为 `Deploy from a branch`，分支选 `gh-pages`、目录选 `/(root)`。
 
+**推到 GitHub 前先确认解析地址还通**。`scripts/deploy-pages.mjs` 与主仓库都配了 `http.curloptResolve`，把 `github.com` 固定到一个 IP 上——直连时绕开本地 DNS，避免解析到走不通的地址。但写死的 IP 会被 GitHub 换掉：固定的那个失效后，现象是**直连 21 秒超时、代理 502，两个方向同时不通**，很容易误判成网络故障。换地址前先单独验一下新 IP 通不通：
+
+```bash
+curl -o /dev/null -w "%{http_code}\n" --resolve github.com:443:<IP> --noproxy '*' https://github.com/
+```
+
+能返回 200 才写进配置。同时 `api.github.com` 与 `raw.githubusercontent.com` 走的是另一套解析，它们通不代表 git 那条路通——判断依据要分开看。
+
 ## 图片处理
 
 截图源图放 `media-src/`（PNG），由 `scripts/optimize-images.py` 统一转成 WebP 写到 `public/media/`，产物里不留 PNG。整站图片从 14.6MB 压到 1.9MB。
 
-README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓线上界面，`scripts/make-docs-images.py` 压成 WebP（`docs/images/`，289KB）。抓的是线上而不是本地构建——README 是给别人看的，展示的应该是访客实际打开的样子。
+README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓线上界面，`scripts/make-docs-images.py` 压成 WebP（`docs/images/`，5 张 444KB）。抓的是线上而不是本地构建——README 是给别人看的，展示的应该是访客实际打开的样子。
 
 ## 简历
 
@@ -140,13 +156,17 @@ PDF 是最终版，放在 `public/media/resume/lukeyu-resume.pdf`；页面上那
 
 项目列表由 `resume.projectSlugs` 决定，不要在页面上写死关键词。断言也从这个字段派生，改简历时只改数据不改断言。
 
+**简历字段的存在性要单独钉一条断言**。内容断言几乎都写成 `data.resume.advantages || []` 这种带兜底的写法，好处是某个字段暂时为空也不误报；代价是字段整个被删掉时，它只会说「内容为空」而不是「字段没了」。而页面里是 `resume.advantages.map(...)`——字段没了当场抛异常，简历页直接白屏，测试报告里只剩一句「渲染抛错」，看不出缺的是哪个字段。
+
+所以 `smoke-render.mjs` 里另有一组字段契约断言，放在**渲染之前**跑：先确认 `resume` 上被 `main.jsx` 用到的每个字段都存在，再去渲染。顺序很关键——契约断言放在渲染之后的话，字段缺失时脚本已经跳进 catch 了，后面的断言一条都跑不到。
+
 ## 验证
 
 四个 SSR 冒烟脚本。在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器。
 
 ```bash
-node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（142 条）
-node scripts/smoke-nav.mjs         # 导航下拉：SSR 结构 + 数据 + 样式契约（74 条）
+node scripts/smoke-render.mjs      # 页面渲染、文案、导航、数据结构契约（146 条）
+node scripts/smoke-nav.mjs         # 导航下拉：SSR 结构 + 数据 + 样式契约（75 条）
 node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约（43 条）
 node scripts/smoke-backtotop.mjs   # 回到顶部按钮显隐逻辑（31 条）
 ```
@@ -181,6 +201,7 @@ node scripts/category-nav-trace.mjs http://127.0.0.1:5199/      # 逐条真点�
 node scripts/category-guard.mjs http://127.0.0.1:5199/          # 聚合页边界：不存在的 slug、点卡片跳转
 node scripts/shot-category.mjs http://127.0.0.1:5199/ 9333 agent 1440  # 截方向聚合页
 node scripts/shot-resume.mjs http://127.0.0.1:5199/#/resume 9222 1440  # 截简历页与预览图
+node scripts/probe-resume.mjs http://127.0.0.1:5199/#/resume          # 量简历页：章节、优势条数、分点数、链接数、横向溢出
 node scripts/shoot-docs.mjs 9333                              # 抓 README 配图
 ```
 

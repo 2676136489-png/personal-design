@@ -37,8 +37,8 @@ export const IMAGE_SIZES = {
   '/media/project-research.webp': [1400, 933],
   '/media/project-station.webp': [1400, 960],
   '/media/project-wiki.webp': [1385, 950],
-  '/media/resume/resume-900.webp': [900, 1421],
-  '/media/resume/resume.webp': [1588, 2508],
+  '/media/resume/resume-900.webp': [900, 1274],
+  '/media/resume/resume.webp': [1588, 2248],
 };
 
 /* 传给 <img> 的 width/height；查不到就什么都不给，宁可缺也不要写错的比例。 */
@@ -70,7 +70,10 @@ export const profile = {
   heroIntro: '从算法到界面，从第一行代码到线上运行，关注实现最终是否被真实使用。',
   email: 'luky2124@mails.jlu.edu.cn',
   phone: '15144167675',
-  city: '重庆',
+  city: '吉林 长春',
+  /* 现在校地与籍贯是两回事：简历上写的是「吉林 长春（籍贯 重庆）」。
+     只写「重庆」会被读成人在重庆，而学校在长春 —— 投递时这是个会被追问的点。 */
+  hometown: '籍贯 重庆',
   school: '吉林大学',
   education: '吉林大学 · 计算机科学与技术',
   github: 'https://github.com/2676136489-png',
@@ -116,11 +119,61 @@ export const resume = {
     { title: '大学英语四级（CET-4）', period: '' },
     { title: '吉林大学三等奖学金', period: '2024.09 - 2025.09' },
     { title: '吉林大学校优秀学生干部', period: '2024.09 - 2025.09' },
-    { title: '数学建模省三', period: '2025.08 - 2025.09' },
+    { title: '全国大学生数学建模竞赛省级三等奖', period: '2025.09' },
+  ],
+  /* 「个人优势」四条，与 PDF 上的同名章节逐条一致。
+     简历源文件改了这一节，这里要同步改 —— 网页与 PDF 是同一份材料的两份形态，
+     招聘方对照着看会对不上。 */
+  advantages: [
+    '后端以 PHP / MySQL 与 Python / FastAPI 为主，具备表结构设计、接口开发与线上问题定位经验。',
+    '具备 AI 应用工程经验：LangGraph 状态机编排、Dify 自定义工具接入、RAG 检索与降级设计。',
+    '擅长 LLM Agent 分层工程设计，确定性逻辑由程序实现、大模型负责候选取舍与解释，方案以实测数据验证。',
+    '使用 pytest、PHPUnit、Playwright 与浏览器 DevTools 协议验证，界面问题以量化指标判定。',
   ],
   /* 简历页只列 PDF 里出现过的那几个项目，与投递版本保持一致。
      顺序按简历原文：校园圈子 → AI 研究 → 五子棋 → 个人作品集。 */
   projectSlugs: ['campus', 'research', 'gomoku', 'portfolio'],
+
+  /* 简历上每个项目那一行「技术栈 · 参与方式」，与 PDF 逐字一致。
+     为什么不让简历页直接用 projects[].role：
+     那个字段是项目详情页的口径，讲清自己干了什么（「独立开发 · 架构与实现」）；
+     简历上写的是参与方式（「Vibe Coding」）。两边刻意不同，单列一份。 */
+  projectMeta: {
+    campus: 'PHP / MySQL 全栈 · Vibe Coding',
+    research: 'LangGraph + RAG · 237 项 pytest',
+    gomoku: 'Python / C++ · 博弈搜索与评估',
+    portfolio: 'React 19 + Vite 6 · 独立开发',
+  },
+  /* 每个项目下的分点技术描述，与 PDF 上的项目经历逐条一致。
+     为什么不用 projects[].lede：
+     lede 是项目详情页的引子，语气是散文，讲的是「为什么做这个」；
+     简历要的是「做了什么、怎么做的」，读者是 HR 与面试官。
+     两份材料用同一段话，招聘方对照网站与 PDF 会发现对不上。 */
+  projectHighlights: {
+    campus: [
+      '独立完成高校实名社交平台全栈开发，交付 54 个页面脚本与 27 个公共模块（PHP 约 1.3 万行），覆盖实名审核、动态广场、站内私信、举报处理与运营后台，平台已上线运行并服务 19 名实名用户。',
+      '设计多层安全防护体系：数据访问统一使用 MySQLi 预处理语句防注入，鉴权由 bcrypt、CSRF、验证码与登录频控四层构成，管理员额外启用 TOTP 二次认证，支持单设备登录与敏感操作回滚。',
+      '封装学生端 / 管理端两个独立查询接口，经 API Key 校验后注册为 Dify 对话应用的自定义工具，使大模型可直接调用业务数据；管理端写操作在接口层二次校验角色，权限判定不依赖模型输出。',
+      '搭建版本化数据库管理，以 18 个 SQL 迁移推进表结构演进（含索引优化）；完成云服务器 Nginx + PHP-FPM 部署（环境隔离、健康检查、每日备份），并以 PHPUnit 与 17 组 Playwright 用例覆盖登录、私信与后台改密，保障线上稳定运行。',
+    ],
+    research: [
+      '基于 LangGraph StateGraph 实现证据优先的 AI 研究工作流，将流程建模为「拆解 → 计划 → 检索 → 分析 → 核查」有向状态图，核查未通过经条件边回流重检（迭代与核查均设上限），报告生成前以 interrupt 中断等待人工确认，约束大模型生成过程。',
+      '解决长任务网关超时问题：图执行转入后台异步任务、接口即时返回；前端以 SSE 流式输出为主，配置 6 秒看门狗超时后降级为 2.5 秒轮询，兼容反向代理环境，保障前端实时交互稳定。',
+      '发现并修正固定相似度阈值的缺陷（无关片段 0.473 高于相关片段 0.441），设计自适应检索降级策略：检索器不具备语义能力时回退联网检索并标注降级原因，缓解大模型幻觉。',
+      '实现证据溯源机制：报告结论强制绑定证据编号，未标注内容在局限说明中标记为「未经证据核对」；编写 237 项 pytest 用例覆盖状态流转、中断恢复与边界场景，保障 Agent 状态机可靠。',
+    ],
+    gomoku: [
+      '实现遵循国际连珠规则的五子棋对弈引擎，完成「三三 / 四四 / 长连」禁手递归判定（递归深度两层）与落点中心 11 格线递归棋形识别，重构增量评分只重算半径 4 内受影响的子，深度 5 单次搜索 2195 个节点、耗时 1.23 秒。',
+      '采用 Negamax + alpha-beta 剪枝，结合 Zobrist 置换表、迭代加深与逐层递减的展开宽度，时间预算硬性生效、超时回退上一层完整结果；连五与堵五等确定性规则前置，避免深度不足漏算必胜与必防点。',
+      '设计 LLM Agent 分层架构：由引擎输出带攻防棋形标签的可信候选点，大模型仅在候选集合内做风格取舍并给出解释，越界、超时或非 JSON 输出统一回退引擎首选；难度通过近优候选加权随机实现，兼顾交互体验与决策确定性。',
+      '训练 2881 参数落点价值网络（34 维特征 → 48 → 24 → 1，教师蒸馏 + 三轮 DAgger），与教师选点一致率 0.927，完成搜索先验对照实验（整局对贪心算法 1 胜 23 负）；配套 387 项自动化测试覆盖规则、搜索与接口。',
+    ],
+    portfolio: [
+      '从零搭建个人作品集站点，手写 hash 路由与页面转场，不引入第三方路由库与 UI 组件库；按「背景 / 方案 / 实测数据」结构化组织 9 个项目详情，沉淀完整开发案例。',
+      '适配多环境部署：一套源码按 base 与静态资源路径切换，同时发布至 GitHub Pages 子路径与云托管根路径，两处内容保持一致。',
+      '优化首屏性能：图片统一转 WebP 并输出两档尺寸，首屏资源体积控制在 1 MB 以内。',
+    ],
+  },
 };
 
 /* ============================================================
@@ -181,6 +234,11 @@ export const getCategoryNavLinks = () =>
       count: c.projects.length,
     }));
 
+/* 导航「作品」那一列的条目：按 projects 逐条列，标签取项目标题。
+   同样必须是函数 —— 理由见上面 getCategoryNavLinks 的说明。 */
+export const getProjectNavLinks = () =>
+  projects.map((p) => ({ label: p.title, href: `#/${p.slug}` }));
+
 /* 导航结构。
    有 columns 的项在悬停/聚焦时展开全宽面板（苹果官网那种）。
    面板由若干列组成，每列一个标题 + 一组条目；每组再细分成
@@ -233,16 +291,14 @@ export const navItems = [
       {
         title: '作品',
     featured: [{ label: '全部作品', href: '#/#work' }],
-    links: [
-      { label: 'OpsPilot · AI 事故响应系统', href: '#/opspilot' },
-      { label: 'AI 研究工作台', href: '#/research' },
-      { label: '五子棋引擎', href: '#/gomoku' },
-      { label: '菜鸟驿站快递管理系统', href: '#/station' },
-      { label: 'iGEM Glass Wiki 插件', href: '#/wiki' },
-      { label: '学习目标管理台', href: '#/checkin' },
-      { label: '个人作品集', href: '#/portfolio' },
-      { label: '校园服务视觉系统', href: '#/identity' },
-    ],
+    /* getter：这一列按 projects 逐条列，不能手写。
+       手写过一版，改名后忘了同步（作品列表叫「五子棋对弈引擎 Gomoku Match」，
+       导航里还写着「五子棋引擎」），读者会以为是两个项目。
+       跟「按方向」那列同理：navItems 求值时 projects 还没定义完，
+       所以要存 getter，读取时才现算。 */
+    get links() {
+      return getProjectNavLinks();
+    },
   },
   {
     title: '按方向',
@@ -370,6 +426,9 @@ export const campus = {
   name: '校园圈子',
   en: 'Campus Circle',
   site: 'https://www.lucky-campus.top',
+  /* 简历页要链到仓库，校园圈子是独立数据源，不在 projects 数组里，
+     所以 github 得自己带一份。 */
+  github: 'https://github.com/2676136489-png/campus',
   period: '2026.05 — 2026.08',
   role: '独立开发 · AI 辅助工程',
   stack: 'PHP · MySQL · SSE · Docker',
@@ -1905,7 +1964,7 @@ export const timeline = [
   },
   {
     year: '2026',
-    title: '五子棋对弈引擎',
+    title: '五子棋对弈引擎 Gomoku Match',
     text: '从单文件 C++ Bot 重写成 Python 引擎：连珠禁手判定、递归棋形识别、alpha-beta 搜索，外加一层只在候选点里取舍的 Agent。',
   },
   {

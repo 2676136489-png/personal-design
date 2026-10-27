@@ -6,13 +6,16 @@ WebP 视觉无损、体积约为 PNG 的 1/8，README 里看不出差别。
 只用其中 4 张。README 是给人读的，图片太多反而没人往下看：
 首屏深色、首屏浅色、作品网格、项目详情——够说明长什么样了。
 其余留在 screenshots/（已 gitignore），需要时重抓。
+
+（2026-10 起加了一张简历页。简历是这轮改动最大的部分，
+网页简历与 PDF 是同一份材料的两份形态，给 README 一张能对上。）
 """
 from pathlib import Path
 
 from PIL import Image
 
 SRC = Path("docs/images")
-KEEP = ["home-dark", "home-light", "work-grid", "project-opspilot"]
+KEEP = ["home-dark", "home-light", "work-grid", "project-opspilot", "resume-page"]
 # 2x 截图宽 2880，README 里的显示宽度最多 900px 左右，1600 足够
 TARGET_W = 1600
 

@@ -12,9 +12,11 @@ import { execFileSync } from 'node:child_process';
 
 const CSS = 'src/styles.css';
 const JSX = 'src/main.jsx';
+const DATA = 'src/data.js';
 
 const css = readFileSync(CSS, 'utf8');
 const jsx = readFileSync(JSX, 'utf8');
+const data = readFileSync(DATA, 'utf8');
 
 /* 每条：名字 / 目标文件 / 坏写法（要匹配原文，可为正则）/ 换成的坏写法 / 预期 FAIL 的断言名 */
 const mutations = [
@@ -141,6 +143,46 @@ const mutations = [
     to: '',
     expectFail: '简历页有「个人优势」章节',
   },
+  {
+    /* 导航「作品」那一列改回手写 —— 改名后忘了同步就会露馅
+       （作品列表叫「五子棋对弈引擎 Gomoku Match」，导航写「五子棋引擎」）。 */
+    name: '作品导航列改回手写标签（改名后不同步）',
+    file: 'src/data.js',
+    from: /get links\(\) \{\n      return getProjectNavLinks\(\);\n    \}/,
+    to: 'get links() {\n      return [{ label: \'五子棋引擎\', href: \'#/gomoku\' }];\n    }',
+    expectFail: '作品分组的标签与项目标题逐字一致',
+    script: 'smoke-nav',
+  },
+  {
+    /* data.js 里整段删掉 resume.advantages。
+       页面在 main.jsx 里是 resume.advantages.map(...) —— 字段没了直接抛异常，
+       简历页白屏。之前那组断言都带 `|| []` 兜底，只会说「内容为空」，
+       不一定拦得住，所以另加了一条字段契约断言。 */
+    name: '删掉 resume.advantages 字段（简历页会白屏）',
+    file: 'src/data.js',
+    from: /  advantages: \[[\s\S]*?\n  \],\n/,
+    to: '',
+    expectFail: 'resume 上被渲染用到的字段都存在（缺一个就是白屏）',
+    script: 'smoke-render',
+  },
+  {
+    /* profile.hometown 缺了，名片上会显示「重庆 · undefined」。 */
+    name: '删掉 profile.hometown（名片显示 undefined）',
+    file: 'src/data.js',
+    from: /\n  hometown: '籍贯 重庆',/,
+    to: '',
+    expectFail: 'profile 有 hometown（名片要显示现居地 + 籍贯）',
+    script: 'smoke-render',
+  },
+  {
+    /* 时间线标题与作品列表标题不一致 —— 读者会以为是两个项目。 */
+    name: '时间线标题与作品列表不一致',
+    file: 'src/data.js',
+    from: "    title: '五子棋对弈引擎 Gomoku Match',\n    text: '从单文件 C++ Bot",
+    to: "    title: '五子棋对弈引擎',\n    text: '从单文件 C++ Bot",
+    expectFail: '时间线的项目标题与作品列表逐字一致',
+    script: 'smoke-render',
+  },
 ];
 
 /* from 可以是字符串或正则。正则带 g 标志时 lastIndex 会残留，
@@ -200,6 +242,7 @@ try {
 } finally {
   writeFileSync(CSS, css);
   writeFileSync(JSX, jsx);
+  writeFileSync(DATA, data);
 }
 
 console.log(bad ? `\n${bad} 条反例没被拦住，断言有问题` : '\n全部反例都被拦住了');

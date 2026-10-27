@@ -127,6 +127,17 @@ await evaluate(`(() => {
 await wait(1400);
 await shoot('about-section');
 
+// 简历页：网页简历与 PDF 是同一份材料的两份形态，给 README 一张
+await goto('#/resume');
+await evaluate(`(() => {
+  // 滚到「项目经历」标题上方一点，让标题和前两个项目都进画面
+  const el = document.querySelector('#resume-projects');
+  if (el) window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 90);
+  return true;
+})()`);
+await wait(1400);
+await shoot('resume-page');
+
 console.log('尺寸：', W, 'x', 900, '（2x 像素密度）');
 ws.close();
 process.exit(0);

@@ -70,6 +70,18 @@ if (!inited) {
   run(`git remote set-url origin ${REMOTE}`, outDir);
 }
 
+/* 固定 github.com 的解析地址。
+   主仓库的 .git/config 里有这条，dist-pages 这个独立仓库没有 ——
+   缺了它时走代理会 502，直连又 21 秒超时，两个方向都不通。
+   每次重建 dist-pages 都会丢一次配置，所以在这里补上。
+
+   ⚠️ 这个 IP 会失效。GitHub 的边缘节点换过几轮，写死的那个（140.82.112.3）
+   已经连不上了 —— 表现是直连 21 秒超时、代理 502，两个方向同时不通，
+   很容易误判成「网络坏了」。换 IP 前先用这个确认新地址通不通：
+     curl -o /dev/null -w "%{http_code}" --resolve github.com:443:<IP> --noproxy '*' https://github.com/
+   实测可用：20.27.177.113 / 140.82.113.3 / 140.82.114.3 / 20.233.83.145 */
+run('git config http.curloptResolve "github.com:443:20.27.177.113"', outDir);
+
 run(`git checkout -B ${BRANCH}`, outDir);
 run('git add -A', outDir);
 

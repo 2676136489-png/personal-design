@@ -1,0 +1,18 @@
+# 统一换行符：入库一律 LF，检出也是 LF。
+#
+# 为什么写这条：src/data.js 曾以 CRLF 入库，而仓库里其他文件都是 LF。
+# 提交时 autocrlf 只在部分环境生效，那份文件落成了 CRLF，于是以后每次改动
+# 都会被 git 判成「整文件重写」—— 明明只改了几十行，diff 却铺满两千行，
+# 真要复核改动时根本看不出改了什么。
+#
+# 钉死 eol=lf 之后，行尾由仓库自己决定，不再看提交那台机器的配置。
+* text=auto eol=lf
+
+# 图片与 PDF 是二进制，别让 git 试着去改它们的字节。
+*.png binary
+*.webp binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary

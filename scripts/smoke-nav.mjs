@@ -158,6 +158,17 @@ try {
     '作品分组覆盖全部项目详情页',
     projectSlugs.every((slug) => workLinks.some((c) => c.href === `#/${slug}`)),
   );
+  /* ⚠️ 光查 href 不够 —— 改过项目名之后导航里还留着旧名
+     （作品列表叫「五子棋对弈引擎 Gomoku Match」，导航写「五子棋引擎」），
+     读者会以为是两个项目。标签也要逐字对得上。 */
+  const mismatchedLabels = data.projects
+    .filter((p) => {
+      const entry = workLinks.find((c) => c.href === `#/${p.slug}`);
+      return entry && entry.label !== p.title;
+    })
+    .map((p) => `${p.title}（导航写的是「${workLinks.find((c) => c.href === `#/${p.slug}`).label}」）`);
+  expect('作品分组的标签与项目标题逐字一致', mismatchedLabels.length === 0);
+  if (mismatchedLabels.length) console.log('    对不上的:', mismatchedLabels.join(', '));
 
   /* ---------- 2. 数据结构 ---------- */
 
