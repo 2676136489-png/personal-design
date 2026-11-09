@@ -115,10 +115,10 @@ export const resume = {
     ['测试与部署', 'pytest、PHPUnit、Playwright、DevTools 协议；Docker Compose、GitHub Actions、Apache 部署、版本化迁移、健康检查与每日备份'],
   ],
   honors: [
-    { title: '大学英语四级（CET-4）', period: '' },
     { title: '吉林大学三等奖学金', period: '2024.09 - 2025.09' },
     { title: '吉林大学校优秀学生干部', period: '2024.09 - 2025.09' },
     { title: '全国大学生数学建模竞赛省级三等奖', period: '2025.09' },
+    { title: '大学英语四级（CET-4）', period: '' },
   ],
   /* 「个人优势」四条，取自简历源（简历制作/outputs/卢柯宇简历_2026.md）的
      个人简述段，一句一条。断言要求每条都能在新 PDF 抽出的文本里逐字找到，
