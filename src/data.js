@@ -108,11 +108,11 @@ export const resume = {
   ],
   skillGroups: [
     ['Agent / LLM', 'LangGraph（StateGraph、条件边、interrupt 中断）、Dify 自定义工具、Tool Calling、RAG 检索与降级'],
-    ['语言', 'Python、PHP、C / C++、TypeScript / JavaScript、SQL'],
-    ['后端', 'FastAPI、MySQL、SQLite、REST、SSE / WebSocket、Docker Compose、GitHub Actions'],
+    ['语言', 'Python、PHP、SQL'],
+    ['后端', 'FastAPI、MySQL、SQLite、REST、SSE'],
     ['前端', 'React 19、TypeScript、Vite、原生 CSS、Canvas / SVG'],
-    ['算法', 'alpha-beta 搜索、置换表与迭代加深、棋形评估、逻辑回归标定'],
-    ['测试与部署', 'pytest、PHPUnit、Playwright；Apache（mod_php）、版本化迁移、健康检查与备份'],
+    ['算法', 'alpha-beta 搜索、置换表与迭代加深、棋形识别、落点价值网络与可学习贪心的训练'],
+    ['测试与部署', 'pytest、PHPUnit、Playwright、DevTools 协议；Docker Compose、GitHub Actions、Apache 部署、版本化迁移、健康检查与每日备份'],
   ],
   honors: [
     { title: '大学英语四级（CET-4）', period: '' },
