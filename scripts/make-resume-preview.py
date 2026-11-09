@@ -18,8 +18,9 @@ import pymupdf
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
+# 简历源在 简历制作/outputs/（2026-11 目录整理后从 简历/ 迁移过来）
 SRC_PDF = Path(
-    r"D:\C-Drive-Move\UserData\DeskBox\DeskBox\简历制作\简历\卢柯宇简历_2026.pdf"
+    r"D:\C-Drive-Move\UserData\DeskBox\DeskBox\简历制作\outputs\卢柯宇简历_2026.pdf"
 )
 OUT_DIR = ROOT / "public" / "media" / "resume"
 STAGE = ROOT / "media-src" / "resume-preview.png"

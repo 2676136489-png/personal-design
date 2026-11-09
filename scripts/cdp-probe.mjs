@@ -15,7 +15,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const [, , url = 'http://127.0.0.1:5199/', w = '414', h = '900', exprFile, shot] = process.argv;
-const PORT = 9222;
+/* 9222 上可能跑着日常 Edge；专用 headless 实例用 CDP_PORT 指过去（9333）。 */
+const PORT = process.env.CDP_PORT || 9222;
 const base = `http://127.0.0.1:${PORT}`;
 
 const DEFAULT_EXPR = `(() => {

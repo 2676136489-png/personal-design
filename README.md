@@ -29,7 +29,7 @@
 | [OpsPilot · AI 事故响应系统](https://opspilot-v2.app.workbuddy.host/) | Agent 系统 | 2026.09 — 2026.10 |
 | [AI 研究工作台](https://ebed98754f5b4e4abafe591d754aff06.app.workbuddy.host/) | Agent 系统 | 2026.09 — 2026.10 |
 | [校园圈子](https://www.lucky-campus.top) | Web 应用 | 2026.05 — 2026.08 |
-| 五子棋对弈引擎 Gomoku Match | 算法系统 | 2026.04 — 2026.10 |
+| [五子棋对弈引擎 Gomoku Match](https://gomoku-match.app.workbuddy.host/?sharecode=MJAKMJUVAA) | 算法系统 | 2026.04 — 2026.11 |
 | iGEM Glass Wiki 插件 | Web 组件 | 2026.07 |
 | 个人作品集 | 前端开发 | 2026.07 — 2026.10 |
 | 学习目标管理台 | Web 应用 | 2026.09 |

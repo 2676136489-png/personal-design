@@ -18,7 +18,7 @@
  * 用法：node scripts/hover-trace.mjs [url]
  */
 const url = process.argv[2] || 'http://127.0.0.1:5199/';
-const base = 'http://127.0.0.1:9222';
+const base = `http://127.0.0.1:${process.env.CDP_PORT || 9222}`;
 
 const target = await (
   await fetch(`${base}/json/new?${encodeURIComponent(url)}`, { method: 'PUT' })

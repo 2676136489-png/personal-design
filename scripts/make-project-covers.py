@@ -33,6 +33,8 @@ JOBS = [
     ("project-research-raw.png", "project-research.webp", None),
     # docs/app-board-desktop.png：标题在 y≈30，柱状图收在 y≈880，之下全空白
     ("project-checkin-raw.png", "project-checkin.webp", (0.0, 0.008, 1.0, 0.345)),
+    # 2026-11 重拍：大厅页（登录后），水墨山景 + 模块卡
+    ("project-gomoku-raw.png", "project-gomoku.webp", None),
 ]
 
 
