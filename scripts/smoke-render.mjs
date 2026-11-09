@@ -125,7 +125,6 @@ try {
   expect('首页含欢迎语', home.includes(profile.welcome));
   expect('首页含 tagline', home.includes(profile.tagline));
   expect('首页 h1 不再是姓名', !home.includes('<h1>卢柯宇</h1>'));
-  expect('首页含 heroIntro', home.includes(profile.heroIntro));
 
   // 首屏数据条：内容来自 heroFacts，且只讲项目，不放成绩与学校
   const { heroFacts } = data;

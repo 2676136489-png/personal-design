@@ -485,10 +485,7 @@ function Hero() {
         <h1 data-intro style={{ '--i': 1 }}>
           <SplitText text={profile.tagline} delay={180} step={26} />
         </h1>
-        <p className="hero-lede" data-intro style={{ '--i': 2 }}>
-          {profile.heroIntro}
-        </p>
-        <div className="hero-actions" data-intro style={{ '--i': 3 }}>
+        <div className="hero-actions" data-intro style={{ '--i': 2 }}>
           <a className="btn btn--solid" data-magnetic href="#/campus" onClick={(e) => { e.preventDefault(); navigate('/campus'); }}>
             查看校园圈子
             <ArrowRight size={16} />
@@ -500,7 +497,7 @@ function Hero() {
         </div>
       </div>
 
-      <div className="hero-facts" data-intro style={{ '--i': 4 }}>
+      <div className="hero-facts" data-intro style={{ '--i': 3 }}>
         {heroFacts.map((item) => (
           <div key={item.label}>
             <strong>{item.value}</strong>

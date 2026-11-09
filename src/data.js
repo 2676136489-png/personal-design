@@ -67,7 +67,6 @@ export const profile = {
   initials: 'LKY',
   welcome: '欢迎来到我的个人网站',
   tagline: '把还在纸上的想法，做成能跑起来的东西。',
-  heroIntro: '写后端、画界面、部署上线，看代码最后有没有人真的用。',
   email: 'luky2124@mails.jlu.edu.cn',
   phone: '15144167675',
   city: '吉林 长春',

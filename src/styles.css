@@ -582,21 +582,14 @@ img {
   letter-spacing: -0.015em;
 }
 
-.hero-lede {
-  max-width: 640px;
-  margin: 26px auto 0;
-  color: var(--muted);
-  font-size: 17px;
-  line-height: 1.6;
-}
-
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin-top: 26px;
+  /* 副标题删掉后标题直接接按钮，间距补回一档（原来中间隔一行 hero-lede）。 */
+  margin-top: 36px;
 }
 
 .hero-facts {
