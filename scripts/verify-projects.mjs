@@ -79,17 +79,17 @@ const home = await evaluate(`(() => {
   const imgs = [...main.querySelectorAll('img')];
   return {
     heroFacts: [...main.querySelectorAll('.hero-facts li, .hero-facts > div')].map(n => n.textContent.trim()).filter(Boolean),
-    /* 精选截图网格（.stage-item）与作品卡片（.work-card）是两套东西，
-       只有一个占满整行、另一个两两成对。数错类会误判成「项目没渲染出来」。 */
+    /* 精选截图网格（.stage-item）与作品画廊（slider 屏）是两套东西。
+       作品画廊在 #work 内，每屏的标题在 [data-slide] h3 里。 */
     stage: main.querySelectorAll('.stage-item').length,
-    workCards: [...main.querySelectorAll('.work-card h3')].map(h => h.textContent.trim()),
+    slides: [...main.querySelectorAll('#work [data-slide] h3')].map(h => h.textContent.trim()),
     brokenImgs: imgs.filter(i => i.complete && i.naturalWidth === 0).map(i => i.getAttribute('src')),
     totalImgs: imgs.length,
   };
 })()`);
 console.log('【首页】');
-console.log('  精选截图:', home.stage, '张 | 作品卡片:', home.workCards.length, '个');
-console.log('  作品列表:', home.workCards.join(' / '));
+console.log('  精选截图:', home.stage, '张 | 作品画廊:', home.slides.length, '屏');
+console.log('  作品列表:', home.slides.join(' / '));
 console.log('  首屏数据条:', home.heroFacts.join(' | '));
 console.log('  图片:', home.totalImgs, '张, 加载失败', home.brokenImgs.length, '张', home.brokenImgs);
 

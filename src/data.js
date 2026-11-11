@@ -421,6 +421,8 @@ export const mailServices = [
    ============================================================ */
 
 export const campus = {
+  accent: '#C98B9E',
+  accentInk: 'dark',
   slug: 'campus',
   name: '校园圈子',
   en: 'Campus Circle',
@@ -699,6 +701,8 @@ export const campus = {
 export const projects = [
   {
     id: 'opspilot',
+    accent: '#20304A',
+    accentInk: 'light',
     slug: 'opspilot',
     title: 'OpsPilot · AI 事故响应系统',
     category: 'Agent 系统',
@@ -942,6 +946,8 @@ export const projects = [
   },
   {
     id: 'research',
+    accent: '#8FA98F',
+    accentInk: 'dark',
     slug: 'research',
     title: 'AI 研究工作台',
     category: 'Agent 系统',
@@ -1148,6 +1154,8 @@ rows: [
   },
   {
     id: 'checkin',
+    accent: '#E4B34A',
+    accentInk: 'dark',
     slug: 'checkin',
     title: '学习目标管理台',
     category: 'Web 应用',
@@ -1173,6 +1181,8 @@ rows: [
   },
   {
     id: 'gomoku',
+    accent: '#3E4B3C',
+    accentInk: 'light',
     slug: 'gomoku',
     title: '五子棋对弈引擎 Gomoku Match',
     category: '算法系统',
@@ -1456,6 +1466,8 @@ rows: [
   },
   {
     id: 'station',
+    accent: '#D9804F',
+    accentInk: 'dark',
     slug: 'station',
     title: '菜鸟驿站快递管理系统',
     category: '系统设计',
@@ -1611,6 +1623,8 @@ rows: [
   },
   {
     id: 'wiki',
+    accent: '#8B9BC4',
+    accentInk: 'dark',
     slug: 'wiki',
     title: 'iGEM Glass Wiki 插件',
     category: 'Web 组件',
@@ -1741,6 +1755,8 @@ rows: [
   },
   {
     id: 'portfolio',
+    accent: '#191D22',
+    accentInk: 'light',
     slug: 'portfolio',
     title: '个人作品集',
     category: '前端开发',
@@ -1929,6 +1945,8 @@ rows: [
   },
   {
     id: 'identity',
+    accent: '#C26D6D',
+    accentInk: 'dark',
     slug: 'identity',
     title: '校园服务视觉系统',
     category: '品牌视觉',

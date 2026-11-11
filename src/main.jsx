@@ -614,49 +614,8 @@ function FeaturedSection() {
   );
 }
 
-function WorkSection() {
-  return (
-    <section id="work" className="work">
-      <div className="section-head section-head--center" data-reveal="mask">
-        <p className="eyebrow">全部作品</p>
-        <h2>九个作品，都写完了。</h2>
-        <p className="section-lede">
-          算法、后端、前端、视觉各做了一些，能点开的都还在线上。
-        </p>
-      </div>
-
-      <div className="work-grid">
-        {projects.map((project, i) => (
-          <article className="work-card" key={project.id} data-reveal data-tilt style={{ '--i': i % 2 }}>
-            <a href={`#/${project.slug}`} onClick={(e) => { e.preventDefault(); navigate(`/${project.slug}`); }}>
-              <div className="work-media">
-                <img
-                  src={project.image}
-                  alt={`${project.title} 项目视觉`}
-                  loading="lazy"
-                  decoding="async"
-                  {...imgAttrs(project.image)}
-                />
-              </div>
-              <div className="work-body">
-                <p className="work-meta">
-                  <span>{project.category}</span>
-                  <time>{project.year}</time>
-                </p>
-                <h3>{project.title}</h3>
-                <p className="work-desc">{project.description}</p>
-                <span className="work-more">
-                  查看详情
-                  <ChevronRight size={15} />
-                </span>
-              </div>
-            </a>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
+/* 全部作品改由 ProjectShowcase（Akaru 式横向 slider）呈现，
+   聚合页（#/category）仍复用 .work-grid / .work-card 的网格样式。 */
 
 function SkillsSection() {
   return (
@@ -802,9 +761,8 @@ function HomePage({ onCopyEmail }) {
   return (
     <>
       <Hero />
-      <ProjectShowcase />
       <FeaturedSection />
-      <WorkSection />
+      <ProjectShowcase />
       <AboutSection />
       <SkillsSection />
       <ContactSection onCopyEmail={onCopyEmail} />

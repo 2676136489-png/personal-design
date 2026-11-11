@@ -87,14 +87,22 @@ await setTheme('light');
 await shoot('home-light');
 await setTheme('dark');
 
-// 作品区：滚到网格
+// 作品区：滚到横向翻页画廊（Akaru 式 slider，第 1 屏是校园圈子）。
+// 板块比 900 视口高（顶行 + 画板 + 页码行 ≈ 960），临时加高视口
+// 才能把页码和箭头行一起拍进去，拍完恢复。
+await send('Emulation.setDeviceMetricsOverride', {
+  width: 1440, height: 1120, deviceScaleFactor: 2, mobile: false,
+});
 await evaluate(`(() => {
-  const el = document.querySelector('#work .work-grid');
+  const el = document.querySelector('#work.showcase-band');
   if (el) el.scrollIntoView({ block: 'start' });
   return true;
 })()`);
 await wait(1400);
-await shoot('work-grid');
+await shoot('work-showcase');
+await send('Emulation.setDeviceMetricsOverride', {
+  width: 1440, height: 900, deviceScaleFactor: 2, mobile: false,
+});
 
 // 导航下拉
 await evaluate(`(() => { window.scrollTo(0, 0); return true; })()`);
