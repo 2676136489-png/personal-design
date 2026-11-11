@@ -46,6 +46,8 @@ import { goToNavTarget, goToSection, navigate, useRoute } from './router.js';
 import { SplitText, useBackToTop, usePageMotion, useSlidingIndicator } from './motion.jsx';
 import { ImageLightbox } from './lightbox.jsx';
 import './styles.css';
+import './tw.css';
+import ProjectShowcase from './ProjectShowcase.tsx';
 
 const SECTION_IDS = ['top', 'work', 'about', 'skills', 'contact'];
 
@@ -800,6 +802,7 @@ function HomePage({ onCopyEmail }) {
   return (
     <>
       <Hero />
+      <ProjectShowcase />
       <FeaturedSection />
       <WorkSection />
       <AboutSection />

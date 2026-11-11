@@ -1,0 +1,20 @@
+/* Tailwind 作用域样式：preflight 已在 tailwind.config.js 关闭，
+   这里只产出 utilities，且全部带 tw- 前缀，不影响站点既有 CSS。 */
+@tailwind utilities;
+
+/* preflight 关闭后，Tailwind 的 transform 类依赖的 CSS 变量默认值
+   （原本挂在 base 层的 universal 规则上）也一起没了 ——
+   var(--tw-translate-x) 无回退值会让 hover:translate-y 的整条
+   transform 声明失效。这里按板块作用域补回用到的默认值：
+   只影响 .showcase-band 内部，不触碰站点其他部分。 */
+.showcase-band * {
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-translate-z: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-scale-z: 1;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+}
