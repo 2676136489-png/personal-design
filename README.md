@@ -150,7 +150,7 @@ node scripts/push-main.mjs      # 跑完测试再推 main，失败自动换地�
 
 截图源图放 `media-src/`（PNG），由 `scripts/optimize-images.py` 统一转成 WebP 写到 `public/media/`，产物里不留 PNG。整站图片从 14.6MB 压到 1.9MB。
 
-README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓线上界面，`scripts/make-docs-images.py` 压成 WebP（`docs/images/`，5 张 463KB）。抓的是线上而不是本地构建。README 是给别人看的，展示的应该是访客实际打开的样子。
+README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓线上界面，`scripts/make-docs-images.py` 压成 WebP（`docs/images/`，5 张 409KB）。抓的是线上而不是本地构建。README 是给别人看的，展示的应该是访客实际打开的样子。
 
 ## 简历
 
