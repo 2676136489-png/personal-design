@@ -9,107 +9,30 @@
 
    用法：node scripts/smoke-lightbox.mjs */
 
-const store = new Map();
-globalThis.localStorage = {
-  getItem: (k) => (store.has(k) ? store.get(k) : null),
-  setItem: (k, v) => store.set(k, String(v)),
-  removeItem: (k) => store.delete(k),
-};
-globalThis.matchMedia = () => ({
-  matches: false,
-  addEventListener() {},
-  removeEventListener() {},
-  addListener() {},
-  removeListener() {},
-});
-globalThis.IntersectionObserver = class {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-};
-globalThis.ResizeObserver = class {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-};
-globalThis.requestAnimationFrame = (cb) => setTimeout(() => cb(Date.now()), 0);
-globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
-
-let currentHash = '#/';
-globalThis.location = new Proxy(
-  { hash: '#/', pathname: '/', origin: 'http://localhost', href: 'http://localhost/#/' },
-  {
-    get: (t, p) =>
-      p === 'hash' ? currentHash : p === 'href' ? `http://localhost/${currentHash}` : t[p],
-    set: (t, p, v) => {
-      if (p === 'hash') currentHash = v;
-      else t[p] = v;
-      return true;
-    },
-  },
-);
-globalThis.window = globalThis;
-globalThis.window.location = globalThis.location;
-globalThis.window.addEventListener = () => {};
-globalThis.window.removeEventListener = () => {};
-globalThis.window.scrollTo = () => {};
-globalThis.window.scrollY = 0;
-
-globalThis.document = {
-  documentElement: {
-    dataset: {},
-    setAttribute() {},
-    removeAttribute() {},
-    getAttribute: () => null,
-    style: {},
-    scrollHeight: 5000,
-  },
-  body: {
-    setAttribute() {},
-    removeAttribute() {},
-    style: {},
-    appendChild: () => {},
-  },
-  addEventListener() {},
-  removeEventListener() {},
-  getElementById: () => null,
-  createElement: () => ({
-    style: {},
-    setAttribute() {},
-    remove() {},
-    appendChild() {},
-    select() {},
-  }),
-  querySelectorAll: () => [],
-  querySelector: () => null,
-};
-
-import { createServer } from 'vite';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { createChecker, installDomStubs, startSsrServer } from './lib/ssr-dom.mjs';
 
-const checks = [];
-const expect = (n, c) => checks.push([n, !!c]);
+/* ⚠️ 必须在加载业务模块之前打桩 */
+installDomStubs();
 
-const server = await createServer({
-  server: { middlewareMode: true },
-  appType: 'custom',
-  logLevel: 'silent',
-  optimizeDeps: { noDiscovery: true, include: [] },
-});
+const { expect, report } = createChecker();
+const server = await startSsrServer();
 
 try {
   const main = await server.ssrLoadModule('/src/main.jsx');
   const lb = await server.ssrLoadModule('/src/lightbox.jsx');
-  const App = main.App ?? main.default;
+  const AppShell = main.AppShell;
+  const MemoryRouter = main.MemoryRouter;
 
-  const render = (hash) => {
-    currentHash = hash;
-    return renderToStaticMarkup(React.createElement(App));
-  };
+  /* 路由换了 MemoryRouter：HashRouter 在 Node 里读 window.location，拿不到真实路径 */
+  const render = (path) =>
+    renderToStaticMarkup(
+      React.createElement(MemoryRouter, { initialEntries: [path] }, React.createElement(AppShell)),
+    );
 
   /* ---------- 结构：简历页触点 ---------- */
-  const resumeHtml = render('#/resume');
+  const resumeHtml = render('/resume');
   expect('简历页渲染出预览按钮', resumeHtml.includes('resume-paper'));
   expect('预览按钮可点击（button 标签）', /<button[^>]*class="resume-paper"/.test(resumeHtml));
   expect('预览按钮有无障碍名称', resumeHtml.includes('放大查看简历原版'));
@@ -118,12 +41,12 @@ try {
 
   /* ---------- 结构：初始态不该有 dialog ---------- */
   expect('初始 DOM 不含 dialog（未打开）', !resumeHtml.includes('<dialog'));
-  const homeHtml = render('#/');
+  const homeHtml = render('/');
   expect('首页也不含 dialog', !homeHtml.includes('<dialog'));
 
   /* ---------- 其它页面未受影响 ---------- */
-  expect('校园圈子页仍正常', render('#/campus').includes('校园圈子'));
-  expect('项目详情页仍正常', render('#/gomoku').includes('五子棋'));
+  expect('校园圈子页仍正常', render('/campus-circle').includes('校园圈子'));
+  expect('项目详情页仍正常', render('/gomoku').includes('五子棋'));
 
   /* ---------- 纯函数：缩放边界 ---------- */
   const { clampZoom, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP } = lb;
@@ -174,15 +97,9 @@ try {
   expect('reduced-motion 关闭灯箱动画', /prefers-reduced-motion: reduce[\s\S]*?\.lightbox\[open\]\s*\{\s*animation:\s*none/.test(css));
   expect('窄屏工具条适配', /max-width:\s*640px[\s\S]*?\.lightbox-toolbar/.test(css));
 } catch (err) {
-  checks.push([`抛错: ${err.message}`, false]);
+  expect(`抛错: ${err.message}`, false);
 } finally {
   await server.close().catch(() => {});
 }
 
-let failed = 0;
-for (const [n, ok] of checks) {
-  if (!ok) failed += 1;
-  console.log(`${ok ? 'PASS' : 'FAIL'}  ${n}`);
-}
-console.log(`\n结果: ${checks.length - failed}/${checks.length} 通过`);
-process.exit(failed ? 1 : 0);
+process.exit(report() ? 1 : 0);

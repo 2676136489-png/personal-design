@@ -1,50 +1,58 @@
 :root {
   color-scheme: dark;
-  --page: #05070f;
-  --page-deep: #02030a;
-  --surface: rgba(17, 24, 45, 0.82);
-  --surface-alt: rgba(10, 15, 30, 0.78);
-  --ink: #e8eefc;
-  --ink-soft: #bdc9e6;
-  --muted: #8b9ac2;
-  --faint: #64739b;
-  --line: rgba(125, 158, 255, 0.14);
-  --line-strong: rgba(125, 158, 255, 0.3);
-  --panel-divider: rgba(125, 158, 255, 0.22);
-  --accent: #3d8bff;
-  --accent-hover: #5aa0ff;
-  --accent-2: #22e0d2;
-  --accent-warm: #ff7a45;
-  --glow: rgba(61, 139, 255, 0.45);
-  --grid-line: rgba(120, 160, 255, 0.055);
-  --halo-1: rgba(61, 139, 255, 0.22);
-  --halo-2: rgba(34, 224, 210, 0.14);
-  --halo-3: rgba(124, 92, 255, 0.16);
+  /* 低饱和灰蓝主色 + 低饱和青色辅助（对齐新的视觉系统：
+     克制的灰蓝，纸感的暖灰，不用高饱和霓虹） */
+  --page: #0a0e13;
+  --page-deep: #06090e;
+  --surface: rgba(18, 24, 31, 0.78);
+  --surface-alt: rgba(12, 17, 23, 0.8);
+  --ink: #e8edf0;
+  --ink-soft: #c3cdd3;
+  --muted: #8e9ba3;
+  --faint: #68757d;
+  --line: rgba(151, 176, 190, 0.14);
+  --line-strong: rgba(151, 176, 190, 0.28);
+  --panel-divider: rgba(151, 176, 190, 0.2);
+  --accent: #7c9bb5;
+  --accent-hover: #9bb6cb;
+  --accent-2: #7fb0aa;
+  --accent-warm: #c08a6a;
+  --glow: rgba(124, 155, 181, 0.28);
+  --grid-line: rgba(150, 175, 190, 0.06);
+  --halo-1: rgba(124, 155, 181, 0.14);
+  --halo-2: rgba(127, 176, 170, 0.09);
+  --halo-3: rgba(146, 140, 170, 0.09);
   /* 代码块两套主题都用深底（浅底配浅色代码文字会看不清） */
   --code-bg: #01030a;
   --code-ink: #d6e2f7;
   --code-faint: #7b8bb0;
-  --nav-bg: rgba(6, 9, 20, 0.78);
+  --nav-bg: rgba(9, 13, 18, 0.72);
   /* 面板必须用实色。半透明的话，首屏那行 66px 的大标题会从面板底下
      透出来，跟面板里的条目叠成一团鬼影（实测 0.78 的不透明度完全挡不住），
      面板底下的内容本身还可能带渐变文字，透出来更乱。 */
-  --panel-bg: #070b16;
-  --panel-col-hover: rgba(125, 158, 255, 0.09);
-  --overlay: rgba(2, 4, 12, 0.8);
+  --panel-bg: #0c1116;
+  --panel-col-hover: rgba(151, 176, 190, 0.08);
+  --overlay: rgba(4, 7, 11, 0.82);
+  /* 画廊米白纸面：两套主题下都是这张纸，像夹在站里的一件印刷品 */
+  --band: #f1eee6;
+  --band-ink: #14181d;
+  --band-muted: #8a8578;
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 28px;
-  --max-width: 1080px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-ds: 16px;
+  --max-width: 1120px;
   --wide: 1320px;
+  --font-serif: georgia, 'Songti SC', 'Noto Serif SC', serif;
   --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
   /* Apple 最常用的两条：out-expo 收尾极慢、起步很快，接近物体被推出去的观感；
      spring 用于状态回归（hover 抬起、倾斜复位），带一点点过冲的弹性。 */
   --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
-  --nav-height: 48px;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-    "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Inter, sans-serif;
+  --nav-height: 64px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Inter, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -53,34 +61,34 @@
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --page: #f4f7fd;
-  --page-deep: #e7edfa;
-  --surface: rgba(255, 255, 255, 0.78);
-  --surface-alt: rgba(237, 242, 252, 0.9);
-  --ink: #0b1220;
-  --ink-soft: #26324b;
-  --muted: #56637e;
-  --faint: #7d8aa5;
-  --line: rgba(11, 18, 32, 0.1);
-  --line-strong: rgba(11, 18, 32, 0.2);
+  --page: #f5f3ee;
+  --page-deep: #ece9e1;
+  --surface: rgba(255, 255, 255, 0.82);
+  --surface-alt: #efece4;
+  --ink: #161a1e;
+  --ink-soft: #2c343a;
+  --muted: #5d6870;
+  --faint: #7c878e;
+  --line: rgba(22, 26, 30, 0.1);
+  --line-strong: rgba(22, 26, 30, 0.22);
   /* 面板是实色底，竖线得比页面上的分隔线更重一点才看得出分列 */
-  --panel-divider: rgba(11, 18, 32, 0.16);
-  --accent: #1a6bff;
-  --accent-hover: #0b57e0;
-  --accent-2: #00b8a9;
-  --accent-warm: #f5611f;
-  --glow: rgba(26, 107, 255, 0.24);
-  --grid-line: rgba(30, 60, 140, 0.05);
-  --halo-1: rgba(26, 107, 255, 0.14);
-  --halo-2: rgba(0, 184, 169, 0.1);
-  --halo-3: rgba(110, 80, 240, 0.12);
+  --panel-divider: rgba(22, 26, 30, 0.16);
+  --accent: #4e6c88;
+  --accent-hover: #3c566e;
+  --accent-2: #4f8f88;
+  --accent-warm: #b0744f;
+  --glow: rgba(78, 108, 136, 0.2);
+  --grid-line: rgba(60, 80, 95, 0.06);
+  --halo-1: rgba(78, 108, 136, 0.1);
+  --halo-2: rgba(79, 143, 136, 0.08);
+  --halo-3: rgba(120, 110, 140, 0.08);
   --code-bg: #0d1526;
   --code-ink: #d6e2f7;
   --code-faint: #8b9ac2;
-  --nav-bg: rgba(255, 255, 255, 0.76);
-  --panel-bg: #f2f5fc;
-  --panel-col-hover: rgba(11, 18, 32, 0.04);
-  --overlay: rgba(12, 20, 40, 0.5);
+  --nav-bg: rgba(248, 246, 241, 0.8);
+  --panel-bg: #fbfaf7;
+  --panel-col-hover: rgba(22, 26, 30, 0.04);
+  --overlay: rgba(20, 24, 28, 0.45);
 }
 
 * {
@@ -2730,16 +2738,10 @@ section {
 
 /* ============ 页面转场 ============ */
 
-main {
-  animation: page-in 620ms var(--ease-out-expo) both;
-}
-
-@keyframes page-in {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 16px, 0);
-  }
-}
+/* 页面进场已交给 App 里的 GSAP 转场（进场 0→1 / y20→0，退场反之）。
+   这里不再给 main 挂 CSS 动画 —— 旧规则用了 fill-mode: both，
+   动画结束后仍留下一个恒等 transform，会让 main 变成 position: fixed 的包含块，
+   /works 的 ScrollTrigger pin 会被钉在 main 里而不是视口上。 */
 
 /* ============ 阅读进度条 ============ */
 

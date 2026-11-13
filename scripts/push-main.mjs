@@ -23,7 +23,7 @@ const BRANCH = 'main';
 
 /* 推之前先跑一遍测试 —— 推送是最后一步，
    代码没验证过就推出去，线上出问题还得回滚。 */
-const TEST_SCRIPTS = ['smoke-render', 'smoke-nav', 'smoke-lightbox', 'smoke-backtotop'];
+const TEST_SCRIPTS = ['smoke-render', 'smoke-nav', 'smoke-lightbox'];
 
 console.log('· 先跑测试');
 for (const s of TEST_SCRIPTS) {

@@ -1,0 +1,1026 @@
+/* ============================================================
+   设计系统 · 六个新页面与全站骨架
+   ------------------------------------------------------------
+   规则来源：8px 栅格 / 16px 圆角 / 只用极淡阴影 / 大量留白 /
+   低饱和灰蓝主色 + 低饱和青辅助 / 动画只服务叙事。
+   色值全部走 styles.css 的 CSS 变量，深浅两套主题自动跟随；
+   画廊纸面色（--band）例外：两套主题下都是同一张纸。
+   ============================================================ */
+
+/* ---------- 排版基线（新页面用，不动旧页依赖的全局样式） ---------- */
+
+:root {
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.ds-page {
+  position: relative;
+}
+
+/* ⚠️ 用 :where() 把特异性降到 0：下面 .ds-eyebrow 之类的 margin 才压得住。
+   写成 .ds-page p（特异性 0,1,1）会把所有段落的 margin 清成 0，
+   连眉标下面那 24px 间距一起吃掉。 */
+:where(.ds-page) :where(h1, h2, h3, h4, p, figure, blockquote) {
+  margin: 0;
+}
+
+.ds-wrap {
+  width: min(100% - 48px, 1200px);
+  margin-inline: auto;
+}
+
+@media (max-width: 767px) {
+  .ds-wrap {
+    width: min(100% - 32px, 1200px);
+  }
+}
+
+.ds-section {
+  padding-block: clamp(72px, 12vh, 136px);
+}
+
+/* 首屏：整屏高度、内容压在底部（大版式）。
+   手机上不加这层高度 —— 三行标题 + 统计 + 按钮已经够高，
+   再撑满一屏只会在顶部留一大块空白。 */
+.hero-section {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 100svh;
+  padding-top: calc(var(--nav-height) + 48px);
+  padding-bottom: clamp(40px, 8vh, 88px);
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .hero-section {
+    align-items: flex-start;
+    min-height: 0;
+    padding-top: calc(var(--nav-height) + 28px);
+    padding-bottom: 56px;
+  }
+
+  /* 轨道线在窄屏会横穿标题，看着像删除线，直接收掉 */
+  .hero-orbit {
+    display: none;
+  }
+
+  /* 12vh 在手机上会空出一大块，收一档 */
+  .ds-section {
+    padding-block: 64px;
+  }
+}
+
+/* 两列布局的唯一写法。
+   ⚠️ 列定义必须留在 CSS 里：写成 inline style 的话，媒体查询永远盖不过它，
+   窄屏就会出现「两列挤在一起、长邮箱顶出格子压在表单上」。
+   页面上只传 --split / --split-gap 这两个变量（含比例），断点统一在这里收。 */
+.ds-split {
+  display: grid;
+  grid-template-columns: var(--split, repeat(2, minmax(0, 1fr)));
+  gap: var(--split-gap, 40px);
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .ds-split {
+    grid-template-columns: 1fr;
+    gap: var(--split-gap-sm, 32px);
+  }
+}
+
+.ds-eyebrow {
+  margin: 0 0 24px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ds-display {
+  font-size: clamp(2.6rem, 7.2vw, 6.4rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.ds-h2 {
+  font-size: clamp(1.75rem, 3.4vw, 2.9rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.ds-h3 {
+  font-size: 1.125rem;
+  font-weight: 650;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.ds-lede {
+  font-size: clamp(1rem, 1.3vw, 1.125rem);
+  line-height: 1.85;
+  color: var(--muted);
+  max-width: 62ch;
+}
+
+.ds-body {
+  font-size: 0.975rem;
+  line-height: 1.9;
+  color: var(--ink-soft);
+  max-width: 68ch;
+}
+
+.ds-meta {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.ds-rule {
+  height: 1px;
+  border: 0;
+  background: var(--line);
+  margin: 0;
+}
+
+.ds-serif {
+  font-family: var(--font-serif);
+}
+
+/* ---------- 按钮 ---------- */
+
+.ds-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 24px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-ds);
+  background: var(--ink);
+  color: var(--page);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 0.25s var(--ease), color 0.25s var(--ease),
+    border-color 0.25s var(--ease), opacity 0.25s var(--ease);
+}
+
+.ds-btn:hover {
+  background: var(--accent);
+  color: var(--ink);
+}
+
+:root[data-theme='light'] .ds-btn:hover {
+  color: #fff;
+}
+
+.ds-btn--ghost {
+  background: transparent;
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.ds-btn--ghost:hover {
+  background: transparent;
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+/* ---------- 卡片：16px 圆角，只有极淡阴影 ---------- */
+
+.ds-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-ds);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------- 下划线绘制（hover 时从左到右画出来） ---------- */
+
+.ds-underline {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 2px;
+}
+
+.ds-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s var(--ease-out-expo);
+}
+
+.ds-underline:hover::after,
+.ds-underline:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* ---------- 站点导航 ---------- */
+
+.site-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 90;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  background: transparent;
+  transition: background-color 0.35s var(--ease), border-color 0.35s var(--ease),
+    backdrop-filter 0.35s var(--ease);
+  border-bottom: 1px solid transparent;
+}
+
+.site-header[data-scrolled='true'] {
+  background: var(--nav-bg);
+  border-bottom-color: var(--line);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+}
+
+.site-nav-inner {
+  width: min(100% - 48px, 1320px);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.site-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.site-brand span {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.4vw, 32px);
+}
+
+.site-nav-link {
+  position: relative;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  transition: color 0.25s var(--ease);
+}
+
+.site-nav-link:hover {
+  color: var(--ink);
+}
+
+.site-nav-link[data-active='true'] {
+  color: var(--ink);
+}
+
+.site-nav-link[data-active='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -7px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.site-nav-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.site-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.25s var(--ease), background-color 0.25s var(--ease);
+}
+
+.site-icon-btn:hover {
+  color: var(--ink);
+  background: var(--panel-col-hover);
+}
+
+.site-icon-btn--menu {
+  display: none;
+}
+
+.site-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 89;
+  padding: calc(var(--nav-height) + 24px) 24px 32px;
+  background: var(--page);
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.site-drawer a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--line);
+  font-size: 1.5rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .site-nav {
+    display: none;
+  }
+
+  .site-icon-btn--menu {
+    display: inline-flex;
+  }
+}
+
+/* ---------- 页脚 ---------- */
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: 56px 0 40px;
+  margin-top: 0;
+}
+
+.site-footer-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.site-footer-links a:hover {
+  color: var(--ink);
+}
+
+/* ---------- 路由转场容器 ---------- */
+
+.route-stage {
+  position: relative;
+  /* ⚠️ 不要写 will-change: transform：
+     它会把这个容器变成 position:fixed 的包含块，
+     /works 的 ScrollTrigger pin（fixed 定位）会被钉在这层里，
+     结果整块画廊被顶出视口（实测 bandTop = -scrollY）。
+     转场动画由 GSAP 自己加临时合成提示即可。 */
+}
+
+/* ---------- 作品画廊（/works） ---------- */
+
+.works-hero {
+  padding: calc(var(--nav-height) + 64px) 0 40px;
+}
+
+.works-band {
+  position: relative;
+  background: var(--band);
+  color: var(--band-ink);
+  padding-block: 0 24px;
+}
+
+.works-viewport {
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.works-viewport[data-dragging='true'] {
+  cursor: grabbing;
+}
+
+.works-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.works-slide {
+  flex: 0 0 auto;
+  width: 91vw;
+}
+
+.works-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: min(100% - 48px, 1320px);
+  margin-inline: auto;
+  padding-top: 24px;
+}
+
+.works-counter {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.works-counter strong {
+  font-family: var(--font-serif);
+  font-size: 1.9rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.works-counter span {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--band-muted);
+}
+
+.works-progress {
+  position: relative;
+  width: 112px;
+  height: 1px;
+  background: rgba(20, 24, 29, 0.18);
+  margin-left: 8px;
+}
+
+.works-progress i {
+  position: absolute;
+  inset: -0.5px auto auto 0;
+  height: 2px;
+  background: var(--band-ink);
+  transition: width 0.5s var(--ease);
+}
+
+.works-arrows {
+  display: flex;
+  gap: 12px;
+}
+
+.works-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--band-ink);
+  color: var(--band);
+  cursor: pointer;
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+
+.works-arrow:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.works-arrow:disabled {
+  opacity: 0.22;
+  cursor: default;
+}
+
+/* 移动端 Bento 网格 */
+.works-bento {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding: 16px 16px 8px;
+}
+
+/* 移动端卡片：图在上、文字在下。
+   ⚠️ 不要用「图上压一层渐变 + 白字」的做法 ——
+   封面截图本身明暗不定，蒙层薄了白字直接糊在浅色界面上（实测对照度 1.4:1）。 */
+.works-bento-card {
+  overflow: hidden;
+  border-radius: var(--radius-ds);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.works-bento-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--surface-alt);
+}
+
+.works-bento-copy {
+  padding: 14px 16px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.works-bento-meta {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.works-bento-title {
+  margin: 6px 0 0;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+/* ---------- 叙事页（/campus-circle） ---------- */
+
+.narrative-hero {
+  position: relative;
+  padding-top: var(--nav-height);
+}
+
+.narrative-cover {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+  background: var(--surface-alt);
+}
+
+.narrative-cover img {
+  width: 100%;
+  height: min(78vh, 720px);
+  object-fit: cover;
+}
+
+/* 图片遮罩揭开：clip-path 由 GSAP 驱动，初始收起。
+   ⚠️ 只在桌面生效 —— 移动端不跑这段 scrub（见 Campus.tsx），
+   初始值留在这里就会把封面整块裁没，首屏一片空白。 */
+@media (min-width: 768px) {
+  .narrative-cover[data-mask] img {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+.narrative-chapter {
+  padding-block: clamp(56px, 9vh, 104px);
+}
+
+/* 封面下的信息行：角色 / 技术栈在左，两个入口靠右。
+   窄屏时按钮跟着行内走，不要顶到右边去。 */
+.narrative-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 28px;
+  margin-top: 32px;
+}
+
+.narrative-actions {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+}
+
+@media (max-width: 767px) {
+  .narrative-actions-row {
+    gap: 10px 20px;
+  }
+
+  .narrative-actions {
+    margin-left: 0;
+  }
+}
+
+.narrative-shot {
+  border-radius: var(--radius-ds);
+  overflow: hidden;
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+}
+
+.narrative-shot figcaption {
+  padding: 12px 16px 14px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+}
+
+.chapter-nav {
+  position: sticky;
+  top: var(--nav-height);
+  z-index: 20;
+  background: color-mix(in srgb, var(--page) 88%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+.chapter-nav ol {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  scrollbar-width: none;
+}
+
+.chapter-nav ol::-webkit-scrollbar {
+  display: none;
+}
+
+.chapter-nav button {
+  border: 0;
+  background: transparent;
+  padding: 14px 12px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.25s var(--ease);
+  border-bottom: 1px solid transparent;
+}
+
+.chapter-nav button:hover {
+  color: var(--ink);
+}
+
+.chapter-nav button[data-active='true'] {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-ds);
+  overflow: hidden;
+}
+
+.metric-cell {
+  background: var(--page);
+  padding: 20px 16px;
+}
+
+.metric-cell strong {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 1.9rem;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.metric-cell span {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+/* ---------- 表单（/contact） ---------- */
+
+.ds-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ds-field label {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ds-field input,
+.ds-field textarea {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-ds);
+  background: transparent;
+  color: var(--ink);
+  padding: 14px 16px;
+  font-size: 0.975rem;
+  line-height: 1.6;
+  transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease),
+    background-color 0.3s var(--ease);
+}
+
+.ds-field textarea {
+  min-height: 148px;
+  resize: vertical;
+}
+
+.ds-field input::placeholder,
+.ds-field textarea::placeholder {
+  color: var(--faint);
+}
+
+.ds-field input:focus,
+.ds-field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+/* 表单里并排的两个字段：只在窄屏才叠成一列（比整体两列早一点收） */
+.contact-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 520px) {
+  .contact-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- 能力页 ---------- */
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* 错落：第二列整体下移半格。单列时必须归零，否则会留下奇怪的断档。 */
+@media (min-width: 861px) {
+  .skills-card:nth-child(even) {
+    margin-top: 40px;
+  }
+}
+
+@media (max-width: 860px) {
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.skills-detail-row {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 600px) {
+  .skills-detail-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+
+/* ---------- 通用细节 ---------- */
+
+.ds-kicker-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ds-index {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: var(--faint);
+  letter-spacing: 0.06em;
+}
+
+/* 键盘焦点：统一细描边，不发光 */
+.ds-page :focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 4px;
+}
+
+@media (max-width: 767px) {
+  .works-hero {
+    padding-top: calc(var(--nav-height) + 40px);
+  }
+
+  .works-foot {
+    width: calc(100% - 32px);
+    padding-top: 16px;
+  }
+
+  .works-foot .works-hint {
+    display: none;
+  }
+
+  .narrative-cover img {
+    height: 44vh;
+  }
+}
+
+/* ============================================================
+   旧页面（作品详情 / 方向聚合 / 简历）对齐新设计系统
+   ------------------------------------------------------------
+   这三页是从旧站整块迁过来的长文档，结构（章节 / 表格 / 简历块）
+   本身没有重做的必要，但要换掉旧皮肤里最扎眼的部分：
+   渐变标题字、980px 药丸按钮、彩色描边小标签、旧圆角与重阴影。
+   只在 .legacy-doc 里生效，避免动到别处。
+   ============================================================ */
+
+.legacy-doc .page-hero {
+  background: transparent;
+  border-bottom: 0;
+}
+
+.legacy-doc .page-hero-inner {
+  max-width: 900px;
+  padding: calc(var(--nav-height) + 56px) 0 0;
+}
+
+/* 底部 84px 是留给 .page-hero-shot 上移 34px 的。
+   简历页与方向页没有那张图，留着就是一段空白。 */
+.legacy-doc .page-hero:has(.page-hero-shot) .page-hero-inner {
+  padding-bottom: 84px;
+}
+
+/* 旧样式给标题加了 ink→accent 的渐变色，新系统不要渐变 */
+.legacy-doc .page-hero h1 {
+  margin: 18px 0 0;
+  font-size: clamp(2.4rem, 5.4vw, 4.4rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  text-wrap: balance;
+  background-image: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+}
+
+.legacy-doc .eyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* 旧眉标前面挂了一道渐变短横，新页面没有这个记号 */
+.legacy-doc .eyebrow::before {
+  display: none;
+}
+
+.legacy-doc .page-hero-lede {
+  margin-top: 24px;
+  font-size: clamp(1rem, 1.3vw, 1.125rem);
+  line-height: 1.85;
+  color: var(--muted);
+}
+
+/* 旧版是彩色描边药丸标签，换成细描边小方块 */
+.legacy-doc .page-hero-meta {
+  margin-top: 24px;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.legacy-doc .page-hero-meta span {
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  font-size: 12px;
+}
+
+.legacy-doc .page-hero-note {
+  margin-top: 24px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-ds);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.legacy-doc .back-link {
+  margin-bottom: 24px;
+  color: var(--faint);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+/* 旧按钮：980px 药丸 + 彩色底。统一成 16px 圆角的实心/描边两档 */
+.legacy-doc .btn {
+  min-height: 0;
+  height: 48px;
+  padding: 0 22px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-ds);
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: background-color 0.25s var(--ease), color 0.25s var(--ease),
+    border-color 0.25s var(--ease);
+}
+
+.legacy-doc .btn--solid {
+  background: var(--ink);
+  color: var(--page);
+}
+
+.legacy-doc .btn--solid:hover {
+  background: var(--accent);
+  color: var(--ink);
+}
+
+:root[data-theme='light'] .legacy-doc .btn--solid:hover {
+  color: #fff;
+}
+
+.legacy-doc .btn--plain,
+:root[data-theme='dark'] .legacy-doc .btn--plain {
+  background: transparent;
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.legacy-doc .btn--plain:hover,
+:root[data-theme='dark'] .legacy-doc .btn--plain:hover {
+  background: transparent;
+  border-color: var(--ink);
+}
+
+/* 旧的圆角与重阴影 */
+.legacy-doc .page-hero-shot img,
+.legacy-doc .shot-frame,
+.legacy-doc .work-card,
+.legacy-doc .resume-paper,
+.legacy-doc .doc-table {
+  border-radius: var(--radius-ds);
+}
+
+.legacy-doc .page-hero-shot img {
+  box-shadow: var(--shadow-sm);
+}
+
+.legacy-doc .work-card {
+  background: var(--surface);
+}
+
+.legacy-doc .resume-block h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+/* 手机上的 PDF 预览：拉满栏宽等于把 A4 压成一片糊字，
+   按缩略图收窄，点开灯箱才是看全文的地方。 */
+@media (max-width: 640px) {
+  .legacy-doc .resume-preview {
+    max-width: 260px;
+  }
+}

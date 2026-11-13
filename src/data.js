@@ -713,7 +713,7 @@ export const projects = [
     description: '状态机驱动的 AI 事故响应 Agent，跑完发现到复盘的九个环节，每一步都落库可查。',
     role: '独立开发 · 架构与实现',
     stack: 'Python · LangGraph · FastAPI · React 19 · MCP',
-    site: 'https://opspilot-v2.app.workbuddy.host/',
+    site: 'https://2676136489-png.github.io/personal-design/demo/opspilot.html',
     github: 'https://github.com/2676136489-png/OpsPilot',
     lede: '把值班工程师处理告警的那段流程交给一个状态机驱动的 Agent，同时要求它把每一步都落库。它允许输出「我没查出来」：诊断能输出 UNKNOWN，验证失败就是失败。一个会说「不知道」的系统，比总能给出漂亮答案的系统更适合放在生产旁边。',
     metrics: [
@@ -958,7 +958,7 @@ export const projects = [
     description: '证据优先的 AI 研究工作台，自动拆解任务、检索取证、核查后产出带来源的报告。',
     role: '独立开发 · 架构与实现',
     stack: 'Python · LangGraph · FastAPI · React 18 · SQLite',
-    site: 'https://ebed98754f5b4e4abafe591d754aff06.app.workbuddy.host/',
+    site: 'https://2676136489-png.github.io/personal-design/demo/research.html',
     github: 'https://github.com/2676136489-png/Personal-agent-development-flow',
     lede: '输入一个研究任务后，工作流完成理解、规划、工具调用、证据分析与验证，在生成报告前中断等待人工确认，最终产出逐条标注来源的报告。证据不足时重新检索、报告生成前暂停确认，均由流程强制而非可选项。',
     metrics: [
@@ -1166,7 +1166,7 @@ rows: [
     description: '以打卡驱动目标推进的个人工作台。核心算法回答「还剩几天」，而不是「连续几天」。',
     role: '独立开发',
     stack: '单文件 HTML · React 18 · TypeScript · Tailwind',
-    site: 'https://study-goal-console-59328.app.workbuddy.host/',
+    site: 'https://github.com/2676136489-png/Check-in-activity',
     github: 'https://github.com/2676136489-png/Check-in-activity',
     lede: '做这个是因为自己管不住学习计划。习惯打卡 App 只关心「你连续打了 12 天」，从来不回答「按现在的速度，这本书还要几天读完」。前者能判断今晚要不要多花一小时，后者只能让人自我感觉良好。整个页面的核心就一个算法：取最近 7 天、按休息日规则剔掉不该算的天、算出日均速度，再拿「还剩多少」除以它。',
     metrics: [
@@ -1193,7 +1193,7 @@ rows: [
     description: '15×15 国际连珠对弈平台：禁手判定、alpha-beta 搜索、可学习贪心与 Agent 决策层，八个页面已上线可玩。',
     role: '独立开发',
     stack: 'Python · FastAPI · C++17 · SQLite · React 19 · Docker',
-    site: 'https://gomoku-match.app.workbuddy.host/?sharecode=MJAKMJUVAA',
+    site: 'https://2676136489-png.github.io/personal-design/demo/gomoku.html',
     lede: '项目起点是 Botzone 的单文件 C++ Bot，以棋形模板打分选点。此后重写为 Python 引擎，长成一整套对弈平台：大厅、对弈、复盘、教程、代码工坊、竞技场、贪心学习，每个选点都带棋形解释。',
     metrics: [
       { value: '453', label: '后端测试' },

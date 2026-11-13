@@ -10,252 +10,197 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
-const CSS = 'src/styles.css';
-const JSX = 'src/main.jsx';
+const DS = 'src/design-system.css';
+const APP = 'src/app/App.jsx';
+const WORKS = 'src/pages/Works.tsx';
+const DETAIL = 'src/pages/DetailPages.jsx';
 const DATA = 'src/data.js';
 const README = 'README.md';
+const CAMPUS_STATS = 'src/pages/CampusStats.tsx';
 
-const css = readFileSync(CSS, 'utf8');
-const jsx = readFileSync(JSX, 'utf8');
-const data = readFileSync(DATA, 'utf8');
-/* README 也要顶层留一份：反例会改它，
-   循环里的 writeFileSync(original) 只在正常走完时兜底，
-   进程被中断时靠 finally 里的这行还原。 */
-const readme = readFileSync(README, 'utf8');
+const originals = {
+  [DS]: readFileSync(DS, 'utf8'),
+  [APP]: readFileSync(APP, 'utf8'),
+  [WORKS]: readFileSync(WORKS, 'utf8'),
+  [DETAIL]: readFileSync(DETAIL, 'utf8'),
+  [DATA]: readFileSync(DATA, 'utf8'),
+  /* README 也留一份：进程被中断时靠 finally 还原 */
+  [README]: readFileSync(README, 'utf8'),
+  [CAMPUS_STATS]: readFileSync(CAMPUS_STATS, 'utf8'),
+};
 
-/* 每条：名字 / 目标文件 / 坏写法（要匹配原文，可为正则）/ 换成的坏写法 / 预期 FAIL 的断言名 */
+/* 每条：名字 / 目标文件 / 坏写法（要匹配原文）/ 换成的坏写法 / 预期 FAIL 的断言名 / 跑哪个脚本 */
 const mutations = [
   {
-    name: '面板底色改回半透明',
-    file: CSS,
-    from: /(\.nav-panel \{[^}]*?)background: var\(--panel-bg\)/s,
-    to: '$1background: var(--surface-alt)',
-    expectFail: '面板底色用不透明的 --panel-bg（半透明会让底下大标题透出来）',
+    /* 迁移过来的三页曾经带 ink→accent 的渐变标题字，新系统要纯色 */
+    name: '旧页面标题改回渐变字',
+    file: DS,
+    from: /(\.legacy-doc \.page-hero h1 \{[\s\S]*?)background-image: none;/,
+    to: '$1background-image: linear-gradient(112deg, var(--ink), var(--accent));',
+    expectFail: '旧页面标题不带渐变',
   },
   {
-    name: '列悬停高亮改回半透明表面色',
-    file: CSS,
-    from: /(\.nav-panel-col:hover \{[^}]*?)background: var\(--panel-col-hover\)/s,
-    to: '$1background: var(--surface)',
-    expectFail: '列悬停高亮用不透明层色',
+    /* 移动端卡片把标题压回截图上 —— 封面明暗不定，白字会糊掉 */
+    name: '移动端卡片标题压回图上',
+    file: DS,
+    from: '.works-bento-copy {\n  padding: 14px 16px 16px;',
+    to: '.works-bento-copy {\n  position: absolute;\n  padding: 14px 16px 16px;',
+    expectFail: '移动端卡片标题不压在图上',
   },
   {
-    name: '列分隔线去掉',
-    file: CSS,
-    from: /(\.nav-panel-col \{[^}]*?)border-left: 1px solid var\(--panel-divider\);/s,
-    to: '$1border-left: 0;',
-    expectFail: '面板列之间有分隔线',
+    /* 两列布局的断点被删 —— 窄屏就会两列挤成一团、长邮箱顶出格子 */
+    name: '两列布局去掉窄屏折叠',
+    file: DS,
+    from: '@media (max-width: 860px) {\n  .ds-split {\n    grid-template-columns: 1fr;',
+    to: '@media (max-width: 860px) {\n  .ds-split {\n    grid-template-columns: var(--split);',
+    expectFail: '.ds-split 有窄屏折叠',
   },
   {
-    name: '竖线改回页面分隔线（实色底上看不见）',
-    file: CSS,
-    from: 'border-left: 1px solid var(--panel-divider);',
-    to: 'border-left: 1px solid var(--line);',
-    expectFail: '面板竖线用加重的 --panel-divider（实色底上 --line 太淡）',
+    /* 转场结束后残留 transform 会让 ScrollTrigger 的 pin 以它为包含块，
+       /works 的整块画廊会被顶出视口。 */
+    name: '转场结束不清 transform（pin 会错位）',
+    file: APP,
+    custom: (src) => src.replace(/clearProps: 'transform'/g, "clearProps: 'none'"),
+    expectFail: '转场结束清掉 transform（否则 pin 错位）',
   },
   {
-    name: '开合判定从 header 挪回触发项（覆盖 header 的判定）',
-    file: JSX,
-    from: /(className="global-nav"[\s\S]*?)onMouseEnter=\{keep\}\s*\n\s*onMouseLeave=\{closeLater\}/,
-    to: '$1',
-    expectFail: '导航栏开合判定挂在 header 上（保证移动路径不出现命中空隙）',
+    name: '换页前不 kill 触发器（旧触发器残留）',
+    file: APP,
+    from: 'ScrollTrigger.getAll().forEach((t) => t.kill());',
+    to: '/* 不 kill */',
+    expectFail: '换页前 kill 所有触发器',
   },
   {
-    name: '面板自己又管起开合（与 header 判定抢状态）',
-    file: JSX,
-    from: '<div className="nav-panel" data-open={open}>',
-    to: '<div\n      className="nav-panel"\n      data-open={open}\n      onMouseEnter={() => {}}\n      onMouseLeave={() => {}}\n    >',
-    expectFail: '面板不重复绑定开合判定',
+    /* slug 不存在时不再转 404，会直接渲染旧版 not-found 或者空白 */
+    name: '未知 slug 不转 404',
+    file: APP,
+    from: '  if (!project) return <NotFound />;\n',
+    to: '',
+    expectFail: '未知路由渲染 404（单段路径）',
   },
   {
-    // 把面板挪回触发项内部（JSX 结构仍然平衡，只是位置变了）
-    name: '面板挪回触发项内部（参照物变窄，全宽失效）',
-    file: JSX,
-    // 先做一次等价改写占位，真正的结构移动由下面 mutate 做
-    expectFail: '下拉面板挂在 .global-nav 内（不是触发项内部）',
-    custom: (src) => {
-      // 把面板那一整段从 header 尾部剪出来，塞到 nav-group 的 div 里
-      const panelBlock = src.match(/\n      \{\/\* 面板挂在[\s\S]*?\n      \)\}/);
-      if (!panelBlock) return null;
-      const cut = src.replace(panelBlock[0], '\n      {/*面板移位*/}');
-      const groupMark = '<div key={id} className="nav-group" data-open={openId === id} onMouseEnter={() => open(id)}>';
-      return cut.replace(groupMark, `${groupMark}${panelBlock[0]}`);
-    },
+    name: '作品页关掉 pin（横滚退回普通滚动）',
+    file: WORKS,
+    from: '        pin: true,',
+    to: '        pin: false,',
+    expectFail: '作品页桌面用 pin + scrub',
   },
   {
-    // 指针桥梁去掉：面板与导航栏之间的命中缺口回来，斜向移动会漏触发 leave
-    name: '去掉面板的指针桥梁',
-    file: CSS,
-    from: /\.nav-panel::before \{[\s\S]*?\n\}/,
-    to: '.nav-panel::before {\n  display: none;\n}',
-    expectFail: '面板有指针桥梁接上导航栏',
-    script: 'smoke-nav',
-  },
-  {
-    name: '面板展开选择器写回 .nav-group（命中不到元素）',
-    file: CSS,
-    from: '.nav-panel[data-open="true"] .nav-panel-col li',
-    to: '.nav-group[data-open="true"] .nav-panel-col li',
-    expectFail: '面板的展开选择器不再依赖 .nav-group',
-    script: 'smoke-nav',
-  },
-  {
-    name: '分组设 position:relative（面板定位参照物变窄）',
-    file: CSS,
-    from: '.nav-group {\n  display: flex;',
-    to: '.nav-group {\n  position: relative;\n  display: flex;',
-    expectFail: '分组不设 position（否则面板定位参照物变窄）',
-    script: 'smoke-nav',
+    name: '作品页不再按宽度切分支（移动端也上 pin）',
+    file: WORKS,
+    from: "matchMedia('(max-width: 767px)')",
+    to: "matchMedia('(max-width: 1px)')",
+    expectFail: '作品页按宽度切分支',
   },
   {
     /* 简历标注行退回项目详情页口径 —— 与 PDF 上的
        「PHP / MySQL 全栈 · Vibe Coding」对不上，投递时会露馅。 */
     name: '简历标注行退回 p.role（与 PDF 口径不一致）',
-    file: JSX,
+    file: DETAIL,
     from: '{resume.projectMeta?.[p.slug] || p.role}',
     to: '{p.role}',
     expectFail: '简历页显示「campus」的标注行',
   },
   {
     name: '灯箱标题写死月份（简历更新后就不对上了）',
-    file: JSX,
+    file: DETAIL,
     from: 'caption={`卢柯宇简历 · ${resume.updated}`}',
     to: 'caption="卢柯宇简历 · 2026 年 9 月"',
     expectFail: '灯箱标题跟着 resume.updated 走（不能写死月份）',
   },
   {
-    name: '简历项目去掉 GitHub 链接（投递方得自己去搜仓库）',
-    file: JSX,
-    from: /\{p\.github \? \([\s\S]*?\) : null\}/,
-    to: '{null}',
-    expectFail: '简历页链到「campus」的仓库',
-  },
-  {
-    /* 分点描述退回项目详情页的引子 —— 与 PDF 上的技术描述不是一回事，
-       招聘方对照网站与 PDF 会发现对不上。 */
-    name: '简历分点退回 lede（与 PDF 口径不一致）',
-    file: JSX,
-    from: /\{highlights\.length \? \([\s\S]*?\) : null\}/,
-    to: '{p.lede ? <p className="resume-desc">{p.lede}</p> : null}',
-    expectFail: '简历页渲染全了「campus」的分点',
-  },
-  {
-    name: '删掉「个人优势」章节（PDF 里有，网站上没有）',
-    file: JSX,
-    /* ⚠️ 结尾不能锚死 \n\n —— 仓库里的行尾可能是 CRLF，
-       锚死换行会匹配不上（这一条最初就是这么写的，一直报「没匹配上原文」）。 */
-    from: /\s*<section className="resume-block" id="resume-advantages"[\s\S]*?<\/section>/,
-    to: '',
-    expectFail: '简历页有「个人优势」章节',
-  },
-  {
-    /* 跨源契约的反例：网页简历与 PDF 讲同一件事，但说法不同。
-       改文案时漏改一边，两边测试都过，招聘方对照网站与 PDF 才发现对不上。
-       这条断言直接读 PDF 副本抽文字比对，所以改一边就会露馅。 */
-    /* ⚠️ 锚文本必须来自 resume.projectHighlights 当前的分点 ——
-       简历分点跟着 md 重写后，旧锚（「接口即时不再断」那句）就没了，
-       反例会退化成「没匹配上原文，跳过」。锚串在 data.js 里必须唯一：
-       String.replace 只换首个匹配，撞上 projects 章节里的同句就改错地方。 */
-    name: '网页简历分点与 PDF 说法不一致（改一边漏一边）',
-    file: 'src/data.js',
-    from: '长任务撞网关超时：图执行转后台异步任务、接口即时返回；',
-    to: '长任务撞网关超时：图执行转后台异步任务、接口立刻返回；',
-    expectFail: '简历分点与 PDF 逐条一致（网页不能多也不能少）',
-    script: 'smoke-render',
-  },
-  {
-    /* 导航「作品」那一列改回手写 —— 改名后忘了同步就会露馅
-       （作品列表叫「五子棋对弈引擎 Gomoku Match」，导航写「五子棋引擎」）。 */
-    name: '作品导航列改回手写标签（改名后不同步）',
-    file: 'src/data.js',
-    from: /get links\(\) \{\n      return getProjectNavLinks\(\);\n    \}/,
-    to: 'get links() {\n      return [{ label: \'五子棋引擎\', href: \'#/gomoku\' }];\n    }',
-    expectFail: '作品分组的标签与项目标题逐字一致',
-    script: 'smoke-nav',
-  },
-  {
     /* data.js 里整段删掉 resume.advantages。
-       页面在 main.jsx 里是 resume.advantages.map(...) —— 字段没了直接抛异常，
-       简历页白屏。之前那组断言都带 `|| []` 兜底，只会说「内容为空」，
-       不一定拦得住，所以另加了一条字段契约断言。 */
+       页面里是 resume.advantages.map(...) —— 字段没了直接抛异常，简历页白屏。 */
     name: '删掉 resume.advantages 字段（简历页会白屏）',
-    file: 'src/data.js',
+    file: DATA,
     from: /  advantages: \[[\s\S]*?\n  \],\n/,
     to: '',
     expectFail: 'resume 上被渲染用到的字段都存在（缺一个就是白屏）',
-    script: 'smoke-render',
   },
   {
-    /* profile.hometown 缺了，名片上会显示「重庆 · undefined」。 */
+    /* profile.hometown 缺了，名片上会显示「重庆 · undefined」 */
     name: '删掉 profile.hometown（名片显示 undefined）',
-    file: 'src/data.js',
+    file: DATA,
     from: /\n  hometown: '籍贯 重庆',/,
     to: '',
     expectFail: 'profile 有 hometown（名片要显示现居地 + 籍贯）',
-    script: 'smoke-render',
   },
   {
-    /* 时间线标题与作品列表标题不一致 —— 读者会以为是两个项目。 */
+    /* 首屏统计是手写值，必须与 projects 对得上 —— 改一个数字就该被拦住 */
+    name: '首屏统计手改数字（与项目条数对不上）',
+    file: DATA,
+    from: "value: '6 个'",
+    to: "value: '7 个'",
+    expectFail: '首屏「线上运行中」与有站点的项目数一致',
+  },
+  {
+    /* 统计区大数字手写死值的话，data.js 改了数字页面不会跟着动 */
+    name: '统计区大数字脱离数据源（手写死值）',
+    file: CAMPUS_STATS,
+    from: 'const target = Number(hero.value);',
+    to: 'const target = 99;',
+    expectFail: '校园圈子大数字钉在 metrics[0]',
+  },
+  {
+    /* 时间线标题与作品列表标题不一致 —— 读者会以为是两个项目。
+       ⚠️ 锚点必须落在时间线那一条上：作品列表里也有同名标题，
+       String.replace 只换首个匹配，改错地方验的就不是这件事。 */
     name: '时间线标题与作品列表不一致',
-    file: 'src/data.js',
-    /* ⚠️ 锚点必须落在**时间线**那一条上，不能只锚 title ——
-       作品列表里也有一条同名标题，String.replace 只替换首个匹配，
-       改到作品列表那条虽然也能让断言失配，但验的不是时间线这一处。
-       时间线条目前面有 year: '2026',，作品列表那条没有，用它定位。 */
+    file: DATA,
     from: "    year: '2026',\n    title: '五子棋对弈引擎 Gomoku Match',",
     to: "    year: '2026',\n    title: '五子棋对弈引擎',",
     expectFail: '时间线的项目标题与作品列表逐字一致',
-    script: 'smoke-render',
   },
   {
-    /* README 引用了仓库里没有的配图 —— GitHub 上那张图就是坏的。
-       踩过的坑：resume-page.webp 被 README 引用了却从没进过仓库。
-       这个坏图在本地和线上都看不出来，只有真的打开 README 才发现。 */
+    /* 网页简历与 PDF 讲同一件事但说法不同：改文案时漏改一边，
+       两边测试都过，只有对照 PDF 才发现对不上。 */
+    name: '网页简历分点与 PDF 说法不一致（改一边漏一边）',
+    file: DATA,
+    from: '长任务撞网关超时：图执行转后台异步任务、接口即时返回；',
+    to: '长任务撞网关超时：图执行转后台异步任务、接口立刻返回；',
+    expectFail: '简历分点与 PDF 逐条一致',
+  },
+  {
+    /* README 引用了仓库里没有的配图 —— GitHub 上那张图就是坏的，
+       本地和线上都看不出来，只有真打开 README 才发现。 */
     name: 'README 引用了一张仓库里没有的图',
-    file: 'README.md',
+    file: README,
     from: 'docs/images/resume-page.webp',
     to: 'docs/images/resume-page-missing.webp',
-    expectFail: 'README 引用的配图都在仓库里（缺一张就是坏图）',
-    script: 'smoke-render',
+    expectFail: 'README 引用的配图都在仓库里',
   },
   {
-    /* 禁用词回来了 —— 「打造」「助力」这类词是 AI 腔的直接信号。
-       反例挂在 src/data.js 的界面上，不动简历正文（简历要跟 PDF 逐字一致）。 */
+    /* 禁用词回来了 —— 「打造」「助力」是 AI 腔的直接信号 */
     name: '界面文案混入禁用词（AI 腔）',
-    file: 'src/data.js',
+    file: DATA,
     from: /tagline:\s*'([^']*)'/,
     to: "tagline: '助力打造$1'",
     expectFail: '文案禁用词',
     script: 'check-copy',
   },
   {
-    /* 破折号当停顿号用 —— 中文技术文案里出现「——」说明作者没想好怎么断句。 */
+    /* 破折号当停顿号用 */
     name: '界面文案用破折号当停顿号',
-    file: 'src/data.js',
+    file: DATA,
     from: /tagline:\s*'([^']*)'/,
     to: "tagline: '$1 —— 站点持续维护中'",
     expectFail: '文案破折号',
     script: 'check-copy',
   },
   {
-    /* 三段排比：「读需求、读代码、读文档」这种三句同头。
-       塞进 tagline 里，规则应该抓住。 */
+    /* 三段排比：「读需求、读代码、读文档」 */
     name: '界面文案写成三段排比',
-    file: 'src/data.js',
+    file: DATA,
     from: /tagline:\s*'([^']*)'/,
     to: "tagline: '读需求、读代码、读文档，三件事都做完了。'",
     expectFail: '文案三段排比',
     script: 'check-copy',
   },
   {
-    /* 简历正文里塞一个超长分句 —— 整句长是正常的，
-       但一个逗号之间超过 32 字读者要读两遍才断得开。
-       ⚠️ 反例必须真的超过阈值：只多写两三个字，
-       分句还是 26 字，规则当然不报，反例就白写了。 */
-    /* 锚的是 portfolio 分点（重写后的唯一一条）。坏写法把最后一个分句
-       塞到 50 字开外 —— 简历正文按「逗号之间」卡 32 字，整句长不管。 */
+    /* 简历正文里塞超长分句 —— 按「逗号之间」卡 32 字，整句长不管。
+       ⚠️ 反例必须真的超过阈值，只多两三个字规则当然不报。 */
     name: '简历分点塞进超长分句',
-    file: 'src/data.js',
+    file: DATA,
     from: '一套源码双环境部署，图片转 WebP 两档，首屏 1 MB 内。',
     to: '一套源码双环境部署，图片统一转成 WebP 并按布局与详情两个档位输出且把全部首屏静态资源的体积整体控制在 1 MB 以内以避免任何不必要的网络往返与重复加载。',
     expectFail: '文案分句过长',
@@ -273,7 +218,7 @@ const probe = (pattern, text) =>
 let bad = 0;
 try {
   for (const m of mutations) {
-    const original = readFileSync(m.file, 'utf8');
+    const original = originals[m.file];
     let mutated = null;
     if (m.custom) {
       mutated = m.custom(original);
@@ -318,10 +263,7 @@ try {
     if (!pass) bad += 1;
   }
 } finally {
-  writeFileSync(CSS, css);
-  writeFileSync(JSX, jsx);
-  writeFileSync(DATA, data);
-  writeFileSync(README, readme);
+  for (const [file, src] of Object.entries(originals)) writeFileSync(file, src);
 }
 
 console.log(bad ? `\n${bad} 条反例没被拦住，断言有问题` : '\n全部反例都被拦住了');

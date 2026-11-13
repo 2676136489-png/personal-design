@@ -165,7 +165,18 @@ const LABEL_SUFFIX = [
  *  注释（// 与 /* *）会被剥掉后再查，代码标识符不参与。 */
 const TARGETS = [
   { file: 'src/data.js', label: '界面文案' },
-  { file: 'src/main.jsx', label: '组件文案' },
+  /* main.jsx 现在只是挂载壳，真正写在组件里的界面文案在这几处 */
+  { file: 'src/app/Nav.jsx', label: '界面文案' },
+  { file: 'src/app/Footer.jsx', label: '界面文案' },
+  { file: 'src/pages/Home.tsx', label: '界面文案' },
+  { file: 'src/pages/Works.tsx', label: '界面文案' },
+  { file: 'src/pages/Campus.tsx', label: '界面文案' },
+  { file: 'src/pages/About.tsx', label: '界面文案' },
+  { file: 'src/pages/Skills.tsx', label: '界面文案' },
+  { file: 'src/pages/Contact.tsx', label: '界面文案' },
+  { file: 'src/pages/CtaLuma.tsx', label: '界面文案' },
+  { file: 'src/pages/NotFound.tsx', label: '界面文案' },
+  { file: 'src/pages/DetailPages.jsx', label: '界面文案' },
   { file: 'index.html', label: '页面元信息' },
   /* README 是技术文档，一句话要讲清「为什么这么选」，天然比界面文案长。
      界面文案超 25 字是啰嗦，README 超 25 字是省略了前提。 */
