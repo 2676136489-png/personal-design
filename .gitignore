@@ -38,6 +38,7 @@ build.log
 .mutation-check.mjs
 .shot-nav*.mjs
 .shot-campus-stats.mjs
+.probe-*.mjs
 
 # 参考用的第三方整站源码（只读素材，不入库）
 jack-3d-portfolio/
