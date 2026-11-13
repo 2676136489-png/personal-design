@@ -1,19 +1,24 @@
 # 个人作品集
 
-卢柯宇的作品集网站。React 19 + Vite 6 单页应用，hash 路由，六个独立页面。
+卢柯宇的作品集网站。React 19 + Vite 6 单页应用，hash 路由。当前外观是 3D 视觉重构版：纯黑底、Kanit 渐变大标题、两行自行反向滚动的作品带、白底反差的能力区、逐层缩放的 sticky 作品卡。
 
 <p align="center">
-  <img src="docs/images/home-dark.webp" width="49%" alt="首页（深色）">
-  <img src="docs/images/home-light.webp" width="49%" alt="首页（浅色）">
+  <img src="docs/images/v3-hero.webp" width="49%" alt="首屏">
+  <img src="docs/images/v3-about.webp" width="49%" alt="关于我">
 </p>
 
-深色主题是默认外观，浅色主题共用同一套结构，只覆盖 CSS 变量。
+首屏只讲项目，学校与成绩放在关于页和简历页。九个作品全部从同一份 `src/data.js` 派生，校园圈子映射成统一形状后与另外八个项目一起渲染。
 
 <p align="center">
-  <img src="docs/images/work-showcase.webp" alt="作品画廊">
+  <img src="docs/images/v3-capabilities.webp" width="49%" alt="能力（白底反差）">
+  <img src="docs/images/v3-projects.webp" width="49%" alt="作品堆叠卡">
 </p>
 
-作品页是整屏横向翻页的画廊，参考 Awwwards 上的 Akaru-2 Lateral Slider。滚动锁住视口，纵向滚动驱动内部横滚，停下吸附到最近一屏。每一屏左侧是标题与一句话说明，右侧用该项目自己的主题色，封面取线上站点的真实截图。
+## 工程回退
+
+站点只有一套对外外观，导航与页脚都不再提供旧版入口。`?skin=legacy` 是不对访客露出的隐藏开关：136 条 SSR 冒烟和两套历史布局脚本仍钉在旧版 DOM 上，留着才能继续跑回归，出问题时也能立刻切回来。
+
+旧版 CSS 只在隐藏分支动态加载。`styles.css` 里有 `body`、`h1`、`a` 这类全局选择器，静态 import 会把新版一起染色；新版 `site.css` 的选择器全部挂在 `.v3` 下，反过来不影响旧版。SSR 冒烟脚本渲染的是旧版 `AppShell`。
 
 ## 在线地址
 
@@ -24,16 +29,18 @@
 
 ## 页面
 
-| 路由 | 内容 | 动效语言 |
+| 路由 | 内容 | 动效 |
 | --- | --- | --- |
-| `/` | 首屏大版式、统计、五个入口 | 标题遮罩错峰入场、背景轨道线随滚动描出、首屏随滚动退场 |
-| `/works` | 九个项目的横向画廊 | 视口锁定 + 横向位移 + 惯性吸附 |
-| `/campus-circle` | 校园圈子长页叙事 | 封面遮罩揭开、章节时序入场、运营数据用单个大数字计数、四张截图散点入场、锚点平滑滚动 |
-| `/about` `/skills` `/contact` | 教育、履历、能力、联系方式 | 组件库 + 时序入场 |
-| `/resume` | 网页简历 | 与 PDF 同源，灯箱看原版 |
-| `/category/:slug` `/:slug` | 方向聚合页、项目详情页 | 长文档版式 |
+| `/` | 首屏、数据条、作品滚动带、关于、能力、堆叠卡、时间线、简历、联系 | 反向自动滚动带、悬停单行冻结并放大、逐字显影、磁吸主视觉、sticky 缩放 |
+| `/works` | 九个项目的卡片网格，可按方向筛选 | 进场淡入 |
+| `/resume` | 完整网页简历，与 PDF 同源 | 进场淡入 |
+| `/category/:slug` | 方向聚合页 | 进场淡入 |
+| `/:slug` | 项目详情，章节按 `data.js` 的六种块统一渲染 | 章节时序入场 |
+| `/about` `/skills` `/contact` | 首页对应板块的锚点 | 滚动定位 |
 
-页面切换有统一的进退场：进场 `opacity 0→1`、`y 20→0`，退场反过来，缓动都是 `power2.out`。
+<p align="center">
+  <img src="docs/images/v3-detail.webp" alt="项目详情页">
+</p>
 
 ## 收录的作品
 
@@ -49,13 +56,13 @@
 | 菜鸟驿站快递管理系统 | 系统设计 | 2024.09 — 2024.12 |
 | 校园服务视觉系统 | 品牌视觉 | 探索性设计 |
 
-每个项目都有独立详情页，正文按章节讲设计取舍。
+每个项目都有独立详情页，正文按章节讲设计取舍。页首是封面与三格界面图集，再往下才是章节，正文里引用过的截图不会在图集里重放一遍。
 
 <p align="center">
   <img src="docs/images/project-opspilot.webp" alt="项目详情页">
 </p>
 
-简历页与 PDF 是同一份材料的两份形态：网页上能直接读到项目要点，点开灯箱看排好版的原版。
+简历页与 PDF 是同一份材料的两份形态：首页给一段预览与荣誉，`/resume` 能读到完整的项目要点和排好版的原版。
 
 <p align="center">
   <img src="docs/images/resume-page.webp" alt="简历页">
@@ -66,18 +73,25 @@
 ```
 index.html
 src/
-  main.jsx          入口，只做挂载与样式装配
-  app/App.jsx       路由表、主题、全局转场
-  app/Nav.jsx       全局导航与移动端抽屉
-  app/Footer.jsx    站点地图与页脚
-  pages/            六个页面 + 404 + 三个迁移页
+  main.jsx          入口，默认只挂新版；旧版只走隐藏分支的动态 CSS
+  v3/
+    App.jsx         hash 路由、锚点滚动
+    content.js      从 data.js 派生九个作品、导航、滚动带数据
+    lib.jsx         FadeIn / Magnet / AnimatedText / 按钮
+    sections.jsx    首页八个板块
+    Detail.jsx      作品详情、全部作品、方向聚合、完整简历
+    site.css        新版样式，全部作用域在 .v3 下
+  app/App.jsx       旧版路由表、主题、全局转场
+  app/Nav.jsx       旧版全局导航与移动端抽屉
+  app/Footer.jsx    旧版站点地图与页脚
+  pages/            旧版六个页面 + 404 + 三个迁移页
   motion/scroll.tsx GSAP 注册、作用域、揭示动效基座
   lightbox.jsx      图片灯箱
   motion.jsx        迁移页仍在用的逐字揭示与视差
   router.js         hash 跳转与锚点滚动的两个小工具
   data.js           全部内容数据
-  design-system.css 新页面的设计系统（变量、栅格、按钮、卡片）
-  styles.css        配色变量与旧页面的基础样式
+  design-system.css 旧版设计系统（变量、栅格、按钮、卡片）
+  styles.css        旧版配色变量与基础样式
   tw.css            Tailwind 变量桥接
 public/media/       图片素材（全部 WebP）
 media-src/          截图源图（PNG），不进产物
@@ -86,6 +100,8 @@ scripts/            构建部署、图片处理、验证脚本
 ```
 
 ## 技术选择
+
+以下多数条目记录的是隐藏分支里那套旧代码的实现取舍，它仍完整保留在仓库里供回归测试使用。重构版换用了 Framer Motion 做进场与滚动驱动，Kanit 字体自托管在 `@fontsource/kanit`，运行时不依赖 Google Fonts。
 
 **hash 路由**。站点同时部署在根目录和 `/personal-design/` 子路径下，hash 路由不依赖服务端 rewrite，刷新任意深层页面都不会 404。
 
@@ -120,6 +136,32 @@ scripts/            构建部署、图片处理、验证脚本
 **`<img>` 上的 `width` / `height` 是固定像素尺寸提示**，优先级低于 CSS、高于 `auto`。只写 `width: 100%` 而不写高度时，高度会被属性里那个定值顶住，图片纵向变形。所以全局 `img` 规则里显式写了 `height: auto`。
 
 主题偏好存在 `localStorage`，key 带版本号（`portfolio-theme-v2`）。整体视觉换过一次之后，旧 key 里存的偏好属于上一套外观，继续沿用会让访客看不到新样式。
+
+### 重构版的几个取舍
+
+**作品卡的三格素材全部互不重复**。有线上界面的项目用各仓库 README 里挑过的真实截图，或从线上站点抓的不同视图。菜鸟驿站、iGEM Wiki 插件与视觉探索没有线上界面，就放一张真实封面，另外两格用章节名和实测数据做信息面板。之前用同一张封面补齐三格，九张卡里有六张是复制粘贴。断言逐卡检查图源唯一。
+
+<p align="center">
+  <img src="docs/images/v3-card-02.webp" alt="OpsPilot 作品卡：三格分别是三个不同的真实界面">
+</p>
+
+**主视觉用抽象雕塑，不用人物肖像**。首屏那件紫橙渐变的环形 3D 物体是生成的。白底按「离纯白的距离」算 alpha 抠掉，环内部的镂空本来就该透出黑底。`scripts/make-hero-3d.py` 输出 90KB 的透明 WebP。关于页四个角的装饰是同一张图做旋转与色相偏移。
+
+**渐变标题的动画 transform 放在外层 wrapper**。`background-clip: text` 与元素自身的 transform 在部分浏览器里会互相干扰，直接把淡入写在 `h2` 上会让文字消失。
+
+**逐字显影的区间压在 progress 0—0.9**。铺满 0—1 时最后一个字永远差一点点，停在 0.2 的灰上；留出尾部余量，读者滚到段落时文字已经全亮。
+
+**新版 `<img>` 也要写 `height: auto`**。旧版那条断言同样适用于重构版：带上 `width` / `height` 属性防 CLS，但不写 `height: auto` 的话属性里的固定像素会把图纵向拉长。
+
+**按钮的文字色要压过 `.v3 a { color: inherit }`**。那条重置的特异性是 0,1,1，比 `.v3-btn-ink` 的 0,1,0 高。白底简历区里继承到的是黑字，黑底按钮就成了黑底黑字、整块看不见。按钮规则写成 `.v3 a.v3-btn-ink` 并显式指定 `-webkit-text-fill-color`。断言逐个量所有实心按钮的前景色与底色，判据本身配了正反例自测。
+
+**滚动带的循环周期按「一组图 + 组间距」实测**。三倍复制的图片里，相位走满一个周期时第二组正好顶到第一组原来的位置，取模跳回 0 看不出来。周期用 tile 实测宽度加 CSS `columnGap` 算，拿 `scrollWidth / 3` 近似会少一个间隔，接缝处每圈抖 12px。
+
+**两行的暂停状态各自独立**。鼠标进入哪一行就把哪行的速度缓降到 0，另一行照跑；停稳后连页面滚动的视差也不再写进 transform，否则「停下的行」还会跟着页面飘。移开鼠标再缓升回原速。页面滚动的视差只在 scroll 事件里算好缓存，rAF 里不读 `getBoundingClientRect`。
+
+<p align="center">
+  <img src="docs/images/v3-marquee-hover.webp" alt="悬停时单行停下并放大当前作品">
+</p>
 
 ## 本地开发
 
@@ -168,7 +210,9 @@ node scripts/push-main.mjs      # 跑完测试再推 main，失败自动换地�
 
 截图源图放 `media-src/`（PNG），由 `scripts/optimize-images.py` 统一转成 WebP 写到 `public/media/`，产物里不留 PNG。整站图片从 14.6MB 压到 1.9MB。
 
-README 配图单独一条链路：`scripts/shoot-docs.mjs` 抓界面，`scripts/make-docs-images.py` 压成 WebP（`docs/images/`，5 张，合计 400KB 上下）。
+README 配图分两条链路。旧版走 `scripts/shoot-docs.mjs` 抓界面 + `scripts/make-docs-images.py` 压成 WebP。重构版走 `scripts/verify-v3.mjs` 在本地预览站上抓 `screenshots/v3-*.png`，再由 `scripts/make-v3-docs-images.py` 压到 1600 宽（`docs/images/v3-*.webp`，7 张合计 413KB）。改过界面就重跑这两步。
+
+作品卡的截图另有一条链路。源图是各项目仓库 `docs/` 下已经挑好的界面截图，以及 `scripts/capture-portfolio-views.mjs` 从线上作品集站抓的三个画面，统一放在 `media-src/captured/`。`scripts/make-gallery-images.py` 压到 1400 宽写入 `public/media/gallery/`（15 张合计 753KB），同时生成 `src/v3/gallery-sizes.json` 供 `<img>` 写宽高。
 
 ## 简历
 
@@ -195,10 +239,16 @@ PDF 是最终版，放在 `public/media/resume/lukeyu-resume.pdf`。页面上那
 三个 SSR 冒烟脚本。在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器。
 
 ```bash
-node scripts/smoke-render.mjs      # 路由、内容、数据契约、设计系统约束（133 条）
+node scripts/smoke-render.mjs      # 路由、内容、数据契约、设计系统约束（136 条）
 node scripts/smoke-nav.mjs         # 导航结构、激活态、抽屉与主题契约（28 条）
 node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约（43 条）
+node scripts/verify-v3.mjs         # 重构版真实浏览器冒烟（40 条 + 截图）
+node scripts/audit-images.mjs      # 逐路由滚动到底，检查每张图真的解码成功
 ```
+
+前三套是 SSR 冒烟，渲染的是 legacy 皮肤。`verify-v3.mjs` 走 CDP 打开默认外观。它检查八个板块、九个作品卡和两行反向自动滚动。每张卡的三格图源互不重复，新截图没有 404，按钮文字不与底色撞色，这些都有断言。悬停单行冻结、当前图放大、移开后恢复也在内。其余覆盖 sticky 缩放、逐字显影、四条内页路由、详情页封面与图集和 390px 移动端。界面上没有旧版入口、隐藏回退仍可用、控制台报错，这些也算在内。它顺带产出 README 配图的源截图。
+
+`audit-images.mjs` 补的是另一类故障：图片路径写错、构建漏拷、CDN 上少了一个文件，这些在 SSR 里全是字符串，看不出问题。它把 13 条路由逐条滚到底，等每个 `<img>` 的 `decode()` 落地再判，再单独扫一遍 CSS 背景图。现在跑下来 158 张图全部解码成功。判「还在加载」和「取不到」用的是 `decode()` 而不是 `complete`：后者在流式加载途中就是 `false`，会报一堆假失败。
 
 断言分两种：一种是「内容有没有渲染出来」，另一种是「实现契约有没有被改坏」。后者防的是某次重构悄悄把已经修好的问题带回来，比如「转场结束必须清掉 transform」，不清的话画廊的 pin 立刻错位。
 
@@ -231,10 +281,12 @@ node scripts/mutation-check.mjs
 布局与交互只能让真实布局引擎回答，比如「pin 到底贴住视口没有」「祖先链上有没有残留 transform」。本机装了 Edge，走 CDP 驱动：
 
 ```bash
-node scripts/verify-layout.mjs            # 九条路由 + pin/吸附/转场/移动端降级（44 条）
-node scripts/shoot-docs.mjs               # 抓 README 配图
+node scripts/verify-layout.mjs            # legacy 皮肤：九条路由 + pin/吸附/转场/移动端降级
+node scripts/verify-projects.mjs          # legacy 皮肤：作品列表与逐条详情页
 node scripts/push-main.mjs                # 跑完测试推 main，失败自动换地址
 ```
+
+这两套 CDP 脚本验证重构前的布局，URL 里都带 `?skin=legacy`。`shoot-docs.mjs` 抓的也是 legacy 配图。
 
 `verify-layout.mjs` 里最有用的两条是「pin 期间 bandTop 是否贴近 0」和「祖先链上有没有 transform」。前者证明横滚生效，后者解释它为什么没生效。这两个量在截图上看不出来，只能量。
 

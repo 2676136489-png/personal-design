@@ -39,7 +39,7 @@ const checks = [];
 const expect = (name, cond, detail) => checks.push([name, !!cond, detail]);
 
 const target = await (
-  await fetch(`${CDP}/json/new?${encodeURIComponent(`${BASE}/index.html`)}`, { method: 'PUT' })
+  await fetch(`${CDP}/json/new?${encodeURIComponent(`${BASE}/index.html?skin=legacy`)}`, { method: 'PUT' })
 ).json();
 const ws = new WebSocket(target.webSocketDebuggerUrl);
 let seq = 0;
@@ -86,7 +86,7 @@ const viewport = (width, height, mobile = false, scale = 1) =>
 
 /* ⚠️ cache-bust 必须拼在 # 之前：拼进 hash 只改片段，不会重新加载 */
 const open = async (path) => {
-  await send('Page.navigate', { url: `${BASE}/index.html?cb=${Date.now()}${path}` });
+  await send('Page.navigate', { url: `${BASE}/index.html?skin=legacy&cb=${Date.now()}${path}` });
   await sleep(1900);
   await evaljs('window.scrollTo({top:0,behavior:"instant"})');
   await sleep(250);

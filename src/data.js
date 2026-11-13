@@ -13,6 +13,7 @@ export const asset = (path) => `${BASE}${path.replace(/^\//, '')}`;
    所以这里填真实像素值即可，显示尺寸仍由布局决定。 */
 export const IMAGE_SIZES = {
   '/media/avatar-lky.webp': [1200, 1500],
+  '/media/hero-3d-object.webp': [839, 743],
   '/media/campus-desktop.webp': [1216, 832],
   '/media/campus-phone.webp': [832, 1216],
   '/media/campus/admin-accounts.webp': [2321, 1189],

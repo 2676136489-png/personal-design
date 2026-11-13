@@ -177,6 +177,12 @@ const TARGETS = [
   { file: 'src/pages/CtaLuma.tsx', label: '界面文案' },
   { file: 'src/pages/NotFound.tsx', label: '界面文案' },
   { file: 'src/pages/DetailPages.jsx', label: '界面文案' },
+  { file: 'src/v3/content.js', label: '界面文案' },
+  { file: 'src/v3/gallery.js', label: '界面文案' },
+  { file: 'src/v3/lib.jsx', label: '界面文案' },
+  { file: 'src/v3/sections.jsx', label: '界面文案' },
+  { file: 'src/v3/Detail.jsx', label: '界面文案' },
+  { file: 'src/v3/App.jsx', label: '界面文案' },
   { file: 'index.html', label: '页面元信息' },
   /* README 是技术文档，一句话要讲清「为什么这么选」，天然比界面文案长。
      界面文案超 25 字是啰嗦，README 超 25 字是省略了前提。 */

@@ -24,7 +24,7 @@ const BASE = `http://127.0.0.1:${PORT}`;
 const OUT = 'screenshots';
 
 const target = await (
-  await fetch(`http://127.0.0.1:${CDP}/json/new?${encodeURIComponent(`${BASE}/index.html`)}`, { method: 'PUT' })
+  await fetch(`http://127.0.0.1:${CDP}/json/new?${encodeURIComponent(`${BASE}/index.html?skin=legacy`)}`, { method: 'PUT' })
 ).json();
 const ws = new WebSocket(target.webSocketDebuggerUrl);
 let seq = 0;
@@ -60,7 +60,9 @@ const evaluate = async (expression) => {
 
 const goto = async (url) => {
   await send('Page.navigate', { url });
-  await new Promise((r) => setTimeout(r, 1500));
+  /* 旧版皮肤是先动态 import 三份 CSS 再挂载的，1.5s 常常还在转场；
+     等太短会把「还没渲染」读成「一个元素都没有」。 */
+  await new Promise((r) => setTimeout(r, 3200));
 };
 const shoot = async (name) => {
   const r = await send('Page.captureScreenshot', { format: 'png' });
@@ -71,26 +73,27 @@ const shoot = async (name) => {
 };
 
 /* 首页：项目卡片数、封面有没有真的加载出来 */
-await goto(`${BASE}/index.html#/`);
+await goto(`${BASE}/index.html?skin=legacy#/`);
 await shoot('v-home');
 
 const home = await evaluate(`(() => {
   const main = document.querySelector('main');
-  const imgs = [...main.querySelectorAll('img')];
+  /* 挂载失败时不要抛错也不要静默给 0，单独报出来，否则「没渲染」和「渲染了但为空」分不清 */
+  if (!main) return { mounted: false };
+  const imgs = [...document.images];
   return {
-    heroFacts: [...main.querySelectorAll('.hero-facts li, .hero-facts > div')].map(n => n.textContent.trim()).filter(Boolean),
-    /* 精选截图网格（.stage-item）与作品画廊（slider 屏）是两套东西。
-       作品画廊在 #work 内，每屏的标题在 [data-slide] h3 里。 */
-    stage: main.querySelectorAll('.stage-item').length,
-    slides: [...main.querySelectorAll('#work [data-slide] h3')].map(h => h.textContent.trim()),
+    mounted: main.innerHTML.length > 500,
+    h1: (document.querySelector('h1')?.textContent || '').trim().slice(0, 40),
     brokenImgs: imgs.filter(i => i.complete && i.naturalWidth === 0).map(i => i.getAttribute('src')),
     totalImgs: imgs.length,
   };
 })()`);
+if (!home?.mounted) {
+  console.log('【首页】FAIL 旧版皮肤没有挂载，下面的读数都不可信');
+  process.exit(1);
+}
 console.log('【首页】');
-console.log('  精选截图:', home.stage, '张 | 作品画廊:', home.slides.length, '屏');
-console.log('  作品列表:', home.slides.join(' / '));
-console.log('  首屏数据条:', home.heroFacts.join(' | '));
+console.log('  首屏标题:', home.h1 || '(无 h1)');
 console.log('  图片:', home.totalImgs, '张, 加载失败', home.brokenImgs.length, '张', home.brokenImgs);
 
 const list = [
@@ -101,7 +104,7 @@ const list = [
 ];
 
 for (const [slug, title] of list) {
-  await goto(`${BASE}/index.html#/${slug}`);
+  await goto(`${BASE}/index.html?skin=legacy#/${slug}`);
   const info = await evaluate(`(() => {
     const main = document.querySelector('main');
     const img = main.querySelector('img');
@@ -127,40 +130,18 @@ for (const [slug, title] of list) {
   await shoot(`v-${slug}`);
 }
 
-/* 导航下拉：新项目是否都列出来了，面板有没有铺满整页宽。
-   ⚠️ 必须用 Input.dispatchMouseEvent 发真实鼠标事件。
-      React 的 onMouseEnter 是由 mouseout/mouseover 合成出来的，
-      手动 dispatchEvent(new MouseEvent('mouseenter')) 根本不会触发它 ——
-      踩过一次，看起来像「面板坏了」，其实是验证方式不对。 */
-await goto(`${BASE}/index.html#/`);
-const trig = await evaluate(`(() => {
-  const g = [...document.querySelectorAll('.nav-group-trigger')].find(n => n.textContent.includes('全部作品'));
-  if (!g) return null;
-  const r = g.getBoundingClientRect();
-  return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
+/* 导航链接：旧版换成扁平导航后没有下拉面板了，改查链接本身。
+ * 手写那版全是占位 #/#work，旧断言只查 label 存在，全都能通过。 */
+await goto(`${BASE}/index.html?skin=legacy#/`);
+const nav = await evaluate(`(() => {
+  const links = [...document.querySelectorAll('.site-nav a, .site-drawer a')].map(a => ({
+    label: a.textContent.trim(), href: a.getAttribute('href') || ''
+  }));
+  return { links, placeholders: links.filter(l => !l.href || l.href === '#' || l.href === '#/#work') };
 })()`);
-if (trig) {
-  await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: trig.x, y: trig.y, buttons: 0 });
-  await new Promise((r) => setTimeout(r, 700));
-}
-const panel = await evaluate(`(() => {
-  const p = document.querySelector('.nav-panel[data-open="true"]');
-  if (!p) return null;
-  const r = p.getBoundingClientRect();
-  return {
-    links: [...p.querySelectorAll('a')].map(a => a.textContent.trim()),
-    cols: p.querySelectorAll('.nav-panel-col').length,
-    left: Math.round(r.left), right: Math.round(r.right),
-    client: document.documentElement.clientWidth,
-  };
-})()`);
-console.log('\n【导航下拉 · 全部作品】');
-if (panel) {
-  console.log('  列数:', panel.cols, '| 宽度:', panel.left, '→', panel.right, '(可布局', panel.client + ')');
-  console.log('  条目(' + panel.links.length + '):', panel.links.join(' / '));
-} else {
-  console.log('  ❌ 面板未打开');
-}
+console.log('\n【导航链接】');
+console.log('  条目(' + nav.links.length + '):', nav.links.map(l => l.label).join(' / '));
+console.log('  占位链接:', nav.placeholders.length ? JSON.stringify(nav.placeholders) : '无');
 await shoot('v-nav');
 
 console.log('\n截图已写入', OUT + '/');
