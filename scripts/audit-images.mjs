@@ -62,6 +62,17 @@ const evaluate = async (expression) => {
   return out?.result?.value;
 };
 
+/* 等 SPA 真的渲染出来。本机预览 2 秒够，线上要等 bundle 下载完，
+ * 否则采到的是空壳，会读成「这个路由一张图都没有」。 */
+const waitReady = () => evaluate(`(async () => {
+  for (let i = 0; i < 80; i += 1) {
+    const main = document.querySelector('main');
+    if (main && main.innerText.trim().length > 80) return true;
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  return false;
+})()`);
+
 /* 滚一遍把懒加载都触发出来，再回到顶部 */
 const sweep = async () => {
   await evaluate(`(async () => {
@@ -75,11 +86,22 @@ const sweep = async () => {
   })()`);
 };
 
-/* 先把每张图 decode 掉再判定：只读 naturalWidth 会把「还在流式加载」误判成坏图 */
-const settle = () => evaluate(`Promise.race([
-  Promise.all([...document.images].map(i => (i.decode ? i.decode() : Promise.resolve()).catch(() => {}))),
-  new Promise(r => setTimeout(r, 8000)),
-]).then(() => true)`);
+/* 先让每张图 decode 落地，再补一段有限的等待。
+ * 只读 naturalWidth 会把「还在流式加载」误判成坏图；
+ * 但也不能无上限地等所有 complete —— 页面里大量 loading="lazy" 的图
+ * 可能永远不会被请求，等它们只会把每条路由拖到超时。 */
+const settle = () => evaluate(`(async () => {
+  await Promise.race([
+    Promise.all([...document.images].map((i) => (i.decode ? i.decode().catch(() => {}) : Promise.resolve()))),
+    new Promise((r) => setTimeout(r, 20000)),
+  ]);
+  const cap = Date.now() + 8000;
+  while (Date.now() < cap) {
+    if ([...document.images].every((i) => i.complete || i.naturalWidth > 0)) return true;
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  return false;
+})()`);
 
 /* 收页面上的图片：<img> 解码状态 + CSS 背景图 + 内联 SVG 里的 <image href> */
 const collect = () => evaluate(`(() => {
@@ -121,7 +143,7 @@ const routes = [
 
 /* 详情页 slug 从首页链接里抓，避免手写清单跟数据脱节（路由形如 #/<slug>） */
 await send('Page.navigate', { url: `${BASE}${BASE.includes('?') ? '&' : '?'}cb=${Date.now()}` });
-await wait(2500);
+await waitReady();
 const slugs = await evaluate(`(() => {
   const RESERVED = new Set(['/', '/works', '/resume', '/about', '/skills', '/contact']);
   const links = [...document.querySelectorAll('a[href^="#/"]')];
@@ -138,11 +160,12 @@ const dupeReport = [];
 for (const [hash, label] of routes) {
   netFails = [];
   await send('Page.navigate', { url: `${BASE}${BASE.includes('?') ? '&' : '?'}cb=${Date.now()}${hash.replace('#', '') ? '#' + hash.replace('#', '') : ''}` });
-  await wait(2000);
+  const ready = await waitReady();
   await sweep();
-  await settle();
+  const settled = await settle();
   const res = await collect();
   grandTotal += res.total;
+  if (!ready || !settled) console.log(`\n   ⚠️ 等待超时（ready=${ready} settled=${settled}），下面的结论可能不准`);
 
   /* 详情页里同一张图不该出现两次。
    * 例外：页首封面。campus 的封面就是「学生中心」那一屏，它既是封面也出现在章节里，
@@ -155,6 +178,7 @@ for (const [hash, label] of routes) {
   }
 
   console.log(`\n== ${label}  (${hash})  图片 ${res.total} 张`);
+  if (res.total === 0 && hash !== '#/resume') console.log('   ⚠️ 这一页一张图都没有，先确认它是不是真的渲染了');
   if (res.broken.length) {
     allBroken += res.broken.length;
     for (const b of res.broken) console.log(`   BROKEN ${b.src}  natural=${b.natural} complete=${b.complete} alt=${b.alt}`);

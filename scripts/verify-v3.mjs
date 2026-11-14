@@ -57,6 +57,16 @@ await send('Emulation.setDeviceMetricsOverride', {
 });
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+/* 线上 bundle 与旧版 chunk 都要过网络，固定等待会在慢链路下误报。
+   这里轮询到条件成立为止，超时才判失败。 */
+const waitFor = async (expression, timeout = 12000) => {
+  const started = Date.now();
+  while (Date.now() - started < timeout) {
+    if (await evaluate(expression)) return true;
+    await wait(200);
+  }
+  return false;
+};
 const evaluate = async (expression) => {
   const out = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
   if (out?.exceptionDetails) throw new Error(out.exceptionDetails.text);
@@ -128,11 +138,11 @@ expect('页面标题正确', dom.title === '卢柯宇 | 个人作品集', dom.ti
 expect('新版根节点存在且背景是 #0C0C0C', dom.hasRoot && dom.bg === 'rgb(12, 12, 12)', dom.bg);
 expect('字体栈以 Kanit 开头', /^['"]?Kanit/.test(dom.font || ''), dom.font);
 expect('渐变大标题用了 background-clip:text', dom.h1Text === 'LUKEYU' && dom.h1Clip === 'text', `${dom.h1Text} / ${dom.h1Clip}`);
-expect('导航 5 个栏目 + 求职状态胶囊', dom.navLinks === 5 && dom.statusLink === 1, `${dom.navLinks}/${dom.statusLink}`);
+expect('导航 5 个栏目，没有求职状态胶囊', dom.navLinks === 5 && dom.statusLink === 0, `${dom.navLinks}/${dom.statusLink}`);
 expect('界面上没有旧版入口', dom.legacyVisible === 0, String(dom.legacyVisible));
 expect('八个板块都在', Object.values(dom.sections).every((n) => n > 0), JSON.stringify(dom.sections));
 expect('首屏数据条 4 项且值来自数据源', JSON.stringify(dom.factValues) === JSON.stringify(['9 个', '6 个', '19 位', '4 类']), dom.factValues.join('/'));
-expect('作品滚动带 27 张封面（5+4 各三倍）', dom.sections.marqueeTiles === 27, String(dom.sections.marqueeTiles));
+expect('作品滚动带 54 张封面（两行各 9 个项目三倍）', dom.sections.marqueeTiles === 54, String(dom.sections.marqueeTiles));
 expect('能力 4 组 + 技术栈 6 组', dom.capRows === 4 && dom.skillItems === 6, `${dom.capRows}/${dom.skillItems}`);
 expect('作品堆叠卡 9 张（含校园圈子）', dom.stackCards === 9, String(dom.stackCards));
 expect('旗舰项目在首位', (dom.stackTitles[0] || '').includes('校园圈子'), dom.stackTitles[0]);
@@ -334,7 +344,7 @@ await shot('mobile-hero');
 /* ---------- 不对访客露出的工程回退 ---------- */
 await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
 await goto(`${BASE}${BASE.includes('?') ? '&' : '?'}skin=legacy&cb=${Date.now()}`);
-await wait(1500);
+await waitFor(`!!document.querySelector('.site-shell') && !!document.querySelector('.v3-legacy-badge')`);
 const legacy = await evaluate(`({ shell: !!document.querySelector('.site-shell'), badge: !!document.querySelector('.v3-legacy-badge'), v3: !!document.querySelector('.v3') })`);
 expect('隐藏的工程回退仍可用（界面不露出入口）', legacy.shell && legacy.badge && !legacy.v3 && dom.legacyVisible === 0, JSON.stringify(legacy));
 

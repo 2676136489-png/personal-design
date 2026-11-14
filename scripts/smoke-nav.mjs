@@ -28,7 +28,7 @@ const NAV = [
 ];
 
 try {
-  const main = await server.ssrLoadModule('/src/main.jsx');
+  const main = await server.ssrLoadModule('/src/app/App.jsx');
   const AppShell = main.AppShell;
   const MemoryRouter = main.MemoryRouter;
 

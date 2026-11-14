@@ -20,7 +20,7 @@ const { expect, report } = createChecker();
 const server = await startSsrServer();
 
 try {
-  const main = await server.ssrLoadModule('/src/main.jsx');
+  const main = await server.ssrLoadModule('/src/app/App.jsx');
   const lb = await server.ssrLoadModule('/src/lightbox.jsx');
   const AppShell = main.AppShell;
   const MemoryRouter = main.MemoryRouter;

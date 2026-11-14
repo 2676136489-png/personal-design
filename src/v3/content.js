@@ -45,11 +45,13 @@ export const PROJECT_BY_SLUG = Object.fromEntries(ALL_PROJECTS.map((p) => [p.slu
 
 export { galleryFor } from './gallery.js';
 
-/* 双行反向滚动带。9 张封面各出现三次，滚动时不会露出空档。 */
+/* 双行反向滚动带。两行都铺满 9 个项目的封面，
+   第二行用倒序，避免上下两行在同一列反复出现同一张图。
+   三倍复制保证相位走满一组后接缝处仍有内容。 */
 const COVERS = ALL_PROJECTS.map((p) => ({ src: p.image, title: p.title, slug: p.slug }));
 const triple = (list) => [...list, ...list, ...list];
-export const MARQUEE_ROW_ONE = triple(COVERS.slice(0, 5));
-export const MARQUEE_ROW_TWO = triple(COVERS.slice(5));
+export const MARQUEE_ROW_ONE = triple(COVERS);
+export const MARQUEE_ROW_TWO = triple([...COVERS].reverse());
 
 export const NAV_ITEMS = [
   { label: '首页', href: '#/' },

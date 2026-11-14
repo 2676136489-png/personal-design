@@ -276,7 +276,7 @@ export default function CtaLuma() {
               viewport={{ once: true, amount: 0.4 }}
               transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
             >
-              实习、项目合作，或者只是对某个实现有疑问，邮件基本当天回。
+              项目合作，或者只是对某个实现有疑问，邮件基本当天回。
             </motion.p>
             <motion.a
               className="luma01-btn"

@@ -22,7 +22,9 @@ const outDir = path.join(root, 'dist-pages');
 const tmpDir = path.join(root, 'dist-pages-new');
 const oldDir = path.join(root, 'dist-pages-old');
 const REPO = 'personal-design';
-const REMOTE = `https://github.com/2676136489-png/${REPO}.git`;
+/* 默认走 HTTPS；凭据管理器在后台进程里弹不出窗口时会卡死，
+   这时用 PAGES_REMOTE=git@github.com:... 走 SSH 绕开。 */
+const REMOTE = process.env.PAGES_REMOTE || `https://github.com/2676136489-png/${REPO}.git`;
 const BRANCH = 'gh-pages';
 
 function run(cmd, cwd = root) {

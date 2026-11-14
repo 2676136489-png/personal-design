@@ -7,8 +7,10 @@ import {
   MARQUEE_ROW_ONE,
   MARQUEE_ROW_TWO,
   NAV_ITEMS,
+  PROJECT_BY_SLUG,
   achievements,
   capabilities,
+  categories,
   heroFacts,
   imgAttrs,
   media,
@@ -28,11 +30,24 @@ import {
 
 /* ---------------- 导航 ---------------- */
 
+/* Logo：双斜 K。竖线取当前文字色，两道斜臂用强调紫。
+   尺寸由外套 CSS 给，导航与页脚共用同一个形状。 */
+function LogoMark() {
+  return (
+    <svg className="v3-logo-mark" viewBox="9 5 32 38" aria-hidden="true" focusable="false">
+      <path d="M12 8 V40" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+      <path d="M12 24 L38 8" stroke="#b600a8" strokeWidth="6" strokeLinecap="round" />
+      <path d="M12 24 L38 40" stroke="#b600a8" strokeWidth="6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function SiteNav() {
   return (
     <header className="v3-nav">
       <a className="v3-nav-mark" href="#/" aria-label="回到首页">
-        LKY<span className="v3-nav-dot">.</span>
+        <LogoMark />
+        <span>LKY</span>
       </a>
       <nav className="v3-nav-links" aria-label="主导航">
         {NAV_ITEMS.slice(1).map((item) => (
@@ -41,9 +56,6 @@ export function SiteNav() {
           </a>
         ))}
       </nav>
-      <a className="v3-nav-status" href="#/contact">
-        <i aria-hidden="true" /> 开放实习机会
-      </a>
     </header>
   );
 }
@@ -190,7 +202,7 @@ export function Marquee() {
         if (paused.current[index] && current.speed === 0) return;
         if (!current.cycle) return;
 
-        current.offset += 34 * current.speed * dt;
+        current.offset += 42.5 * current.speed * dt;
         const phase = current.offset % current.cycle;
         const x = index === 0
           ? -phase + parallax
@@ -284,7 +296,7 @@ export function About() {
             <p>{resume.education[0].period} · {resume.education[0].gpa}</p>
             <p>{resume.education[0].points[0]}</p>
             <p>{profile.city}（{profile.hometown}）</p>
-            <p className="v3-profile-status">{profile.status} · 求职方向 AI Agent / 后端开发实习</p>
+            <p className="v3-profile-status">{profile.status}</p>
           </div>
         </FadeIn>
       </div>
@@ -429,7 +441,7 @@ export function Projects() {
   return (
     <section className="v3-projects" id="work">
       <SectionTitle className="v3-gradient">作品</SectionTitle>
-      <p className="v3-section-lede">九个项目，从线上运行的系统到算法与视觉探索。</p>
+      <p className="v3-section-lede">九个项目，覆盖线上系统、算法引擎与视觉探索。</p>
       <div ref={ref} className="v3-stack">
         {ALL_PROJECTS.map((project, index) => (
           <ProjectCard
@@ -506,7 +518,6 @@ export function Resume() {
               <li key={line}>{line}</li>
             ))}
           </ul>
-          <p className="v3-resume-updated">最近更新 {resume.updated}</p>
         </div>
       </div>
     </section>
@@ -514,6 +525,11 @@ export function Resume() {
 }
 
 /* ---------------- 08 联系 ---------------- */
+
+/* 页脚作品列只放主力项目：九项全列会把这一列拉得比别的高一截，
+   剩下的入口由「全部作品」承接。 */
+const FOOTER_PROJECT_SLUGS = ['campus', 'opspilot', 'research', 'gomoku'];
+const FOOTER_PROJECTS = FOOTER_PROJECT_SLUGS.map((slug) => PROJECT_BY_SLUG[slug]).filter(Boolean);
 
 export function Contact() {
   const links = [
@@ -525,29 +541,63 @@ export function Contact() {
 
   return (
     <footer className="v3-contact" id="contact">
-      <SectionTitle className="v3-gradient v3-contact-title">联系我</SectionTitle>
-      <p className="v3-contact-lede">在找 AI Agent / 后端开发实习机会，欢迎聊聊。</p>
-      <GradientButton href={`mailto:${profile.email}`} className="v3-contact-cta">
-        发邮件 <ArrowUpRight size={18} aria-hidden="true" />
-      </GradientButton>
-      <div className="v3-contact-links">
-        {links.map(({ icon: Icon, label, value, href }) => (
-          <div key={label} className="v3-contact-link">
-            <Icon size={18} aria-hidden="true" />
-            <span>{label}</span>
-            {href ? (
-              <a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
-                {value}
-              </a>
-            ) : (
-              <b>{value}</b>
-            )}
-          </div>
-        ))}
+      <div className="v3-contact-main">
+        <SectionTitle className="v3-gradient v3-contact-title">联系我</SectionTitle>
+        <p className="v3-contact-lede">项目合作或技术交流，欢迎邮件联系。</p>
+        <GradientButton href={`mailto:${profile.email}`} className="v3-contact-cta">
+          发邮件 <ArrowUpRight size={18} aria-hidden="true" />
+        </GradientButton>
+        <div className="v3-contact-links">
+          {links.map(({ icon: Icon, label, value, href }) => (
+            <div key={label} className="v3-contact-link">
+              <Icon size={18} aria-hidden="true" />
+              <span>{label}</span>
+              {href ? (
+                <a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
+                  {value}
+                </a>
+              ) : (
+                <b>{value}</b>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="v3-footer">
-        <span>© 2026 {profile.name} · {profile.school}</span>
-        <span>{profile.status} · AI Agent / 后端开发实习</span>
+
+      <div className="v3-footer-grid">
+        <div className="v3-footer-brand">
+          <a className="v3-footer-mark" href="#/" aria-label="回到首页">
+            <LogoMark />
+            <span>LKY</span>
+          </a>
+          <p>{profile.name} · 独立开发</p>
+          <p>{profile.education}</p>
+          <a href={`mailto:${profile.email}`}>{profile.email}</a>
+        </div>
+
+        <nav className="v3-footer-col" aria-label="页脚作品导航">
+          <p className="v3-footer-heading">作品</p>
+          {FOOTER_PROJECTS.map((project) => (
+            <a key={project.slug} href={`#/${project.slug}`}>{project.title}</a>
+          ))}
+          <a href="#/works">全部作品</a>
+        </nav>
+
+        <nav className="v3-footer-col" aria-label="页脚方向导航">
+          <p className="v3-footer-heading">方向</p>
+          {categories.map((category) => (
+            <a key={category.slug} href={`#/category/${category.slug}`}>{category.name}</a>
+          ))}
+        </nav>
+
+        <nav className="v3-footer-col" aria-label="页脚更多导航">
+          <p className="v3-footer-heading">更多</p>
+          <a href="#/about">关于</a>
+          <a href="#/skills">能力</a>
+          <a href="#/resume">在线简历</a>
+          <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/2676136489-png/personal-design" target="_blank" rel="noreferrer">本站源码</a>
+        </nav>
       </div>
     </footer>
   );

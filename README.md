@@ -18,14 +18,14 @@
 
 站点只有一套对外外观，导航与页脚都不再提供旧版入口。`?skin=legacy` 是不对访客露出的隐藏开关：136 条 SSR 冒烟和两套历史布局脚本仍钉在旧版 DOM 上，留着才能继续跑回归，出问题时也能立刻切回来。
 
-旧版 CSS 只在隐藏分支动态加载。`styles.css` 里有 `body`、`h1`、`a` 这类全局选择器，静态 import 会把新版一起染色；新版 `site.css` 的选择器全部挂在 `.v3` 下，反过来不影响旧版。SSR 冒烟脚本渲染的是旧版 `AppShell`。
+旧版 JS 与 CSS 都只在隐藏分支动态加载。`styles.css` 里有 `body`、`h1`、`a` 这类全局选择器，静态 import 会把新版一起染色；旧版 `App` 还会把 react-router 与六个旧页面带进首屏包，所以只有 `?skin=legacy` 时才加载。新版 `site.css` 的选择器全部挂在 `.v3` 下，反过来不影响旧版。SSR 冒烟脚本直接渲染旧版 `AppShell`。
 
 ## 在线地址
 
-- 主站：https://2676136489-png.github.io/personal-design/
+- 主站：https://lukeyu-portfolio.app.workbuddy.host/?sharecode=VQRU7WNFFG
 - 镜像：https://2676136489-png.github.io/personal-design/
 
-两个站部署方式不同，源码相同、构建参数不同，改完各自发布。
+两个站部署方式不同，源码相同、构建参数不同，改完各自发布。WorkBuddy 的 sharecode 每次重新发布会变，对外分享时原样带上。
 
 ## 页面
 
@@ -51,7 +51,7 @@
 | [校园圈子](https://www.lucky-campus.top) | Web 应用 | 2026.05 — 2026.08 |
 | [五子棋对弈引擎 Gomoku Match](https://2676136489-png.github.io/personal-design/demo/gomoku.html) | 算法系统 | 2026.04 — 2026.11 |
 | iGEM Glass Wiki 插件 | Web 组件 | 2026.07 |
-| 个人作品集 | 前端开发 | 2026.07 — 2026.10 |
+| 个人作品集 | 前端开发 | 2026.07 — 2026.11 |
 | 学习目标管理台 | Web 应用 | 2026.09 |
 | 菜鸟驿站快递管理系统 | 系统设计 | 2024.09 — 2024.12 |
 | 校园服务视觉系统 | 品牌视觉 | 探索性设计 |
@@ -73,7 +73,7 @@
 ```
 index.html
 src/
-  main.jsx          入口，默认只挂新版；旧版只走隐藏分支的动态 CSS
+  main.jsx          入口，默认只挂新版；旧版只走隐藏分支的动态 JS 与 CSS
   v3/
     App.jsx         hash 路由、锚点滚动
     content.js      从 data.js 派生九个作品、导航、滚动带数据

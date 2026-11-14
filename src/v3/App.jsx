@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
-import { parseRoute } from './content.js';
+import { parseRoute, profile, PROJECT_BY_SLUG, categories } from './content.js';
 import { Landing, SiteNav } from './sections.jsx';
 import { FullResume, ProjectDetail, Works } from './Detail.jsx';
+
+const TITLE_BASE = `卢柯宇 | 个人作品集`;
+const ANCHOR_TITLES = { about: '关于', skills: '能力', contact: '联系' };
 
 function useHashRoute() {
   const [route, setRoute] = useState(() =>
@@ -24,6 +27,25 @@ export default function App() {
     document.documentElement.style.backgroundColor = '#0C0C0C';
     document.body.style.backgroundColor = '#0C0C0C';
   }, []);
+
+  /* 详情页、作品页与简历页各自有标题，分享与标签页才看得出是哪一页。 */
+  useEffect(() => {
+    let title = TITLE_BASE;
+    if (route.kind === 'works') {
+      title = `全部作品 | ${profile.name}`;
+    } else if (route.kind === 'resume') {
+      title = `简历 | ${profile.name}`;
+    } else if (route.kind === 'detail') {
+      const project = PROJECT_BY_SLUG[route.slug];
+      if (project) title = `${project.title} | ${profile.name}`;
+    } else if (route.kind === 'category') {
+      const category = categories.find((item) => item.slug === route.slug);
+      if (category) title = `${category.name} | ${profile.name}`;
+    } else if (route.kind === 'anchor' && ANCHOR_TITLES[route.id]) {
+      title = `${ANCHOR_TITLES[route.id]} | ${profile.name}`;
+    }
+    document.title = title;
+  }, [route.kind, route.id, route.slug]);
 
   /* 锚点路由（#/about 等）和章节深链（#/slug#chapter）都要等新内容上屏再滚。
    * 其余路由换页直接回顶部，否则从长页面点进详情页会停在半空。 */

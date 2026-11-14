@@ -135,41 +135,45 @@ export function AnimatedText({ text, className = '', style }) {
 
   return (
     <p ref={ref} className={`v3-at ${className}`} style={style}>
-      {tokenize(text).map((token, index) => {
-        if (token.type === 'space') {
-          cursor += 1;
-          return <span key={index} className="v3-at-space"> </span>;
-        }
-        if (token.type === 'char') {
-          const at = cursor;
-          cursor += 1;
+      {/* 逐字拆分对读屏不友好：完整文本单独给一份，动画层整体隐藏。 */}
+      <span className="v3-sr-only">{text}</span>
+      <span aria-hidden="true">
+        {tokenize(text).map((token, index) => {
+          if (token.type === 'space') {
+            cursor += 1;
+            return <span key={index} className="v3-at-space"> </span>;
+          }
+          if (token.type === 'char') {
+            const at = cursor;
+            cursor += 1;
+            return (
+              <AnimatedChar
+                key={index}
+                char={token.text}
+                progress={scrollYProgress}
+                range={rangeOf(at)}
+              />
+            );
+          }
+          const chars = Array.from(token.text).map((ch, i) => {
+            const at = cursor + i;
+            return (
+              <AnimatedChar
+                key={`${index}-${i}`}
+                char={ch}
+                progress={scrollYProgress}
+                range={rangeOf(at)}
+              />
+            );
+          });
+          cursor += token.text.length;
           return (
-            <AnimatedChar
-              key={index}
-              char={token.text}
-              progress={scrollYProgress}
-              range={rangeOf(at)}
-            />
+            <span key={index} className="v3-at-word">
+              {chars}
+            </span>
           );
-        }
-        const chars = Array.from(token.text).map((ch, i) => {
-          const at = cursor + i;
-          return (
-            <AnimatedChar
-              key={`${index}-${i}`}
-              char={ch}
-              progress={scrollYProgress}
-              range={rangeOf(at)}
-            />
-          );
-        });
-        cursor += token.text.length;
-        return (
-          <span key={index} className="v3-at-word">
-            {chars}
-          </span>
-        );
-      })}
+        })}
+      </span>
     </p>
   );
 }

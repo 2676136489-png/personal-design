@@ -130,7 +130,7 @@ export function ProjectDetail({ slug }) {
             GitHub <Github size={16} aria-hidden="true" />
           </GhostButton>
         )}
-        <GradientButton href="#/contact">聊聊这个项目</GradientButton>
+        <GradientButton href="#/contact">联系我</GradientButton>
       </div>
 
       {extraShots.length > 0 && (
@@ -246,7 +246,6 @@ export function FullResume() {
     <div className="v3-full-resume">
       <a className="v3-back" href="#/"><ArrowLeft size={16} aria-hidden="true" /> 回首页</a>
       <SectionTitle className="v3-gradient">简历</SectionTitle>
-      <p className="v3-section-lede">最近更新 {resume.updated} · 与 PDF 版本逐条对齐</p>
 
       <div className="v3-fr-actions">
         <a className="v3-btn-gradient" href={media.resume.pdf} target="_blank" rel="noreferrer">下载 PDF</a>
@@ -262,7 +261,7 @@ export function FullResume() {
         <h2>教育背景</h2>
         {resume.education.map((edu) => (
           <div className="v3-fr-edu" key={edu.school}>
-            <div>
+            <div className="v3-fr-edu-main">
               <b>{edu.school}</b>
               <span>{edu.major}</span>
             </div>

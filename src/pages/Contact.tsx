@@ -56,7 +56,7 @@ export default function Contact() {
             聊聊？
           </h1>
           <p className="ds-lede" data-r style={{ marginTop: 20 }}>
-            实习、项目合作，或者只是对某个实现有疑问，都可以直接找我。邮件基本当天回。
+            项目合作，或者只是对某个实现有疑问，都可以直接找我。邮件基本当天回。
           </p>
         </div>
       </header>

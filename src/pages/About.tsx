@@ -81,7 +81,6 @@ export default function About() {
                 <Row icon={<GraduationCap size={15} />} k="教育" v={profile.education} />
                 <Row icon={<MapPin size={15} />} k="坐标" v={`${profile.city} · ${profile.hometown}`} />
                 <Row k="状态" v={profile.status} />
-                <Row k="方向" v="AI Agent / 后端开发实习" />
                 <Row k="更新" v={resume.updated} />
               </dl>
             </aside>

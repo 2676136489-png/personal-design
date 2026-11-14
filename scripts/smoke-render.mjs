@@ -19,7 +19,7 @@ const read = (rel) => readFileSync(fileURLToPath(new URL(`../${rel}`, import.met
 
 try {
   /* 页面组件走 Vite 的 SSR 模块图；React 由 lib/ssr-dom 保证只有一份 */
-  const main = await server.ssrLoadModule('/src/main.jsx');
+  const main = await server.ssrLoadModule('/src/app/App.jsx');
   const data = await server.ssrLoadModule('/src/data.js');
   const AppShell = main.AppShell;
   const MemoryRouter = main.MemoryRouter;
@@ -135,7 +135,7 @@ try {
 
   /* ============ 关于 / 能力 / 联系 ============ */
   const about = html['/about'];
-  expect('关于页有四条优势', resume.advantages.every((a) => about.includes(a)));
+  expect('关于页的优势都渲染出来了', resume.advantages.every((a) => about.includes(a)));
   expect('关于页有教育经历', resume.education.every((e) => about.includes(e.school)));
   expect('关于页有荣誉', resume.honors.every((h) => about.includes(h.title || h.name || '')));
 
@@ -189,7 +189,7 @@ try {
       if (miss.length) console.log(`    ${s} 漏掉的分点:`, miss.join(' | '));
     }
   }
-  expect('个人优势四条都渲染出来了', resume.advantages.every((a) => resumeBody.includes(a)));
+  expect('个人优势都渲染出来了', resume.advantages.every((a) => resumeBody.includes(a)));
 
   /* ============ 数据契约 ============ */
   /* 每个项目都能通过 slug 打开详情页 */
@@ -246,15 +246,32 @@ try {
   /* ============ 跨源：网页简历 ↔ PDF ============ */
   const PDF_PATH = fileURLToPath(new URL('../public/media/resume/lukeyu-resume.pdf', import.meta.url));
   if (existsSync(PDF_PATH)) {
-    let pdfText = '';
-    try {
-      const { execFileSync } = await import('node:child_process');
-      pdfText = execFileSync('python', ['-c',
-        'import pymupdf,sys;d=pymupdf.open(sys.argv[1]);print("\\n".join(p.get_text() for p in d))',
-        PDF_PATH], { encoding: 'utf8' });
-    } catch (err) {
-      console.log('    （读 PDF 失败，跳过跨源比对:', err.message.slice(0, 80), '）');
+    const { execFileSync } = await import('node:child_process');
+    const PY_CODE = 'import pymupdf,sys;d=pymupdf.open(sys.argv[1]);print("\\n".join(p.get_text() for p in d))';
+    /* PATH 里的 python 未必装了 pymupdf。逐个探解释器，
+       全找不到就判失败 —— 静默跳过等于这两条断言根本没写。 */
+    const candidates = [
+      ...(process.env.PDF_PYTHON ? [process.env.PDF_PYTHON.split(' ')] : []),
+      ['python'], ['python3'], ['py', '-3'], ['py'],
+    ];
+    let reader = null;
+    for (const [bin, ...pre] of candidates) {
+      try {
+        execFileSync(bin, [...pre, '-c', 'import pymupdf'], { stdio: 'ignore' });
+        reader = [bin, ...pre];
+        break;
+      } catch { /* 这个解释器没装，换下一个 */ }
     }
+    let pdfText = '';
+    if (reader) {
+      const [bin, ...pre] = reader;
+      try {
+        pdfText = execFileSync(bin, [...pre, '-c', PY_CODE, PDF_PATH], { encoding: 'utf8' });
+      } catch (err) {
+        console.log('    （读 PDF 出错:', err.message.slice(0, 80), '）');
+      }
+    }
+    if (!pdfText) expect('简历 PDF 文字可抽取（pymupdf）', false);
     if (pdfText) {
       /* PDF 抽出的文字会跨行拆开，比对前两边都去空白 */
       const squash = (t) => t.replace(/\s+/g, '');
