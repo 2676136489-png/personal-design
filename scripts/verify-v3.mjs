@@ -143,7 +143,7 @@ expect('界面上没有旧版入口', dom.legacyVisible === 0, String(dom.legacy
 expect('八个板块都在', Object.values(dom.sections).every((n) => n > 0), JSON.stringify(dom.sections));
 expect('首屏数据条 4 项且值来自数据源', JSON.stringify(dom.factValues) === JSON.stringify(['10 个', '9 个', '19 位', '4 类']), dom.factValues.join('/'));
 expect('作品滚动带 60 张封面（两行各 10 个项目三倍）', dom.sections.marqueeTiles === 60, String(dom.sections.marqueeTiles));
-expect('能力 4 组 + 技术栈 6 组', dom.capRows === 4 && dom.skillItems === 6, `${dom.capRows}/${dom.skillItems}`);
+expect('能力 4 组 + 技术栈 4 组', dom.capRows === 4 && dom.skillItems === 4, `${dom.capRows}/${dom.skillItems}`);
 expect('作品堆叠卡 10 张（含校园圈子）', dom.stackCards === 10, String(dom.stackCards));
 expect('旗舰项目在首位', (dom.stackTitles[0] || '').includes('校园圈子'), dom.stackTitles[0]);
 const cardSlots = await evaluate(`Array.from(document.querySelectorAll('.v3-stack-card')).map((card) => {
