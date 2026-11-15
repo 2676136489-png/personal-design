@@ -381,7 +381,7 @@ function ProjectCard({ project, index, total, progress }) {
   const targetScale = 1 - (total - 1 - index) * 0.015;
   const scale = useTransform(progress, [index * (1 / total), 1], [1, targetScale]);
   const shots = galleryFor(project);
-  /* 参考站只有 3 张卡，固定 28px 累加没问题。这里有 11 张，
+  /* 参考站只有 3 张卡，固定 28px 累加没问题。这里有 10 张，
      累加到 224px 会把最后一张顶出视口，所以按总数摊平并封顶 120px。 */
   const stackOffset = Math.round((index * 120) / Math.max(1, total - 1));
 
@@ -446,7 +446,7 @@ export function Projects() {
   return (
     <section className="v3-projects" id="work">
       <SectionTitle className="v3-gradient">作品</SectionTitle>
-      <p className="v3-section-lede">十一个项目，覆盖线上系统、算法引擎与视觉探索。</p>
+      <p className="v3-section-lede">十个项目，覆盖线上系统、算法引擎与视觉组件。</p>
       <div ref={ref} className="v3-stack">
         {ALL_PROJECTS.map((project, index) => (
           <ProjectCard

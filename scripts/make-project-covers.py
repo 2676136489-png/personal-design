@@ -37,8 +37,12 @@ JOBS = [
     ("project-archive-raw.png", "project-archive.webp", None),
     ("project-lumora-raw.png", "project-lumora.webp", None),
     ("project-portfolio-raw.png", "project-dashboard-v2.webp", None),
-    # 2026-11 重拍：大厅页（登录后），水墨山景 + 模块卡
-    ("project-gomoku-raw.png", "project-gomoku.webp", None),
+    # 2026-11 重拍：算法竞技场
+    ("project-gomoku-raw.png", "project-gomoku-v2.webp", None),
+    # 2026-11 重拍：校园圈子学生中心
+    ("project-campus-raw.png", "campus/campus-cover-v2.webp", None),
+    # 2026-11 重拍：LUMEN iGEM Wiki 首屏
+    ("project-wiki-raw.png", "project-wiki-v2.webp", None),
 ]
 
 

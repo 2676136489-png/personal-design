@@ -1,6 +1,6 @@
 /* 新版（3D 视觉）内容层。
  * 不复制数据：全部从 src/data.js 派生，避免同一份事实写两遍。
- * 校园圈子不在 projects 数组里，这里映射成统一形状，11 个项目才能一起渲染。 */
+ * 校园圈子不在 projects 数组里，这里映射成统一形状，10 个项目才能一起渲染。 */
 import {
   projects,
   campus,
@@ -53,7 +53,7 @@ export const PROJECT_BY_SLUG = Object.fromEntries(ALL_PROJECTS.map((p) => [p.slu
 
 export { galleryFor } from './gallery.js';
 
-/* 双行反向滚动带。两行都铺满 11 个项目的封面，
+/* 双行反向滚动带。两行都铺满 10 个项目的封面，
    第二行用倒序，避免上下两行在同一列反复出现同一张图。
    三倍复制保证相位走满一组后接缝处仍有内容。 */
 const COVERS = ALL_PROJECTS.map((p) => ({ src: p.image, title: p.title, slug: p.slug }));

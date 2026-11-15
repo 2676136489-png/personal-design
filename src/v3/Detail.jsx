@@ -12,7 +12,7 @@ import {
 import { FadeIn, GhostButton, GradientButton, SectionTitle } from './lib.jsx';
 
 /* 章节里的六种块，按 data.js 的字段渲染。
- * 11 个项目共用这一套渲染器，新增项目不用再写页面。 */
+ * 10 个项目共用这一套渲染器，新增项目不用再写页面。 */
 function Block({ block }) {
   switch (block.type) {
     case 'text':
@@ -210,7 +210,7 @@ export function Works({ categorySlug = null }) {
       <p className="v3-section-lede">
         {categorySlug
           ? (categories.find((c) => c.slug === categorySlug)?.blurb || '')
-          : '十一个项目，按方向筛选。'}
+          : '十个项目，按方向筛选。'}
       </p>
       {options.length > 0 && (
         <div className="v3-filters">

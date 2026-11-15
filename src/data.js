@@ -30,6 +30,7 @@ export const IMAGE_SIZES = {
   '/media/campus/admin-students.webp': [2319, 1228],
   '/media/campus/ai-assistant-overview.webp': [1920, 962],
   '/media/campus/ai-assistant.webp': [454, 776],
+  '/media/campus/campus-cover-v2.webp': [1400, 933],
   '/media/campus/dashboard-1960.webp': [1960, 989],
   '/media/campus/feed.webp': [2559, 1283],
   '/media/campus/login.webp': [2559, 1256],
@@ -37,13 +38,12 @@ export const IMAGE_SIZES = {
   '/media/project-archive.webp': [1400, 933],
   '/media/project-checkin-v2.webp': [1400, 933],
   '/media/project-dashboard-v2.webp': [1400, 933],
-  '/media/project-gomoku.webp': [1400, 933],
-  '/media/project-identity.webp': [1400, 960],
+  '/media/project-gomoku-v2.webp': [1400, 933],
   '/media/project-lumora.webp': [1400, 933],
   '/media/project-opspilot-v2.webp': [1400, 933],
   '/media/project-research-v2.webp': [1400, 933],
   '/media/project-station-v2.webp': [1400, 933],
-  '/media/project-wiki.webp': [1385, 950],
+  '/media/project-wiki-v2.webp': [1400, 933],
   '/media/resume/resume-900.webp': [900, 1274],
   '/media/resume/resume.webp': [1588, 2248],
 };
@@ -89,7 +89,7 @@ export const profile = {
 /* 首屏数据条讲的是「做出来了什么」。
    成绩、学校、排名不放这里——那些属于简历和关于页（关于页的个人名片里已有教育信息）。 */
 export const heroFacts = [
-  { label: '收录作品', value: '11 个' },
+  { label: '收录作品', value: '10 个' },
   { label: '线上运行中', value: '9 个' },
   { label: '校园圈子用户', value: '19 位' },
   { label: '自动化测试', value: '4 类' },
@@ -203,7 +203,6 @@ const CATEGORY_META = {
   '系统设计': { slug: 'system', blurb: '数据结构与业务流程的完整实现。' },
   'Web 组件': { slug: 'component', blurb: '为已有平台补充可复用的功能模块。' },
   '前端开发': { slug: 'frontend', blurb: '信息层级与操作路径设计。' },
-  '品牌视觉': { slug: 'brand', blurb: '按场景建立克制的视觉方向。' },
 };
 
 /* projects 还没定义，先占位；下面 projects 导出之后再补上 projects 字段。 */
@@ -441,7 +440,7 @@ export const campus = {
   stack: 'PHP · MySQL · SSE · Docker',
   headline: '一个正在运行的校园社交平台。',
   lede: '实名认证、实时私信、敏感词过滤与运营后台均已实现，目前在线运行。',
-  cover: asset('/media/campus/dashboard-1960.webp'),
+  cover: asset('/media/campus/campus-cover-v2.webp'),
 
   /* 首页精选网格里用的 AI 助手整屏截图。
      详情页第 3 章放的是对话特写（那张是竖图，塞进横向网格会变成一条细条），
@@ -1242,7 +1241,7 @@ rows: [
     category: '算法系统',
     year: '2026',
     period: '2026.04 — 2026.11',
-    image: asset('/media/project-gomoku.webp'),
+    image: asset('/media/project-gomoku-v2.webp'),
     tag: 'Python / C++ · 博弈搜索与可学习评估',
     description: '15×15 国际连珠对弈平台：禁手判定、alpha-beta 搜索、可学习贪心与 Agent 决策层，八个页面已上线可玩。',
     role: '独立开发',
@@ -1685,7 +1684,7 @@ rows: [
     category: 'Web 组件',
     year: '2026',
     period: '2026.07',
-    image: asset('/media/project-wiki.webp'),
+    image: asset('/media/project-wiki-v2.webp'),
     tag: 'HTML · CSS · JavaScript',
     description: '面向 iGEM 团队的多页面 Wiki 模板，静态优先架构，附带可复用的界面与交互插件。',
     role: '独立开发',
@@ -1819,13 +1818,13 @@ rows: [
     period: '2026.07 — 2026.11',
     image: asset('/media/project-dashboard-v2.webp'),
     tag: 'React 19 · Vite 6',
-    description: '纯黑底 3D 视觉作品集，十一个作品共用一份数据与一套详情渲染，同一份源码发布到两个域名。',
+    description: '纯黑底 3D 视觉作品集，十个作品共用一份数据与一套详情渲染，同一份源码发布到两个域名。',
     role: '独立开发 · AI 辅助工程',
     stack: 'React 19 · Vite 6 · 手写 CSS',
     lede: '视觉经过一版重做，保留的是可长期维护的结构：内容同源，详情共用一套渲染，部署分两条链路。',
     metrics: [
-      { value: '11', label: '个收录作品' },
-      { value: '60', label: '张 WebP 素材' },
+      { value: '10', label: '个收录作品' },
+      { value: '66', label: '张 WebP 素材' },
       { value: '2', label: '个线上域名' },
       { value: '4', label: '类自动化验证' },
     ],
@@ -1836,11 +1835,11 @@ rows: [
         id: 'arch',
         nav: '信息架构',
         kicker: '01',
-        title: '十一个作品，一套详情渲染',
+        title: '十个作品，一套详情渲染',
         blocks: [
           {
             type: 'text',
-            body: '首页用于快速判断方向。十一个作品位于后半段，点进任意一个，都由同一套章节渲染器排版。',
+            body: '首页用于快速判断方向。十个作品位于后半段，点进任意一个，都由同一套章节渲染器排版。',
           },
           {
             type: 'text',
@@ -1850,7 +1849,7 @@ rows: [
             type: 'points',
             items: [
               { k: '首页', v: '八个板块按阅读顺序排，首屏只讲项目' },
-              { k: '作品', v: '十一张堆叠卡共用一份数据，详情页不再重复写页面' },
+              { k: '作品', v: '十张堆叠卡共用一份数据，详情页不再重复写页面' },
               { k: '内页', v: '全部作品、方向聚合、简历页复用同一条路由' },
               { k: '锚点', v: '能力与关于是首页板块，URL 带锚点可直接跳转' },
             ],
@@ -1941,7 +1940,7 @@ rows: [
               { k: '转换', v: '脚本批量转 WebP，作品卡素材统一压到 1400 宽' },
               { k: '尺寸', v: '每张图给 width 与 height，加载完成不把页面顶下去' },
               { k: '加载', v: '首屏主视觉直接加载，其余图片懒加载' },
-              { k: '唯一性', v: '十一张作品卡的三格素材互不重复，未用封面重复填充' },
+              { k: '唯一性', v: '十张作品卡的三格素材互不重复，未用封面重复填充' },
             ],
           },
           {
@@ -1973,7 +1972,7 @@ rows: [
               "export const asset = (path) => `${BASE}${path.replace(/^\\//, '')}`;",
               '',
               "// 主站拼出 /media/...，Pages 拼出 /personal-design/media/...",
-              "image: asset('/media/project-gomoku.webp'),",
+              "image: asset('/media/project-gomoku-v2.webp'),",
             ],
           },
           {
@@ -2001,94 +2000,6 @@ rows: [
           {
             type: 'text',
             body: '旧版入口不对访客展示。它用于承载 SSR 断言，也可在出现问题时快速回退。',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'identity',
-    accent: '#C26D6D',
-    accentInk: 'dark',
-    slug: 'identity',
-    title: '校园服务视觉系统',
-    category: '品牌视觉',
-    year: '概念',
-    period: 'Exploration',
-    image: asset('/media/project-identity.webp'),
-    tag: 'Brand Direction',
-    description: '面向校园服务场景的视觉方向，以网格、克制用色与固定留白节奏建立可信度。',
-    role: '视觉方向探索',
-    stack: 'Grid · Type · Color',
-    lede: '一次未投产的视觉方向探索，讨论校园服务如何在年轻感与可信度之间取得平衡。',
-    note: '这是一个概念项目，页面所示为视觉方向与方法，不是已上线的品牌系统。',
-    chapters: [
-      {
-        id: 'tension',
-        nav: '核心张力',
-        kicker: '01',
-        title: '年轻感与可信度往往互相打架',
-        blocks: [
-          {
-            type: 'text',
-            body: '校园产品常走向两个极端：一是学生会海报式的撞色，专业感不足；二是过度克制，接近办事大厅的冷硬风格，使用意愿低。难点在于同时满足两端：既要有使用意愿，也要让人相信信息真实可信。',
-          },
-          {
-            type: 'points',
-            items: [
-              { k: '不可太轻', v: '涉及实名、通知、申诉的功能，视觉必须承载严肃性' },
-              { k: '不可太重', v: '使用者是二十岁上下的人，官僚感会降低使用意愿' },
-              { k: '要能扩展', v: '从一张海报到一个后台界面，同一套语言必须都成立' },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'method',
-        nav: '方法',
-        kicker: '02',
-        title: '用秩序替代装饰',
-        blocks: [
-          {
-            type: 'text',
-            body: '这里的取舍是：把表达欲压到最低，让结构本身承担视觉识别。具体的颜色可以换，网格和层级的骨架一旦立住，换谁来做都不会跑偏。',
-          },
-          {
-            type: 'arch',
-            groups: [
-              {
-                title: '骨架',
-                items: ['统一基线网格', '固定留白节奏', '一致的圆角与分隔线规则'],
-              },
-              {
-                title: '色彩',
-                items: ['一个高识别主色', '大量中性面', '彩色仅用于状态而非装饰'],
-              },
-              {
-                title: '字体',
-                items: ['一套字族两种字重', '负字距标题', '克制的中英混排规则'],
-              },
-              {
-                title: '延展',
-                items: ['界面与物料同源', '深浅两套场景', 'AI 辅助批量生成候选方案再人工收敛'],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'status',
-        nav: '当前状态',
-        kicker: '03',
-        title: '为什么把它放在这里',
-        blocks: [
-          {
-            type: 'text',
-            body: '这一项没有包装成完整案例。它在作品集中的作用有两点：说明界面设计之前先要确定定位；同时保留一个诚实的样本：项目不一定都有上线产品，但每个都应说明当前完成度。',
-          },
-          {
-            type: 'text',
-            body: '这套判断在校园圈子与本站中已经应用：单一强调色、大留白、结构优先于装饰。这两个项目是方法的实际验证。',
           },
         ],
       },

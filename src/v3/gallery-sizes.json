@@ -23,17 +23,41 @@
     1400,
     875
   ],
-  "/media/gallery/gomoku-board.webp": [
+  "/media/gallery/gomoku-play.webp": [
+    1400,
+    972
+  ],
+  "/media/gallery/gomoku-analysis.webp": [
     1400,
     1050
   ],
-  "/media/gallery/gomoku-gallery.webp": [
-    1400,
-    875
-  ],
-  "/media/gallery/gomoku-hub.webp": [
+  "/media/gallery/gomoku-coach.webp": [
     1400,
     972
+  ],
+  "/media/gallery/campus-dynamics.webp": [
+    1280,
+    800
+  ],
+  "/media/gallery/campus-ai.webp": [
+    1280,
+    800
+  ],
+  "/media/gallery/campus-admin.webp": [
+    1280,
+    800
+  ],
+  "/media/gallery/wiki-engineering.webp": [
+    1400,
+    933
+  ],
+  "/media/gallery/wiki-results.webp": [
+    1400,
+    933
+  ],
+  "/media/gallery/wiki-plugins.webp": [
+    1400,
+    933
   ],
   "/media/gallery/checkin-board-v2.webp": [
     1400,

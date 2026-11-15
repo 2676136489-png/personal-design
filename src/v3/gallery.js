@@ -1,10 +1,10 @@
 /* 作品卡的三格素材。
  *
  * 之前 shotsOf() 在没有章节截图的项目上用同一张封面补齐三格，
- * 十一张卡里有六张是「同一张图复制三遍」。现在改成：
+ * 十张卡里有六张是「同一张图复制三遍」。现在改成：
  *   - 有线上站点的项目，用各仓库 README 里挑过的真实界面截图，
  *     或从线上站点抓的不同视图（scripts/make-gallery-images.py）；
- *   - 没有线上界面的项目（C 控制台 / Wiki 模板 / 视觉探索），
+ *   - 没有线上界面的项目（C 控制台 / 概念项目），
  *     只放一张真实封面，另外两格用章节名与实测数据做信息面板，
  *     不拿同一张图凑数。
  */
@@ -31,9 +31,9 @@ const coverOf = (project) => ({
 
 const IMAGES = {
   campus: [
-    fromMedia('/media/campus/dashboard-1960.webp', '校园圈子学生中心'),
-    fromMedia('/media/campus/feed.webp', '校园圈子动态广场'),
-    fromMedia('/media/campus/ai-assistant-overview.webp', '校园圈子 AI 助手整屏'),
+    fromGallery('campus-dynamics', '校园圈子动态广场'),
+    fromGallery('campus-ai', '校园圈子 AI 助手'),
+    fromGallery('campus-admin', '校园圈子管理员后台'),
   ],
   opspilot: [
     fromGallery('opspilot-capabilities', 'OpsPilot 能力目录'),
@@ -66,9 +66,14 @@ const IMAGES = {
     fromGallery('lumora-wiki', 'Lumora Wiki 模板演示'),
   ],
   gomoku: [
-    fromGallery('gomoku-board', '五子棋对局与逐手解说'),
-    fromGallery('gomoku-gallery', '五子棋棋谱展台'),
-    fromGallery('gomoku-hub', '五子棋大厅'),
+    fromGallery('gomoku-play', '五子棋对局与逐手解说'),
+    fromGallery('gomoku-analysis', '五子棋胜率与局面分析'),
+    fromGallery('gomoku-coach', '五子棋教练逐手讲解'),
+  ],
+  wiki: [
+    fromGallery('wiki-engineering', 'iGEM Wiki 工程页：三轮循环'),
+    fromGallery('wiki-results', 'iGEM Wiki 结果页：组合 07'),
+    fromGallery('wiki-plugins', 'iGEM Wiki 插件演示页'),
   ],
   portfolio: [
     fromGallery('portfolio-works-v2', '个人作品集线上作品页'),

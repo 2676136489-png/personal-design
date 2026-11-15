@@ -186,7 +186,7 @@ const mobileWorks = await evaljs(`(() => ({
   overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
 }))()`);
 expect('414 下作品页走 Bento', mobileWorks && mobileWorks.bento && !mobileWorks.band, JSON.stringify(mobileWorks));
-expect('414 下 Bento 卡片数量正确', mobileWorks && mobileWorks.cards === 11, mobileWorks && String(mobileWorks.cards));
+expect('414 下 Bento 卡片数量正确', mobileWorks && mobileWorks.cards === 10, mobileWorks && String(mobileWorks.cards));
 expect('414 下作品页无横向溢出', mobileWorks && !mobileWorks.overflow);
 
 await open('#/campus-circle');

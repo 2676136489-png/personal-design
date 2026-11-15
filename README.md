@@ -7,7 +7,7 @@
   <img src="docs/images/v3-about.webp" width="49%" alt="关于我">
 </p>
 
-首屏只讲项目，学校与成绩放在关于页和简历页。十一个作品全部从同一份 `src/data.js` 派生，校园圈子映射成统一形状后与另外十个项目一起渲染。
+首屏只讲项目，学校与成绩放在关于页和简历页。十个作品全部从同一份 `src/data.js` 派生，校园圈子映射成统一形状后与另外九个项目一起渲染。
 
 <p align="center">
   <img src="docs/images/v3-capabilities.webp" width="49%" alt="能力（白底反差）">
@@ -32,7 +32,7 @@
 | 路由 | 内容 | 动效 |
 | --- | --- | --- |
 | `/` | 首屏、数据条、作品滚动带、关于、能力、堆叠卡、时间线、简历、联系 | 反向自动滚动带、悬停单行冻结并放大、逐字显影、磁吸主视觉、sticky 缩放 |
-| `/works` | 十一个项目的卡片网格，可按方向筛选 | 进场淡入 |
+| `/works` | 十个项目的卡片网格，可按方向筛选 | 进场淡入 |
 | `/resume` | 完整网页简历，与 PDF 同源 | 进场淡入 |
 | `/category/:slug` | 方向聚合页 | 进场淡入 |
 | `/:slug` | 项目详情，章节按 `data.js` 的六种块统一渲染 | 章节时序入场 |
@@ -56,7 +56,6 @@
 | [个人作品集](https://lukeyu-portfolio.app.workbuddy.host/?sharecode=VQRU7WNFFG) | 前端开发 | 2026.07 — 2026.11 |
 | [学习目标管理台](https://study-goal-console-59328.app.workbuddy.host/?sharecode=PCKEDGKLDQ) | Web 应用 | 2026.09 |
 | [菜鸟驿站快递管理系统](https://wbapp-2l4ctx9mw2v4jrjpylnkws.app.workbuddy.host/?sharecode=KLVZBRJP3O) | 系统设计 | 2024.09 — 2024.12 |
-| 校园服务视觉系统 | 品牌视觉 | 探索性设计 |
 
 每个项目都有独立详情页，页首是封面与三格界面图集。设计过程完整的项目再往下展开章节，正文里引用过的截图不会在图集里重放一遍。
 
@@ -78,7 +77,7 @@ src/
   main.jsx          入口，默认只挂新版；旧版只走隐藏分支的动态 JS 与 CSS
   v3/
     App.jsx         hash 路由、锚点滚动
-    content.js      从 data.js 派生十一个作品、导航、滚动带数据
+    content.js      从 data.js 派生十个作品、导航、滚动带数据
     lib.jsx         FadeIn / Magnet / AnimatedText / 按钮
     sections.jsx    首页八个板块
     Detail.jsx      作品详情、全部作品、方向聚合、完整简历
@@ -141,7 +140,7 @@ scripts/            构建部署、图片处理、验证脚本
 
 ### 重构版的几个取舍
 
-**作品卡的三格素材全部互不重复**。有线上界面的项目用各仓库 README 里挑过的真实截图，或从线上站点抓的不同视图。菜鸟驿站、iGEM Wiki 插件与视觉探索没有线上界面，就放一张真实封面，另外两格用章节名和实测数据做信息面板。之前用同一张封面补齐三格，九张卡里有六张是复制粘贴。断言逐卡检查图源唯一。
+**作品卡的三格素材全部互不重复**。有线上界面的项目从站点抓不同视图，没有线上界面的项目用仓库里的真实截图补齐。之前用同一张封面补齐三格，九张卡里有六张是复制粘贴。断言逐卡检查图源唯一。
 
 <p align="center">
   <img src="docs/images/v3-card-02.webp" alt="OpsPilot 作品卡：三格分别是三个不同的真实界面">
@@ -214,7 +213,7 @@ node scripts/push-main.mjs      # 跑完测试再推 main，失败自动换地�
 
 README 配图分两条链路。旧版走 `scripts/shoot-docs.mjs` 抓界面 + `scripts/make-docs-images.py` 压成 WebP。重构版走 `scripts/verify-v3.mjs` 在本地预览站上抓 `screenshots/v3-*.png`，再由 `scripts/make-v3-docs-images.py` 压到 1600 宽（`docs/images/v3-*.webp`，7 张合计 413KB）。改过界面就重跑这两步。
 
-作品卡的截图另有一条链路。源图是各项目仓库 `docs/` 下已经挑好的界面截图，以及 `scripts/capture-portfolio-views.mjs` 从线上作品集站抓的三个画面，统一放在 `media-src/captured/`。`scripts/make-gallery-images.py` 压到 1400 宽写入 `public/media/gallery/`（24 张合计 1,497KB），同时生成 `src/v3/gallery-sizes.json` 供 `<img>` 写宽高。
+作品卡的截图另有一条链路。源图是各项目仓库 `docs/` 下已经挑好的界面截图，以及 `scripts/capture-portfolio-views.mjs` 从线上作品集站抓的三个画面，统一放在 `media-src/captured/`。`scripts/make-gallery-images.py` 压到 1400 宽写入 `public/media/gallery/`（30 张合计 1,489KB），同时生成 `src/v3/gallery-sizes.json` 供 `<img>` 写宽高。
 
 ## 简历
 
@@ -241,16 +240,16 @@ PDF 是最终版，放在 `public/media/resume/lukeyu-resume.pdf`。页面上那
 三个 SSR 冒烟脚本。在 Node 侧用 `react-dom/server` 把组件真渲染成 HTML 再断言，不依赖浏览器。
 
 ```bash
-node scripts/smoke-render.mjs      # 路由、内容、数据契约、设计系统约束（140 条）
+node scripts/smoke-render.mjs      # 路由、内容、数据契约、设计系统约束（137 条）
 node scripts/smoke-nav.mjs         # 导航结构、激活态、抽屉与主题契约（28 条）
 node scripts/smoke-lightbox.mjs    # 图片灯箱结构与交互契约（43 条）
 node scripts/verify-v3.mjs         # 重构版真实浏览器冒烟（40 条 + 截图）
 node scripts/audit-images.mjs      # 逐路由滚动到底，检查每张图真的解码成功
 ```
 
-前三套是 SSR 冒烟，渲染的是 legacy 皮肤。`verify-v3.mjs` 走 CDP 打开默认外观。它检查八个板块、十一个作品卡和两行反向自动滚动。每张卡的三格图源互不重复，新截图没有 404，按钮文字不与底色撞色，这些都有断言。悬停单行冻结、当前图放大、移开后恢复也在内。其余覆盖 sticky 缩放、逐字显影、四条内页路由、详情页封面与图集和 390px 移动端。界面上没有旧版入口、隐藏回退仍可用、控制台报错，这些也算在内。它顺带产出 README 配图的源截图。
+前三套是 SSR 冒烟，渲染的是 legacy 皮肤。`verify-v3.mjs` 走 CDP 打开默认外观。它检查八个板块、十个作品卡和两行反向自动滚动。每张卡的三格图源互不重复，新截图没有 404，按钮文字不与底色撞色，这些都有断言。悬停单行冻结、当前图放大、移开后恢复也在内。其余覆盖 sticky 缩放、逐字显影、四条内页路由、详情页封面与图集和 390px 移动端。界面上没有旧版入口、隐藏回退仍可用、控制台报错，这些也算在内。它顺带产出 README 配图的源截图。
 
-`audit-images.mjs` 补的是另一类故障：图片路径写错、构建漏拷、CDN 上少了一个文件，这些在 SSR 里全是字符串，看不出问题。它把 15 条路由逐条滚到底，等每个 `<img>` 的 `decode()` 落地再判，再单独扫一遍 CSS 背景图。现在跑下来 265 张图全部解码成功。判「还在加载」和「取不到」用的是 `decode()` 而不是 `complete`：后者在流式加载途中就是 `false`，会报一堆假失败。
+`audit-images.mjs` 补的是另一类故障：图片路径写错、构建漏拷、CDN 上少了一个文件，这些在 SSR 里全是字符串，看不出问题。它把 14 条路由逐条滚到底，等每个 `<img>` 的 `decode()` 落地再判，再单独扫一遍 CSS 背景图。现在跑下来 258 张图全部解码成功。判「还在加载」和「取不到」用的是 `decode()` 而不是 `complete`：后者在流式加载途中就是 `false`，会报一堆假失败。
 
 断言分两种：一种是「内容有没有渲染出来」，另一种是「实现契约有没有被改坏」。后者防的是某次重构悄悄把已经修好的问题带回来，比如「转场结束必须清掉 transform」，不清的话画廊的 pin 立刻错位。
 
