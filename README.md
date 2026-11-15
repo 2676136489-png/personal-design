@@ -219,9 +219,9 @@ README 配图分两条链路。旧版走 `scripts/shoot-docs.mjs` 抓界面 + `s
 
 简历页与 PDF 是同一份材料的两份形态，改一处要改另一处。
 
-PDF 是最终版，放在 `public/media/resume/lukeyu-resume.pdf`。页面上那张预览图由 `scripts/make-resume-preview.py` 从 PDF 直接渲染（`resume.webp` 1588 宽、`resume-900.webp` 900 宽），保证「预览所见 = 下载所得」。从 HTML 截图会与 PDF 有出入，HTML 里那版内容比 A4 一页长。
+PDF 是最终版。母版放在 `简历制作/01_母版/`，发布时复制到 `public/media/resume/lukeyu-resume.pdf`。页面上那张预览图由 `scripts/make-resume-preview.py` 从 PDF 直接渲染（`resume.webp` 1588 宽、`resume-900.webp` 900 宽），保证「预览所见 = 下载所得」。
 
-网页上的内容全部来自 `src/data.js` 的 `resume` 字段，分三份。个人优势与项目分点技术描述在 `advantages` / `projectHighlights`。每个项目的标注行在 `projectMeta`，写的是参与方式如「Vibe Coding」。技能分组与证书在 `skillGroups` / `honors`。它们与 PDF 逐条一致，不用项目详情页的 `lede`。那是详情页的引子，讲的是「为什么做这个」，语气是散文，跟简历要的「做了什么、怎么做的」不是一回事。
+网页上的内容全部来自 `src/data.js` 的 `resume` 字段，分三份。个人优势与项目分点技术描述在 `advantages` / `projectHighlights`。每个项目的标注行在 `projectMeta`，写的是项目定位如「高校实名社交平台」。技能分组与证书在 `skillGroups` / `honors`。它们与 PDF 逐条一致，不用项目详情页的 `lede`。那是详情页的引子，讲的是「为什么做这个」，语气是散文，跟简历要的「做了什么、怎么做的」不是一回事。
 
 项目列表由 `resume.projectSlugs` 决定，不要在页面上写死关键词。断言也从这个字段派生，改简历时只改数据不改断言。
 
