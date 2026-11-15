@@ -62,7 +62,7 @@
 
 旧版 JS 与 CSS 仅在隐藏分支中动态加载。`styles.css` 包含 `body`、`h1`、`a` 等全局选择器，静态引入会影响新版样式；旧版 `App` 会将 react-router 与六个旧页面打入首屏包。新版 `site.css` 的选择器全部限定在 `.v3` 作用域内，不影响旧版。SSR 冒烟脚本直接渲染旧版 `AppShell`。
 
-## 页面
+## 功能范围
 
 | 路由 | 内容 | 动效 |
 | --- | --- | --- |
@@ -260,7 +260,7 @@ PDF 为最终版本。母版位于 `简历制作/01_母版/`，发布时复制�
 
 **网页与 PDF 的一致性需直接读取 PDF 比对**。仅检查数据源内部自洽无法发现两边表述不一致。断言读取 `public/media/resume/lukeyu-resume.pdf`，提取文字后与 `resume.advantages` / `resume.projectHighlights` 逐条比对，比对前去除空白字符。
 
-## 验证
+## 质量验证
 
 三个 SSR 冒烟脚本：在 Node 侧通过 `react-dom/server` 渲染组件后断言，不依赖浏览器。
 
