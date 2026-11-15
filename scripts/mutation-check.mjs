@@ -129,7 +129,7 @@ const mutations = [
     /* 首屏统计是手写值，必须与 projects 对得上 —— 改一个数字就该被拦住 */
     name: '首屏统计手改数字（与项目条数对不上）',
     file: DATA,
-    from: "value: '6 个'",
+    from: "value: '9 个'",
     to: "value: '7 个'",
     expectFail: '首屏「线上运行中」与有站点的项目数一致',
   },

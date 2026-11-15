@@ -3,9 +3,10 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowDownRight, ArrowUpRight, ExternalLink, Github, Mail, MapPin, Phone } from 'lucide-react';
 import {
   ALL_PROJECTS,
-  HERO_OBJECT,
+  HERO_AVATAR,
   MARQUEE_ROW_ONE,
   MARQUEE_ROW_TWO,
+  MOOD_AVATARS,
   NAV_ITEMS,
   PROJECT_BY_SLUG,
   achievements,
@@ -78,10 +79,10 @@ export function Hero() {
         <FadeIn delay={0.6} y={30}>
           <Magnet padding={150} strength={3}>
             <img
-              src={HERO_OBJECT}
-              alt="抽象的三维环形雕塑"
+              src={HERO_AVATAR}
+              alt="卢柯宇的 3D 头像"
               className="v3-object-img"
-              {...imgAttrs(HERO_OBJECT)}
+              {...imgAttrs(HERO_AVATAR)}
             />
           </Magnet>
         </FadeIn>
@@ -258,32 +259,36 @@ export function Marquee() {
 /* ---------------- 03 关于 ---------------- */
 
 const CORNERS = [
-  { className: 'tl', rotate: '-18deg', hue: '0deg' },
-  { className: 'tr', rotate: '24deg', hue: '60deg' },
-  { className: 'bl', rotate: '38deg', hue: '290deg' },
-  { className: 'br', rotate: '-32deg', hue: '200deg' },
+  { className: 'tl', rotate: '-8deg' },
+  { className: 'tr', rotate: '7deg' },
+  { className: 'bl', rotate: '6deg' },
+  { className: 'br', rotate: '-6deg' },
 ];
 
 export function About() {
   return (
     <section className="v3-about" id="about">
-      {CORNERS.map((corner, index) => (
-        <FadeIn
-          key={corner.className}
-          delay={0.1 + index * 0.08}
-          x={corner.className.includes('l') ? -80 : 80}
-          y={0}
-          duration={0.9}
-          className={`v3-corner ${corner.className}`}
-        >
-          <img
-            src={HERO_OBJECT}
-            alt=""
-            loading="lazy"
-            style={{ transform: `rotate(${corner.rotate})`, filter: `hue-rotate(${corner.hue})` }}
-          />
-        </FadeIn>
-      ))}
+      {CORNERS.map((corner, index) => {
+        const mood = MOOD_AVATARS[index];
+        return (
+          <FadeIn
+            key={corner.className}
+            delay={0.1 + index * 0.08}
+            x={corner.className.includes('l') ? -80 : 80}
+            y={0}
+            duration={0.9}
+            className={`v3-corner ${corner.className}`}
+          >
+            <img
+              src={mood}
+              alt=""
+              loading="lazy"
+              style={{ transform: `rotate(${corner.rotate})` }}
+              {...imgAttrs(mood)}
+            />
+          </FadeIn>
+        );
+      })}
 
       <div className="v3-about-inner">
         <SectionTitle className="v3-gradient">关于我</SectionTitle>
@@ -376,7 +381,7 @@ function ProjectCard({ project, index, total, progress }) {
   const targetScale = 1 - (total - 1 - index) * 0.015;
   const scale = useTransform(progress, [index * (1 / total), 1], [1, targetScale]);
   const shots = galleryFor(project);
-  /* 参考站只有 3 张卡，固定 28px 累加没问题。这里有 9 张，
+  /* 参考站只有 3 张卡，固定 28px 累加没问题。这里有 11 张，
      累加到 224px 会把最后一张顶出视口，所以按总数摊平并封顶 120px。 */
   const stackOffset = Math.round((index * 120) / Math.max(1, total - 1));
 
@@ -441,7 +446,7 @@ export function Projects() {
   return (
     <section className="v3-projects" id="work">
       <SectionTitle className="v3-gradient">作品</SectionTitle>
-      <p className="v3-section-lede">九个项目，覆盖线上系统、算法引擎与视觉探索。</p>
+      <p className="v3-section-lede">十一个项目，覆盖线上系统、算法引擎与视觉探索。</p>
       <div ref={ref} className="v3-stack">
         {ALL_PROJECTS.map((project, index) => (
           <ProjectCard

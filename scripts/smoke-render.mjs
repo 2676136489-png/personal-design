@@ -117,7 +117,7 @@ try {
   /* ============ 作品页（桌面分支） ============ */
   const works = html['/works'];
   const slideCount = (works.match(/data-slide="true"|data-slide=""/g) || []).length;
-  expect('作品页渲染出 9 屏（campus + 8 个项目）', slideCount === projects.length + 1);
+  expect('作品页渲染出 11 屏（campus + 10 个项目）', slideCount === projects.length + 1);
   expect('作品页有页码', /0?1\s*<\/strong>/.test(works) && String(projects.length + 1).padStart(2, '0').length === 2);
   expect('作品页有拖拽提示', works.includes('拖拽翻页'));
   expect('作品页不渲染移动端网格（桌面分支）', !works.includes('works-bento'));

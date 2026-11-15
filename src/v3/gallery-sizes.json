@@ -1,25 +1,25 @@
 {
-  "/media/gallery/opspilot-dashboard.webp": [
+  "/media/gallery/opspilot-capabilities.webp": [
     1400,
-    1368
+    875
+  ],
+  "/media/gallery/opspilot-topology.webp": [
+    1400,
+    875
   ],
   "/media/gallery/opspilot-incident.webp": [
     1400,
     1461
   ],
-  "/media/gallery/opspilot-agents.webp": [
+  "/media/gallery/research-workflow-v2.webp": [
     1400,
     875
   ],
-  "/media/gallery/research-workflow.webp": [
+  "/media/gallery/research-rag-v2.webp": [
     1400,
     875
   ],
-  "/media/gallery/research-rag.webp": [
-    1400,
-    875
-  ],
-  "/media/gallery/research-reports.webp": [
+  "/media/gallery/research-evaluation.webp": [
     1400,
     875
   ],
@@ -35,27 +35,63 @@
     1400,
     972
   ],
-  "/media/gallery/checkin-board.webp": [
-    1400,
-    1422
-  ],
-  "/media/gallery/checkin-today.webp": [
-    1400,
-    941
-  ],
-  "/media/gallery/checkin-single.webp": [
-    1400,
-    972
-  ],
-  "/media/gallery/portfolio-works.webp": [
+  "/media/gallery/checkin-board-v2.webp": [
     1400,
     875
   ],
-  "/media/gallery/portfolio-hero.webp": [
+  "/media/gallery/checkin-today-v2.webp": [
     1400,
     875
   ],
-  "/media/gallery/portfolio-detail.webp": [
+  "/media/gallery/checkin-weekly.webp": [
+    1400,
+    875
+  ],
+  "/media/gallery/station-voyages.webp": [
+    1400,
+    875
+  ],
+  "/media/gallery/station-innovation.webp": [
+    1400,
+    875
+  ],
+  "/media/gallery/station-source.webp": [
+    1400,
+    875
+  ],
+  "/media/gallery/archive-jack3d.webp": [
+    1400,
+    875
+  ],
+  "/media/gallery/archive-designworld.webp": [
+    1400,
+    875
+  ],
+  "/media/gallery/archive-space.webp": [
+    1400,
+    875
+  ],
+  "/media/gallery/lumora-library.webp": [
+    1400,
+    875
+  ],
+  "/media/gallery/lumora-blocks.webp": [
+    1400,
+    875
+  ],
+  "/media/gallery/lumora-wiki.webp": [
+    1400,
+    933
+  ],
+  "/media/gallery/portfolio-works-v2.webp": [
+    1400,
+    875
+  ],
+  "/media/gallery/portfolio-detail-v2.webp": [
+    1400,
+    875
+  ],
+  "/media/gallery/portfolio-about.webp": [
     1400,
     875
   ]

@@ -141,10 +141,10 @@ expect('渐变大标题用了 background-clip:text', dom.h1Text === 'LUKEYU' && 
 expect('导航 5 个栏目，没有求职状态胶囊', dom.navLinks === 5 && dom.statusLink === 0, `${dom.navLinks}/${dom.statusLink}`);
 expect('界面上没有旧版入口', dom.legacyVisible === 0, String(dom.legacyVisible));
 expect('八个板块都在', Object.values(dom.sections).every((n) => n > 0), JSON.stringify(dom.sections));
-expect('首屏数据条 4 项且值来自数据源', JSON.stringify(dom.factValues) === JSON.stringify(['9 个', '6 个', '19 位', '4 类']), dom.factValues.join('/'));
-expect('作品滚动带 54 张封面（两行各 9 个项目三倍）', dom.sections.marqueeTiles === 54, String(dom.sections.marqueeTiles));
+expect('首屏数据条 4 项且值来自数据源', JSON.stringify(dom.factValues) === JSON.stringify(['11 个', '9 个', '19 位', '4 类']), dom.factValues.join('/'));
+expect('作品滚动带 66 张封面（两行各 11 个项目三倍）', dom.sections.marqueeTiles === 66, String(dom.sections.marqueeTiles));
 expect('能力 4 组 + 技术栈 6 组', dom.capRows === 4 && dom.skillItems === 6, `${dom.capRows}/${dom.skillItems}`);
-expect('作品堆叠卡 9 张（含校园圈子）', dom.stackCards === 9, String(dom.stackCards));
+expect('作品堆叠卡 11 张（含校园圈子）', dom.stackCards === 11, String(dom.stackCards));
 expect('旗舰项目在首位', (dom.stackTitles[0] || '').includes('校园圈子'), dom.stackTitles[0]);
 const cardSlots = await evaluate(`Array.from(document.querySelectorAll('.v3-stack-card')).map((card) => {
   const imgs = Array.from(card.querySelectorAll('.v3-stack-grid img'));
@@ -152,10 +152,10 @@ const cardSlots = await evaluate(`Array.from(document.querySelectorAll('.v3-stac
   const panels = card.querySelectorAll('.v3-stack-grid .v3-stack-panel').length;
   return { title: card.querySelector('h3')?.textContent, slots: srcs.length + panels, unique: new Set(srcs).size, images: srcs.length };
 })`);
-expect('每张作品卡恰好三格且没有重复图源', cardSlots.length === 9 && cardSlots.every((c) => c.slots === 3 && c.unique === c.images), JSON.stringify(cardSlots));
+expect('每张作品卡恰好三格且没有重复图源', cardSlots.length === 11 && cardSlots.every((c) => c.slots === 3 && c.unique === c.images), JSON.stringify(cardSlots));
 expect('至少六张卡是三张不同的真实界面截图', cardSlots.filter((c) => c.images === 3 && c.unique === 3).length >= 6, JSON.stringify(cardSlots.filter((c) => c.images !== 3)));
-expect('时间线 7 条 / 荣誉 6 条 / 联系 4 行', dom.sections.timeline === 7 && dom.honors === 6 && dom.contactLinks === 4, `${dom.sections.timeline}/${dom.honors}/${dom.contactLinks}`);
-expect('3D 主视觉图片加载成功', dom.heroObjectLoaded);
+expect('时间线 9 条 / 荣誉 6 条 / 联系 4 行', dom.sections.timeline === 9 && dom.honors === 6 && dom.contactLinks === 4, `${dom.sections.timeline}/${dom.honors}/${dom.contactLinks}`);
+expect('首屏头像加载成功', dom.heroObjectLoaded);
 expect('桌面视口无横向溢出', dom.scrollWidth <= dom.viewport + 1, `${dom.scrollWidth} vs ${dom.viewport}`);
 
 /* 按钮撞色回归：白底区里 `.v3 a { color: inherit }` 曾把黑底按钮染成黑字。
@@ -279,7 +279,7 @@ const goHash = async (hash) => {
 };
 await goHash('#/works');
 const works = await evaluate(`({ tiles: document.querySelectorAll('.v3-tile').length, filters: document.querySelectorAll('.v3-filters button').length, h2: document.querySelector('.v3-title')?.textContent })`);
-expect('全部作品页 9 张卡片 + 方向筛选', works.tiles === 9 && works.filters > 1, JSON.stringify(works));
+expect('全部作品页 11 张卡片 + 方向筛选', works.tiles === 11 && works.filters > 1, JSON.stringify(works));
 
 await goHash('#/resume');
 const fullResume = await evaluate(`({ sections: document.querySelectorAll('.v3-fr-section').length, projects: document.querySelectorAll('.v3-fr-project').length, pdf: !!document.querySelector('.v3-fr-preview'), text: document.body.innerText.includes('256 项 pytest') })`);
@@ -289,7 +289,7 @@ await goHash('#/opspilot');
 const detail = await evaluate(`({ title: document.querySelector('.v3-detail-title')?.textContent, chapters: document.querySelectorAll('.v3-chapter').length, tables: document.querySelectorAll('.v3-block-table').length })`);
 expect('项目详情页章节渲染（含表格块）', (detail.title || '').includes('OpsPilot') && detail.chapters >= 4 && detail.tables > 0, JSON.stringify(detail));
 
-/* 详情页顶部封面 + 图集：九个项目里只有 campus 的章节自带截图，
+/* 详情页顶部封面 + 图集：十一个项目里只有 campus 的章节自带截图，
    其余八个曾经整页一张图都没有。这里把「每个详情页都得有真实界面」钉住。 */
 const cover = await evaluate(`(() => {
   const img = document.querySelector('.v3-detail-cover img');
@@ -327,7 +327,7 @@ await shot('detail');
 
 await goHash('#/category/agent');
 const category = await evaluate(`({ tiles: document.querySelectorAll('.v3-tile').length, title: document.querySelector('.v3-title')?.textContent })`);
-expect('方向聚合页按分类过滤', category.tiles > 0 && category.tiles < 9, JSON.stringify(category));
+expect('方向聚合页按分类过滤', category.tiles > 0 && category.tiles < 11, JSON.stringify(category));
 
 /* ---------- 移动端 ---------- */
 await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
@@ -338,7 +338,7 @@ const mobile = await evaluate(`(() => {
   return { viewport: de.clientWidth, scrollWidth: de.scrollWidth, cards: document.querySelectorAll('.v3-stack-card').length, nav: document.querySelectorAll('.v3-nav-links a').length };
 })()`);
 expect('390px 视口无横向溢出', mobile.scrollWidth <= mobile.viewport + 1, `${mobile.scrollWidth} vs ${mobile.viewport}`);
-expect('移动端仍渲染 9 张作品卡', mobile.cards === 9, String(mobile.cards));
+expect('移动端仍渲染 11 张作品卡', mobile.cards === 11, String(mobile.cards));
 await shot('mobile-hero');
 
 /* ---------- 不对访客露出的工程回退 ---------- */

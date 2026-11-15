@@ -1,6 +1,6 @@
 /* 新版（3D 视觉）内容层。
  * 不复制数据：全部从 src/data.js 派生，避免同一份事实写两遍。
- * 校园圈子不在 projects 数组里，这里映射成统一形状，9 个项目才能一起渲染。 */
+ * 校园圈子不在 projects 数组里，这里映射成统一形状，11 个项目才能一起渲染。 */
 import {
   projects,
   campus,
@@ -18,7 +18,15 @@ import {
 
 export { categories, profile, heroFacts, resume, capabilities, achievements, timeline, media, imgAttrs };
 
-export const HERO_OBJECT = asset('/media/hero-3d-object.webp');
+export const HERO_AVATAR = asset('/media/avatar-memoji-v2.webp');
+
+/* 关于页四角的表情，顺序对应 tl / tr / bl / br */
+export const MOOD_AVATARS = [
+  asset('/media/avatar-moods/wink.webp'),
+  asset('/media/avatar-moods/idea.webp'),
+  asset('/media/avatar-moods/thumbs-up.webp'),
+  asset('/media/avatar-moods/macbook.webp'),
+];
 
 const campusItem = {
   slug: campus.slug,
@@ -45,7 +53,7 @@ export const PROJECT_BY_SLUG = Object.fromEntries(ALL_PROJECTS.map((p) => [p.slu
 
 export { galleryFor } from './gallery.js';
 
-/* 双行反向滚动带。两行都铺满 9 个项目的封面，
+/* 双行反向滚动带。两行都铺满 11 个项目的封面，
    第二行用倒序，避免上下两行在同一列反复出现同一张图。
    三倍复制保证相位走满一组后接缝处仍有内容。 */
 const COVERS = ALL_PROJECTS.map((p) => ({ src: p.image, title: p.title, slug: p.slug }));

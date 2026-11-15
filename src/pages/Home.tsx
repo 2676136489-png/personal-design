@@ -13,7 +13,7 @@ import { useGsapScope, gsap, ScrollTrigger, reducedMotion, isMobile, revealChild
 import { heroFacts, profile } from '../data.js';
 
 const ENTRIES = [
-  { to: '/works', label: '作品', note: '九个项目，从校园平台到对弈引擎', index: '01' },
+  { to: '/works', label: '作品', note: '十一个项目，从校园平台到对弈引擎', index: '01' },
   { to: '/campus-circle', label: '校园圈子', note: '正在运行的实名校园社交平台', index: '02' },
   { to: '/about', label: '关于', note: '教育背景、履历与做事方式', index: '03' },
   { to: '/skills', label: '能力', note: '四个方向的技术栈与证据', index: '04' },

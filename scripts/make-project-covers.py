@@ -29,10 +29,14 @@ TARGET_W, TARGET_H = 1400, 933
 # 第四项为 None 表示源图已是目标比例，只缩放不裁。
 # 页面类截图请按内容实际边界给：标题要留全，主体卡片不能被切半。
 JOBS = [
-    ("project-opspilot-raw.png", "project-opspilot.webp", None),
-    ("project-research-raw.png", "project-research.webp", None),
-    # docs/app-board-desktop.png：标题在 y≈30，柱状图收在 y≈880，之下全空白
-    ("project-checkin-raw.png", "project-checkin.webp", (0.0, 0.008, 1.0, 0.345)),
+    # 2026-11 重拍：全部按 1500x1000 抓，与 3:2 目标同比，只缩放不裁
+    ("project-opspilot-raw.png", "project-opspilot-v2.webp", None),
+    ("project-research-raw.png", "project-research-v2.webp", None),
+    ("project-checkin-raw.png", "project-checkin-v2.webp", None),
+    ("project-station-raw.png", "project-station-v2.webp", None),
+    ("project-archive-raw.png", "project-archive.webp", None),
+    ("project-lumora-raw.png", "project-lumora.webp", None),
+    ("project-portfolio-raw.png", "project-dashboard-v2.webp", None),
     # 2026-11 重拍：大厅页（登录后），水墨山景 + 模块卡
     ("project-gomoku-raw.png", "project-gomoku.webp", None),
 ]
