@@ -20,21 +20,14 @@ export const IMAGE_SIZES = {
   '/media/avatar-moods/macbook.webp': [480, 480],
   '/media/campus-desktop.webp': [1216, 832],
   '/media/campus-phone.webp': [832, 1216],
-  '/media/campus/admin-accounts.webp': [2321, 1189],
-  '/media/campus/admin-audit.webp': [2252, 1274],
-  '/media/campus/admin-comments.webp': [2142, 1123],
-  '/media/campus/admin-dynamics.webp': [2231, 1290],
-  '/media/campus/admin-messages.webp': [2273, 1293],
-  '/media/campus/admin-overview.webp': [2558, 1289],
-  '/media/campus/admin-reports.webp': [2175, 1089],
-  '/media/campus/admin-students.webp': [2319, 1228],
-  '/media/campus/ai-assistant-overview.webp': [1920, 962],
-  '/media/campus/ai-assistant.webp': [454, 776],
+  /* 2026-11 重拍：六张都来自 campus 仓库的 docs/screenshots，统一 1280×800 */
+  '/media/campus/admin-login.webp': [1280, 800],
+  '/media/campus/ai-assistant.webp': [1280, 800],
   '/media/campus/campus-cover-v2.webp': [1400, 933],
-  '/media/campus/dashboard-1960.webp': [1960, 989],
-  '/media/campus/feed.webp': [2559, 1283],
-  '/media/campus/login.webp': [2559, 1256],
-  '/media/campus/students.webp': [2146, 1183],
+  '/media/campus/dashboard-1960.webp': [1280, 800],
+  '/media/campus/feed.webp': [1280, 800],
+  '/media/campus/login.webp': [1280, 800],
+  '/media/campus/register.webp': [1280, 800],
   '/media/project-archive.webp': [1400, 933],
   '/media/project-checkin-v2.webp': [1400, 933],
   '/media/project-dashboard-v2.webp': [1400, 933],
@@ -438,15 +431,6 @@ export const campus = {
   lede: '实名认证、实时私信、敏感词过滤与运营后台均已实现，当前在线运行。',
   cover: asset('/media/campus/campus-cover-v2.webp'),
 
-  /* 首页精选网格里用的 AI 助手整屏截图。
-     详情页第 3 章放的是对话特写（那张是竖图，塞进横向网格会变成一条细条），
-     首页需要横版，所以单独留一张。 */
-  featuredAssistantShot: {
-    src: asset('/media/campus/ai-assistant-overview.webp'),
-    alt: '校园圈子 AI 助手整屏界面',
-    caption: 'AI 助手整屏：对话区支持多轮追问，回答前会标注实际调用的查询工具。',
-  },
-
   metrics: [
     { value: '19', label: '实名注册学生' },
     { value: '22', label: '已发布动态' },
@@ -489,13 +473,19 @@ export const campus = {
       blocks: [
         {
           type: 'text',
-          body: '学生端按「登录 → 浏览动态 → 查找同学 → 发起私信」的路径组织。登录页左右分栏：左侧以同心圆雷达表达「发现同校的人」，右侧为登录表单，包含图形验证码与协议勾选。',
+          body: '学生端按「登录 → 浏览动态 → 查找同学 → 发起私信」的路径组织。登录页左右分栏：左侧品牌区用文字地球与渐变光晕表达「认识同校的人」，右侧为登录表单，包含图形验证码与协议勾选。',
         },
         {
           type: 'shot',
           src: asset('/media/campus/login.webp'),
           alt: '校园圈子学生登录页',
-          caption: '登录页：左侧品牌区用同心圆雷达表达「认识同校的人」，右侧表单含图形验证码、用户协议勾选与管理员入口。',
+          caption: '登录页：左侧品牌区是文字地球与紫色渐变，右侧表单含图形验证码、用户协议勾选与管理员入口。',
+        },
+        {
+          type: 'shot',
+          src: asset('/media/campus/register.webp'),
+          alt: '校园圈子学生注册页',
+          caption: '注册页：延续登录页的分栏与品牌视觉，填写资料后需等待管理员实名审核。',
         },
         {
           type: 'text',
@@ -505,7 +495,7 @@ export const campus = {
           type: 'shot',
           src: asset('/media/campus/dashboard-1960.webp'),
           alt: '校园圈子学生中心',
-          caption: '学生中心：左侧固定导航（学生中心 / 动态广场 / 同学），顶部实名状态胶囊，四格数据卡与校园公告。',
+          caption: '学生中心：左侧固定导航、顶部实名状态胶囊，玻璃拟态主卡展示用户信息与四项数据，下方是校园公告。',
         },
         {
           type: 'text',
@@ -515,17 +505,19 @@ export const campus = {
           type: 'shot',
           src: asset('/media/campus/feed.webp'),
           alt: '校园圈子动态广场',
-          caption: '动态广场：三重筛选（关键词 / 标签 / 学院）、共 17 条动态计数、右侧发布区与广场公约。',
+          caption: '动态广场：三重筛选（关键词 / 标签 / 学院）、话题标签与图文动态卡片，右侧是发布区与广场公约。',
         },
         {
           type: 'text',
           body: '「同学」页以卡片列出 19 位实名用户，展示姓名、性别、兴趣标签、学院、年级与专业，并按学院、年级、共同标签推荐，支持关注与取消关注。该页面将账号与具体人员对应。',
         },
         {
-          type: 'shot',
-          src: asset('/media/campus/students.webp'),
-          alt: '校园圈子已认证同学列表',
-          caption: '同学页：实名认证同学列表，含兴趣标签、学院、年级、专业，支持按姓名/学院/专业与兴趣标签双向搜索。',
+          type: 'points',
+          items: [
+            { k: '实名资料', v: '姓名、学院、年级、专业与兴趣标签，均来自审核通过的资料' },
+            { k: '同频推荐', v: '按学院、年级与共同标签排序，卡片直接展示可点击的同学资料' },
+            { k: '双向检索', v: '姓名、学院、专业与兴趣标签均可作为搜索条件，支持关注与取消关注' },
+          ],
         },
       ],
     },
@@ -542,10 +534,8 @@ export const campus = {
         {
           type: 'shot',
           src: asset('/media/campus/ai-assistant.webp'),
-          alt: 'AI 校园小助手对话界面',
-          // 这张是手机式竖图（454×776），拉满栏宽会放大近 2 倍且高过一屏，单独限宽居中
-          fit: 'portrait',
-          caption: 'AI 助手：支持多轮对话与追问，回答前展示「已深度思考」状态，并标注实际调用的查询工具。',
+          alt: '校园圈子 Campus AI 助手界面',
+          caption: 'AI 助手：整屏对话界面，可开启新会话，回答中引用站内同学与动态卡片并支持跳转。',
         },
         {
           type: 'text',
@@ -565,67 +555,39 @@ export const campus = {
         },
         {
           type: 'shot',
-          src: asset('/media/campus/admin-overview.webp'),
-          alt: '校园圈子管理后台总览',
-          caption: '后台总览：四项核心计数、管理员二次验证开关，以及 12 个管理功能的快捷入口网格。',
+          src: asset('/media/campus/admin-login.webp'),
+          alt: '校园圈子管理员后台登录页',
+          caption: '管理员入口：独立的后台登录页，通过密码校验后还需完成二次验证。',
         },
         {
           type: 'text',
           body: '学生管理承担实名审核。待审记录包含学生证照片、学号、姓名、联系方式、学院年级专业与出生日期，管理员可执行「通过」「退回」「停用」，操作全部留痕。',
         },
         {
-          type: 'shot',
-          src: asset('/media/campus/admin-students.webp'),
-          alt: '学生实名审核与账号管理',
-          caption: '学生管理：19 名学生名单，含学生证照片预览与「通过 / 退回 / 停用」三态操作。',
-        },
-        {
           type: 'text',
           body: '内容侧有四套独立的管理面板，各自带搜索、计数与 CSV 导出：动态管理可删除违规动态；评论管理可按内容或评论者检索；私信审计可查看完整对话内容（包括与 AI 助手的交互）；举报审核则是待处理队列。',
         },
         {
-          type: 'shot',
-          src: asset('/media/campus/admin-dynamics.webp'),
-          alt: '动态内容管理',
-          caption: '动态管理：22 条动态列表，显示发布者、内容、图片、点赞评论数、状态，支持 CSV 导出。',
-        },
-        {
-          type: 'shot',
-          src: asset('/media/campus/admin-comments.webp'),
-          alt: '评论管理',
-          caption: '评论管理：31 条评论，可按评论内容或评论者搜索，标注所属动态发布者。',
-        },
-        {
-          type: 'shot',
-          src: asset('/media/campus/admin-messages.webp'),
-          alt: '私信审计',
-          caption: '私信审计：75 条私信记录，含发送者、接收者、内容、已读状态与时间。',
-        },
-        {
-          type: 'shot',
-          src: asset('/media/campus/admin-reports.webp'),
-          alt: '举报审核队列',
-          caption: '举报审核：待处理举报队列，含举报人、对象、原因、目标内容与操作。',
+          type: 'table',
+          head: ['模块', '治理能力'],
+          rows: [
+            ['总览', '四项核心计数，活跃看板与趋势报表，支持 CSV 导出'],
+            ['学生管理', '学生证审核，通过 / 退回 / 停用，操作留痕'],
+            ['动态管理', '内容与图片，互动数据和状态，支持 CSV 导出'],
+            ['评论管理', '按内容或评论者检索，标注所属动态'],
+            ['私信审计', '收发双方，内容，已读状态与时间'],
+            ['举报审核', '举报人，对象，原因与处理操作'],
+            ['审计日志', '操作人，类型，详情与时间，删除可回滚'],
+            ['管理员账号', '角色分配与启用状态'],
+          ],
         },
         {
           type: 'text',
           body: '审计日志记录每一条管理员操作，并支持回滚：已删除的私信与动态可以恢复。校园场景中，误删内容可能造成证据丢失或争议，这一能力属于必要项。',
         },
         {
-          type: 'shot',
-          src: asset('/media/campus/admin-audit.webp'),
-          alt: '管理员审计日志',
-          caption: '审计日志：39 条管理员操作记录，含管理员、目标对象、操作类型、详情与时间，删除类操作可一键回滚。',
-        },
-        {
           type: 'text',
           body: '管理员账号同样实行分级：超级管理员可以创建运营管理员并分配角色、设置启用状态，避免权限集中在单一账号上。',
-        },
-        {
-          type: 'shot',
-          src: asset('/media/campus/admin-accounts.webp'),
-          alt: '管理员账号管理',
-          caption: '管理员账号：支持新建管理员、分配角色（超级管理员 / 运营管理员）、设置启用状态。',
         },
         {
           type: 'text',
@@ -1168,6 +1130,7 @@ export const projects = [
     role: '独立开发',
     stack: 'HTML · CSS · 原生 JS · 静态部署',
     site: 'https://wbapp-4ytxtkm2qyyzpnnfhiiqfg.app.workbuddy.host/?sharecode=GHCD2BBZPY',
+    github: 'https://github.com/2676136489-png/prompt_page',
     lede: '索引页将 21 个页面划分为整页、区块、动效、加载四类。三维作品集、玻璃拟态首屏、文字路径与粒子球各自独立成页，各页具备独立的排版与动效。',
     metrics: [
       { value: '21', label: '独立页面' },
@@ -1192,6 +1155,7 @@ export const projects = [
     role: '独立开发',
     stack: 'HTML · CSS · 原生 JS · 静态部署',
     site: 'https://wbapp-v2ojc8qetmpj74ypnddj2s.app.workbuddy.host/?sharecode=32KDFEZKHH',
+    github: 'https://github.com/2676136489-png/Lumora-',
     lede: '区块按页面区块、界面控件、风格页面三类划分，共 197 个。每个区块均可直接复制源码与提示词；外层提供四套主题，并附一套 Wiki 模板，演示整套区块替换内容后的效果。',
     metrics: [
       { value: '197', label: '可复用区块' },

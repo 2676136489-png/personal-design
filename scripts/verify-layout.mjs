@@ -154,14 +154,24 @@ expect('pin 期间轨道有横向位移', pinned && pinned.tx !== 'none' && pinn
 expect('pin 的祖先链上没有 transform', pinned && pinned.ancestors.length === 0, pinned && pinned.ancestors.join(' | '));
 
 /* ---------- 3. 吸附落点 ---------- */
-const N = 9;
+/* 屏数从页面读，别写死：作品数变了断言要跟着变，
+   同时和计数器上显示的总数对一次，防止选择器失效后假通过。 */
+const count = await evaljs(`(() => ({
+  slides: document.querySelectorAll('.works-slide[data-slide]').length,
+  shown: Number((document.querySelector('.works-counter span')?.textContent || '').replace(/\\D/g, '')),
+}))()`);
+const N = count?.slides || 0;
+expect('画廊屏数与计数器一致', N > 1 && N === count?.shown, JSON.stringify(count));
 for (const frac of [0, 0.5, 1]) {
   const y = Math.round(bandStart + travel * frac);
   await evaljs(`window.scrollTo({top: ${y}, behavior:'instant'})`);
   await sleep(900); /* 等吸附 */
   const idx = await evaljs(`Number(document.querySelector('.works-counter strong')?.textContent || 0)`);
   const want = Math.round(frac * (N - 1)) + 1;
-  expect(`吸附到第 ${want} 屏`, idx === want, `实际 ${idx}`);
+  /* 屏数为偶数时，滚动中点正好压在两屏之间，吸附到相邻任一屏都算落对；
+     首尾两档仍要求精确命中，否则这条断言就失去约束了。 */
+  const slack = frac === 0.5 ? 1 : 0;
+  expect(`吸附到第 ${want} 屏`, Math.abs(idx - want) <= slack, `实际 ${idx}`);
 }
 
 /* ---------- 4. 转场不留 transform ---------- */

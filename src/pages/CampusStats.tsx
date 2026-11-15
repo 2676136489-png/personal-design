@@ -20,10 +20,10 @@ import '../campus-stats.css';
 
 /* 散点四图：一张竖版 AI 助手 + 三张横版界面，object-cover 裁成参考稿的卡片比例 */
 const PHOTOS = [
-  { src: asset('/media/campus/ai-assistant.webp'), alt: '校园圈子 AI 助手对话界面' },
-  { src: asset('/media/campus/feed.webp'), alt: '校园圈子动态列表' },
-  { src: asset('/media/campus/students.webp'), alt: '校园圈子同学目录' },
-  { src: asset('/media/campus/admin-overview.webp'), alt: '校园圈子管理后台总览' },
+  { src: asset('/media/campus/login.webp'), alt: '校园圈子学生登录页' },
+  { src: asset('/media/campus/dashboard-1960.webp'), alt: '校园圈子学生中心' },
+  { src: asset('/media/campus/feed.webp'), alt: '校园圈子动态广场' },
+  { src: asset('/media/campus/ai-assistant.webp'), alt: '校园圈子 AI 助手界面' },
 ];
 
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
