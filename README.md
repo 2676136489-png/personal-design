@@ -260,6 +260,13 @@ PDF 为最终版本。母版位于 `简历制作/01_母版/`，发布时复制�
 
 **网页与 PDF 的一致性需直接读取 PDF 比对**。仅检查数据源内部自洽无法发现两边表述不一致。断言读取 `public/media/resume/lukeyu-resume.pdf`，提取文字后与 `resume.advantages` / `resume.projectHighlights` 逐条比对，比对前去除空白字符。
 
+## 范围边界
+
+- 旧版界面仅通过 `?skin=legacy` 访问，不对外露出。
+- 内容数据集中于 `src/data.js`，页面不硬编码作品信息。
+- 图片资源全部本地化，不依赖外部图床或 CDN。
+- 双域名部署需分别发布，构建参数不同。
+
 ## 质量验证
 
 三个 SSR 冒烟脚本：在 Node 侧通过 `react-dom/server` 渲染组件后断言，不依赖浏览器。
