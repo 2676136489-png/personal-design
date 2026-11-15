@@ -94,9 +94,9 @@ export function Hero() {
           <p className="v3-hero-tagline">{profile.tagline}</p>
         </div>
         <FadeIn delay={0.5} y={20} className="v3-hero-cta">
-          <GradientButton href="#/contact">联系我</GradientButton>
+          <GradientButton href="#/contact">联系我们</GradientButton>
           <a className="v3-scroll-hint" href="#/works">
-            看作品 <ArrowDownRight size={16} aria-hidden="true" />
+            查看作品 <ArrowDownRight size={16} aria-hidden="true" />
           </a>
         </FadeIn>
       </FadeIn>
@@ -291,7 +291,7 @@ export function About() {
       })}
 
       <div className="v3-about-inner">
-        <SectionTitle className="v3-gradient">关于我</SectionTitle>
+        <SectionTitle className="v3-gradient">关于</SectionTitle>
         <AnimatedText text={resume.summary} className="v3-about-text" />
         <FadeIn delay={0.3} className="v3-profile-card">
           <img src={media.avatar} alt="卢柯宇的形象插画" className="v3-profile-avatar" {...imgAttrs(media.avatar)} />
@@ -446,7 +446,7 @@ export function Projects() {
   return (
     <section className="v3-projects" id="work">
       <SectionTitle className="v3-gradient">作品</SectionTitle>
-      <p className="v3-section-lede">十个项目，覆盖线上系统、算法引擎与视觉组件。</p>
+      <p className="v3-section-lede">共收录十个项目，覆盖线上系统、算法引擎与视觉组件。</p>
       <div ref={ref} className="v3-stack">
         {ALL_PROJECTS.map((project, index) => (
           <ProjectCard
@@ -547,10 +547,10 @@ export function Contact() {
   return (
     <footer className="v3-contact" id="contact">
       <div className="v3-contact-main">
-        <SectionTitle className="v3-gradient v3-contact-title">联系我</SectionTitle>
-        <p className="v3-contact-lede">项目合作或技术交流，欢迎邮件联系。</p>
+        <SectionTitle className="v3-gradient v3-contact-title">联系方式</SectionTitle>
+        <p className="v3-contact-lede">项目合作与技术交流事宜，请通过邮件联系。</p>
         <GradientButton href={`mailto:${profile.email}`} className="v3-contact-cta">
-          发邮件 <ArrowUpRight size={18} aria-hidden="true" />
+          发送邮件 <ArrowUpRight size={18} aria-hidden="true" />
         </GradientButton>
         <div className="v3-contact-links">
           {links.map(({ icon: Icon, label, value, href }) => (

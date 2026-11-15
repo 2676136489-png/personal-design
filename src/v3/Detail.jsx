@@ -130,7 +130,7 @@ export function ProjectDetail({ slug }) {
             GitHub <Github size={16} aria-hidden="true" />
           </GhostButton>
         )}
-        <GradientButton href="#/contact">联系我</GradientButton>
+        <GradientButton href="#/contact">联系我们</GradientButton>
       </div>
 
       {extraShots.length > 0 && (
@@ -205,12 +205,12 @@ export function Works({ categorySlug = null }) {
 
   return (
     <div className="v3-works">
-      <a className="v3-back" href="#/"><ArrowLeft size={16} aria-hidden="true" /> 回首页</a>
+      <a className="v3-back" href="#/"><ArrowLeft size={16} aria-hidden="true" /> 返回首页</a>
       <SectionTitle className="v3-gradient">{title}</SectionTitle>
       <p className="v3-section-lede">
         {categorySlug
           ? (categories.find((c) => c.slug === categorySlug)?.blurb || '')
-          : '十个项目，按方向筛选。'}
+          : '共收录十个项目，可按方向筛选。'}
       </p>
       {options.length > 0 && (
         <div className="v3-filters">
@@ -234,7 +234,7 @@ export function Works({ categorySlug = null }) {
           <ProjectTile key={project.slug} project={project} index={index} />
         ))}
       </div>
-      {filtered.length === 0 && <p className="v3-empty">这个方向下暂时没有收录作品。</p>}
+      {filtered.length === 0 && <p className="v3-empty">该方向暂无收录作品。</p>}
     </div>
   );
 }
@@ -244,12 +244,12 @@ export function Works({ categorySlug = null }) {
 export function FullResume() {
   return (
     <div className="v3-full-resume">
-      <a className="v3-back" href="#/"><ArrowLeft size={16} aria-hidden="true" /> 回首页</a>
+      <a className="v3-back" href="#/"><ArrowLeft size={16} aria-hidden="true" /> 返回首页</a>
       <SectionTitle className="v3-gradient">简历</SectionTitle>
 
       <div className="v3-fr-actions">
         <a className="v3-btn-gradient" href={media.resume.pdf} target="_blank" rel="noreferrer">下载 PDF</a>
-        <a className="v3-btn-ghost" href="#/contact">联系我</a>
+        <a className="v3-btn-ghost" href="#/contact">联系我们</a>
       </div>
 
       <section className="v3-fr-section">
