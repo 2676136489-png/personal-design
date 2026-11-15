@@ -21,6 +21,41 @@
 
 两个站点源码相同、构建参数不同，需分别发布。WorkBuddy 的 sharecode 在每次重新发布后更新，对外分享时需完整携带。
 
+## 项目背景
+
+个人作品集承担两类职能：向招聘方与合作伙伴说明项目能力，同时作为可长期维护的内容系统。多数作品集依赖模板，结构与样式耦合，新增作品需改动多处代码，图片与文案缺少质量约束。
+
+本项目以「内容同源」为原则：十个作品共用一份数据与一套详情渲染，新增作品仅修改 `src/data.js`；视觉层独立重构，结构保持不变。
+
+## 目标用户与场景
+
+| 角色 | 核心场景 |
+| --- | --- |
+| 招聘方 / 面试官 | 快速了解项目范围、技术栈与交付质量，下载简历 |
+| 同行与合作伙伴 | 查看项目详情、访问线上系统与源码 |
+| 站点维护者 | 新增作品、更新截图与简历，发布至两个域名 |
+
+## 问题定义
+
+| 问题 | 现状 | 目标 |
+| --- | --- | --- |
+| 新增作品成本高 | 每个作品单独编写页面 | 作品由数据派生，详情共用一套渲染 |
+| 双域名部署易出错 | 资源路径写死导致子路径 404 | 路径统一经 `asset()` 拼接，构建时传入 `--base` |
+| 视觉与内容易脱节 | 样式改动影响文案结构 | 新版样式限定在 `.v3` 作用域，旧版分支隔离 |
+| 图片与文案缺少约束 | 截图不统一、文案口语化 | 图片统一转 WebP 并生成尺寸表，文案经规则脚本检查 |
+| 发布后缓存导致旧页面 | 资源清单缓存，JS 未更新 | 导航附加时间戳并禁用 HTTP 缓存 |
+
+## 产品目标与指标
+
+| 目标 | 指标 | 当前结果 |
+| --- | --- | --- |
+| 内容结构统一 | 收录作品 | 10 个，均由同一数据源派生 |
+| 首屏性能可控 | 图片体积 | 由 14.6MB 压缩至 1.9MB |
+| 渲染无回归 | SSR 断言 | 137 + 28 + 43 条通过 |
+| 交互与布局正确 | 真实浏览器冒烟 | 40 条通过，覆盖八个板块与四条内页路由 |
+| 图片可用 | 逐路由图片解码检查 | 251 张全部解码成功 |
+| 文案规范 | 规则检查脚本 | 五类问题零命中 |
+
 ## 工程回退
 
 站点仅保留一套对外界面，导航与页脚不提供旧版入口。`?skin=legacy` 为不对外暴露的隐藏开关：137 条 SSR 冒烟断言与两套历史布局脚本依赖旧版 DOM，保留该分支用于回归测试与紧急回退。
@@ -48,8 +83,8 @@
 | --- | --- | --- | --- |
 | [OpsPilot · AI 事故响应系统](https://opspilot-v2.app.workbuddy.host/?sharecode=RTXXSZUEYF) | Agent 系统 | 2026.09 — 2026.10 | [GitHub](https://github.com/2676136489-png/OpsPilot) |
 | [AI 研究工作台](https://ebed98754f5b4e4abafe591d754aff06.app.workbuddy.host/?sharecode=JJ4JF7TBGM) | Agent 系统 | 2026.09 — 2026.10 | [GitHub](https://github.com/2676136489-png/Personal-agent-development-flow) |
-| [网页设计档案](https://wbapp-4ytxtkm2qyyzpnnfhiiqfg.app.workbuddy.host/?sharecode=GHCD2BBZPY) | 前端开发 | 2026.11 | [GitHub](https://github.com/2676136489-png/prompt_page) |
-| [Lumora · 区块插件库](https://wbapp-v2ojc8qetmpj74ypnddj2s.app.workbuddy.host/?sharecode=32KDFEZKHH) | Web 组件 | 2026.11 | [GitHub](https://github.com/2676136489-png/Lumora-) |
+| [网页设计档案](https://wbapp-4ytxtkm2qyyzpnnfhiiqfg.app.workbuddy.host/?sharecode=GHCD2BBZPY) | 前端开发 | 2026.11 | [GitHub](https://github.com/2676136489-png/web-design-archive) |
+| [Lumora · 区块插件库](https://wbapp-v2ojc8qetmpj74ypnddj2s.app.workbuddy.host/?sharecode=32KDFEZKHH) | Web 组件 | 2026.11 | [GitHub](https://github.com/2676136489-png/Lumora) |
 | [校园圈子](https://www.lucky-campus.top) | Web 应用 | 2026.05 — 2026.08 | [GitHub](https://github.com/2676136489-png/campus) |
 | [五子棋对弈引擎 Gomoku Match](https://gomoku-match.app.workbuddy.host/?sharecode=MJAKMJUVAA) | 算法系统 | 2026.04 — 2026.11 | [GitHub](https://github.com/2676136489-png/Gomoku-match) |
 | iGEM Glass Wiki 插件 | Web 组件 | 2026.07 | [GitHub](https://github.com/2676136489-png/wiki-plugin) |
@@ -164,7 +199,7 @@ scripts/            构建部署、图片处理、验证脚本
   <img src="docs/images/v3-marquee-hover.webp" alt="悬停时单行停止并放大当前作品">
 </p>
 
-## 本地开发
+## 本地开发与发布
 
 ```bash
 npm install
