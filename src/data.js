@@ -1130,7 +1130,7 @@ export const projects = [
     role: '独立开发',
     stack: 'HTML · CSS · 原生 JS · 静态部署',
     site: 'https://wbapp-4ytxtkm2qyyzpnnfhiiqfg.app.workbuddy.host/?sharecode=GHCD2BBZPY',
-    github: 'https://github.com/2676136489-png/prompt_page',
+    github: 'https://github.com/2676136489-png/web-design-archive',
     lede: '索引页将 21 个页面划分为整页、区块、动效、加载四类。三维作品集、玻璃拟态首屏、文字路径与粒子球各自独立成页，各页具备独立的排版与动效。',
     metrics: [
       { value: '21', label: '独立页面' },
@@ -1155,7 +1155,7 @@ export const projects = [
     role: '独立开发',
     stack: 'HTML · CSS · 原生 JS · 静态部署',
     site: 'https://wbapp-v2ojc8qetmpj74ypnddj2s.app.workbuddy.host/?sharecode=32KDFEZKHH',
-    github: 'https://github.com/2676136489-png/Lumora-',
+    github: 'https://github.com/2676136489-png/Lumora',
     lede: '区块按页面区块、界面控件、风格页面三类划分，共 197 个。每个区块均可直接复制源码与提示词；外层提供四套主题，并附一套 Wiki 模板，演示整套区块替换内容后的效果。',
     metrics: [
       { value: '197', label: '可复用区块' },
