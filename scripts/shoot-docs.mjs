@@ -13,7 +13,10 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 const CDP = process.argv[2] || '9333';
-const SITE = 'https://lukeyu-portfolio.app.workbuddy.host';
+/* 默认抓线上主站。本地回归时可传 SITE_BASE / SITE_QS 指向构建产物，
+   SITE_QS 用于带分享码或 ?skin=legacy，追加在 index.html 之后。 */
+const SITE = process.env.SITE_BASE || 'https://lukeyu-portfolio.app.workbuddy.host';
+const QS = process.env.SITE_QS || '';
 const OUT = 'docs/images';
 
 const target = await (
@@ -60,8 +63,14 @@ const shoot = async (name, clip) => {
 };
 
 const goto = async (hash) => {
-  await send('Page.navigate', { url: `${SITE}/index.html${hash}` });
+  await send('Page.navigate', { url: `${SITE}/index.html${QS}${hash}` });
   await wait(2200);
+  /* 本地用 ?skin=legacy 抓图时，工程回退角标不属于对外界面 */
+  await evaluate(`(() => {
+    const badge = document.querySelector('.v3-legacy-badge');
+    if (badge) badge.style.display = 'none';
+    return true;
+  })()`);
 };
 
 /* 站点的主题 key 带版本号，改过视觉后 key 会变。

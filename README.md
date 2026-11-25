@@ -23,9 +23,9 @@
 
 ## 项目背景
 
-个人作品集承担两类职能：向招聘方与合作伙伴说明项目能力，同时作为可长期维护的内容系统。多数作品集依赖模板，结构与样式耦合，新增作品需改动多处代码，图片与文案缺少质量约束。
+个人作品集面向招聘方与合作伙伴，展示项目范围、技术栈与交付质量，同时作为可长期维护的内容系统。
 
-本项目以「内容同源」为原则：十个作品共用一份数据与一套详情渲染，新增作品仅修改 `src/data.js`；视觉层独立重构，结构保持不变。
+内容层遵循单一数据源：十个作品共用一份数据与一套详情渲染，新增作品仅修改 `src/data.js`。视觉层独立重构，结构保持不变。图片统一转换为 WebP 并登记尺寸，文案由规则脚本检查。
 
 ## 目标用户与场景
 
@@ -240,7 +240,7 @@ node scripts/push-main.mjs      # 执行测试后推送 main，失败自动换�
 
 截图源图位于 `media-src/`（PNG），由 `scripts/optimize-images.py` 统一转换为 WebP 并写入 `public/media/`，构建产物不含 PNG。整站图片体积由 14.6MB 降至 1.9MB。
 
-README 配图分两条链路：旧版由 `scripts/shoot-docs.mjs` 抓取界面、`scripts/make-docs-images.py` 压缩为 WebP；重构版由 `scripts/verify-v3.mjs` 在本地预览站抓取 `screenshots/v3-*.png`，再由 `scripts/make-v3-docs-images.py` 压缩至 1600 宽（`docs/images/v3-*.webp`，7 张合计 413KB）。界面变更后需重新执行。
+README 配图分两条链路：旧版由 `scripts/shoot-docs.mjs` 抓取界面、`scripts/make-docs-images.py` 压缩为 WebP；重构版由 `scripts/verify-v3.mjs` 在本地预览站抓取 `screenshots/v3-*.png`，再由 `scripts/make-v3-docs-images.py` 压缩至 1600 宽（`docs/images/v3-*.webp`，7 张合计 371KB）。界面变更后需重新执行。旧版抓图默认取线上主站，本地回归可传 `SITE_BASE` 与 `SITE_QS` 指向构建产物。
 
 作品卡截图使用独立链路：源图为各项目仓库 `docs/` 下的界面截图，以及 `scripts/capture-portfolio-views.mjs` 从线上站点抓取的三个画面，统一存放于 `media-src/captured/`。`scripts/make-gallery-images.py` 压缩至 1400 宽并写入 `public/media/gallery/`（30 张合计 1489KB），同时生成 `src/v3/gallery-sizes.json` 供 `<img>` 设置宽高。
 
@@ -279,7 +279,7 @@ node scripts/verify-v3.mjs         # 重构版真实浏览器冒烟（40 条 + �
 node scripts/audit-images.mjs      # 逐路由滚动，检查图片解码
 ```
 
-前三套为 SSR 冒烟，渲染 legacy 皮肤。`verify-v3.mjs` 通过 CDP 打开默认外观，检查八个板块、十个作品卡与两行反向自动滚动，覆盖三格图源唯一性、新截图 404、按钮对比度、悬停冻结与恢复、sticky 缩放、逐字显影、四条内页路由、详情页封面与图集、390px 移动端、旧版入口隐藏与控制台报错，并产出 README 配图源文件。
+前三套为 SSR 冒烟测试，渲染 legacy 皮肤，共 137 + 28 + 43 条断言。`verify-v3.mjs` 通过 CDP 在真实浏览器中检查八个板块、十个作品卡与两条反向滚动带。断言覆盖三格图源唯一性、截图 404、按钮对比度与悬停冻结恢复。sticky 缩放、逐字显影与四条内页路由同样纳入。详情页封面与图集、390px 移动端、旧版入口隐藏及控制台报错均在检查范围内。脚本另产出 README 配图源文件。
 
 `audit-images.mjs` 覆盖图片路径错误、构建漏拷与 CDN 缺失等 SSR 无法发现的问题。脚本将 14 条路由逐条滚动到底，等待每个 `<img>` 的 `decode()` 完成，并扫描 CSS 背景图。当前 251 张图片全部解码成功。判定加载状态使用 `decode()` 而非 `complete`，后者在流式加载中返回 `false`，会产生误报。
 

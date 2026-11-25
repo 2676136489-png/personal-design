@@ -96,7 +96,6 @@ export function ProjectDetail({ slug }) {
       </div>
       <h1 className="v3-detail-title v3-gradient">{project.title}</h1>
       {project.lede && <p className="v3-detail-lede">{project.lede}</p>}
-      <p className="v3-detail-desc">{project.description}</p>
 
       <figure className="v3-detail-cover">
         <img src={project.image} alt={project.title} {...imgAttrs(project.image)} />

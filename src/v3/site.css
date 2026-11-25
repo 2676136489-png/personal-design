@@ -500,9 +500,10 @@
 .v3-back:hover { color: var(--v3-ink); }
 .v3-detail-top { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
 .v3-detail-cat { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--v3-muted); }
-.v3-detail-title { margin-top: 40px; font-size: clamp(2.4rem, 8vw, 7rem); font-weight: 900; line-height: 1; letter-spacing: -0.04em; }
+/* 提高一级选择器权重：`.v3 h1 { margin: 0 }` 会盖掉这里的 margin-top，
+   标题行盒上溢后压住「← 全部作品」，导致返回链接点不动。 */
+.v3-detail .v3-detail-title { margin-top: 40px; font-size: clamp(2.4rem, 8vw, 7rem); font-weight: 900; line-height: 1; letter-spacing: -0.04em; }
 .v3-detail-lede { margin-top: 26px; font-size: clamp(1.05rem, 2vw, 1.5rem); line-height: 1.65; max-width: 800px; }
-.v3-detail-desc { margin-top: 16px; color: var(--v3-muted); line-height: 1.8; max-width: 800px; }
 .v3-detail-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 44px; }
 .v3-detail-meta > div { padding: 20px; border: 1px solid var(--v3-line); border-radius: 16px; }
 .v3-detail-meta span { display: block; font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--v3-muted); }
