@@ -12,7 +12,7 @@ SRC = ROOT / 'screenshots'
 DST = ROOT / 'docs' / 'images'
 DST.mkdir(parents=True, exist_ok=True)
 
-KEEP = ['v3-hero', 'v3-about', 'v3-capabilities', 'v3-projects', 'v3-detail', 'v3-marquee-hover', 'v3-card-02']
+KEEP = ['v3-hero', 'v3-about', 'v3-capabilities', 'v3-projects', 'v3-detail', 'v3-awards', 'v3-marquee-hover', 'v3-card-02']
 TARGET_W = 1600
 
 for name in KEEP:

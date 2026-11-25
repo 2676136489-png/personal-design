@@ -138,7 +138,7 @@ expect('页面标题正确', dom.title === '卢柯宇 | 个人作品集', dom.ti
 expect('新版根节点存在且背景是 #0C0C0C', dom.hasRoot && dom.bg === 'rgb(12, 12, 12)', dom.bg);
 expect('字体栈以 Kanit 开头', /^['"]?Kanit/.test(dom.font || ''), dom.font);
 expect('渐变大标题用了 background-clip:text', dom.h1Text === 'LUKEYU' && dom.h1Clip === 'text', `${dom.h1Text} / ${dom.h1Clip}`);
-expect('导航 5 个栏目，没有求职状态胶囊', dom.navLinks === 5 && dom.statusLink === 0, `${dom.navLinks}/${dom.statusLink}`);
+expect('导航 6 个栏目，没有求职状态胶囊', dom.navLinks === 6 && dom.statusLink === 0, `${dom.navLinks}/${dom.statusLink}`);
 expect('界面上没有旧版入口', dom.legacyVisible === 0, String(dom.legacyVisible));
 expect('八个板块都在', Object.values(dom.sections).every((n) => n > 0), JSON.stringify(dom.sections));
 expect('首屏数据条 4 项且值来自数据源', JSON.stringify(dom.factValues) === JSON.stringify(['10 个', '9 个', '19 位', '4 类']), dom.factValues.join('/'));
@@ -280,6 +280,20 @@ const goHash = async (hash) => {
 await goHash('#/works');
 const works = await evaluate(`({ tiles: document.querySelectorAll('.v3-tile').length, filters: document.querySelectorAll('.v3-filters button').length, h2: document.querySelector('.v3-title')?.textContent })`);
 expect('全部作品页 10 张卡片 + 方向筛选', works.tiles === 10 && works.filters > 1, JSON.stringify(works));
+
+await goHash('#/awards');
+const awardsPage = await evaluate(`(() => {
+  const imgs = [...document.querySelectorAll('.v3-awards img')];
+  return {
+    h1: document.querySelector('.v3-awards-title')?.textContent,
+    honors: document.querySelectorAll('.v3-awards-honor').length,
+    activities: document.querySelectorAll('.v3-awards-activities li').length,
+    igemLink: [...document.querySelectorAll('.v3-awards-links a')].some((a) => a.href.includes('2026.igem.wiki/jlu-fbh')),
+    broken: imgs.filter((im) => im.complete && im.naturalWidth === 0).length,
+    overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  };
+})()`);
+expect('竞赛与活动页渲染金牌、证书与活动', awardsPage.h1 === '竞赛与活动' && awardsPage.honors === 5 && awardsPage.activities === 3 && awardsPage.igemLink && !awardsPage.broken && !awardsPage.overflow, JSON.stringify(awardsPage));
 
 await goHash('#/resume');
 const fullResume = await evaluate(`({ sections: document.querySelectorAll('.v3-fr-section').length, projects: document.querySelectorAll('.v3-fr-project').length, pdf: !!document.querySelector('.v3-fr-preview'), text: document.body.innerText.includes('256 项 pytest') })`);

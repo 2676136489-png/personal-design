@@ -39,6 +39,13 @@ export const IMAGE_SIZES = {
   '/media/project-wiki-v2.webp': [1400, 933],
   '/media/resume/resume-900.webp': [900, 1274],
   '/media/resume/resume.webp': [1588, 2248],
+  '/media/awards/igem-gold.webp': [1080, 659],
+  '/media/awards/math-modeling.webp': [1400, 989],
+  '/media/awards/social-work-2026.webp': [760, 1094],
+  '/media/awards/scholarship-3rd-2026.webp': [760, 1073],
+  '/media/awards/student-leader-2026.webp': [760, 1076],
+  '/media/awards/student-leader-2025.webp': [760, 1075],
+  '/media/awards/scholarship-3rd-2025.webp': [760, 1075],
 };
 
 /* 传给 <img> 的 width/height；查不到就什么都不给，宁可缺也不要写错的比例。 */
@@ -87,6 +94,93 @@ export const heroFacts = [
   { label: '校园圈子用户', value: '19 位' },
   { label: '自动化测试', value: '4 类' },
 ];
+
+/* 竞赛与活动页：证书内容逐字取自「活动和获奖情况」里的 PDF，
+   iGEM 一条取自 JLU-FBH 官方 Wiki 与吉大一院报道。 */
+export const awards = {
+  igem: {
+    year: '2026',
+    title: 'iGEM 全球总决赛金牌',
+    team: 'JLU-FBH',
+    project: 'CirCure',
+    role: '团队成员，来自计算机科学与技术学院',
+    summary: '围绕三阴性乳腺癌复发问题，团队完成多表位环状 RNA 疫苗平台的计算筛选、实验验证与科普活动。',
+    image: asset('/media/awards/igem-gold.webp'),
+    imageCaption: '2026 GRAND JAMBOREE 金牌图',
+    links: [
+      { label: 'iGEM 官方项目站', href: 'https://2026.igem.wiki/jlu-fbh/' },
+      {
+        label: '吉大一院报道',
+        href: 'https://mp.weixin.qq.com/s?__biz=MzA5OTQ4NjAwOA==&mid=2653218940&idx=1&sn=799db3f22dd9bb3524eb5f5e4739c2b9',
+      },
+      { label: '吉林大学新闻中心', href: 'https://news.jlu.edu.cn/info/1211/62308.htm' },
+    ],
+  },
+  competitions: [
+    {
+      title: '2025 年高教社杯全国大学生数学建模竞赛',
+      award: '吉林赛区三等奖',
+      period: '2025.11',
+      detail: '本科组 · 队员：杜金桥、卢柯宇、张恩宁',
+      image: asset('/media/awards/math-modeling.webp'),
+      caption: '全国大学生数学建模竞赛获奖证书',
+    },
+  ],
+  honors: [
+    {
+      title: '校优秀学生干部',
+      period: '2025—2026 学年',
+      detail: '证书编号 2607210017',
+      image: asset('/media/awards/student-leader-2026.webp'),
+      caption: '2025—2026 学年校优秀学生干部证书',
+    },
+    {
+      title: '三等奖学金',
+      period: '2025—2026 学年',
+      detail: '证书编号 2603210090',
+      image: asset('/media/awards/scholarship-3rd-2026.webp'),
+      caption: '2025—2026 学年三等奖学金证书',
+    },
+    {
+      title: '社会工作奖',
+      period: '2025—2026 学年',
+      detail: '证书编号 2612210013',
+      image: asset('/media/awards/social-work-2026.webp'),
+      caption: '2025—2026 学年社会工作奖证书',
+    },
+    {
+      title: '校优秀学生干部',
+      period: '2024—2025 学年',
+      detail: '证书编号 2507210038',
+      image: asset('/media/awards/student-leader-2025.webp'),
+      caption: '2024—2025 学年校优秀学生干部证书',
+    },
+    {
+      title: '三等奖学金',
+      period: '2024—2025 学年',
+      detail: '证书编号 2503210159',
+      image: asset('/media/awards/scholarship-3rd-2025.webp'),
+      caption: '2024—2025 学年三等奖学金证书',
+    },
+  ],
+  activities: [
+    {
+      year: '2026.05',
+      title: 'iGEM 东北地区交流会',
+      text: 'JLU-FBH 与 JLU-CP 联合承办，11 支队伍参加。',
+    },
+    {
+      year: '2026',
+      title: '合成生物学课堂',
+      text: '走进吉大附中与附小，做 DNA 提取和免疫科普活动。',
+    },
+    {
+      year: '2026',
+      title: '杏花节公益科普',
+      text: '在校园杏花节设乳腺健康咨询与知识问答。',
+    },
+  ],
+};
 
 /* 简历页数据：与 简历制作/01_母版/卢柯宇_简历_母版.md 逐条对齐。
    改简历时这里要同步改，否则线上简历页会和 PDF 对不上。 */

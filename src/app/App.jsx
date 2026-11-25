@@ -30,6 +30,7 @@ import Works from '../pages/Works.tsx';
 import Campus from '../pages/Campus.tsx';
 import About from '../pages/About.tsx';
 import Skills from '../pages/Skills.tsx';
+import Awards from '../pages/Awards.tsx';
 import Contact from '../pages/Contact.tsx';
 import NotFound from '../pages/NotFound.tsx';
 import { CategoryPage, ProjectPage, ResumePage } from '../pages/DetailPages.jsx';
@@ -140,6 +141,7 @@ function AnimatedRoutes() {
         <Route path="/campus-circle" element={<Campus />} />
         <Route path="/about" element={<About />} />
         <Route path="/skills" element={<Skills />} />
+        <Route path="/awards" element={<Awards />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/resume" element={<ResumePage />} />
         <Route path="/category/:slug" element={<CategoryRoute />} />

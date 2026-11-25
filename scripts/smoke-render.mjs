@@ -58,6 +58,7 @@ try {
     ['/campus-circle', campus.name],
     ['/about', profile.name],
     ['/skills', '能力'],
+    ['/awards', '竞赛与活动'],
     ['/contact', '聊聊？'],
     ['/resume', '我的简历'],
   ];
@@ -79,10 +80,11 @@ try {
     ['/campus-circle', '校园圈子'],
     ['/about', '关于'],
     ['/skills', '能力'],
+    ['/awards', '竞赛与活动'],
     ['/contact', '联系'],
     ['/resume', '简历'],
   ];
-  expect('导航 7 个条目都在', NAV.every(([, label]) => home.includes(`>${label}<`)));
+  expect('导航 8 个条目都在', NAV.every(([, label]) => home.includes(`>${label}<`)));
   expect('导航链接指向新路由', NAV.every(([to]) => home.includes(`href="${to}"`)));
   expect('页脚有邮箱', home.includes(`mailto:${profile.email}`));
   expect('页脚有 GitHub', home.includes('github.com/2676136489-png'));
@@ -142,6 +144,19 @@ try {
   const skills = html['/skills'];
   expect('能力页四个模块都在', data.capabilities.every((c) => skills.includes(c.title)));
   expect('能力页列了成绩', data.achievements.every((a) => skills.includes(a.title)));
+
+  /* ============ 竞赛与活动 ============ */
+  const awardsHtml = bodyOf(html['/awards']);
+  const { awards } = data;
+  expect('竞赛页有 iGEM 金牌与队伍名',
+    awardsHtml.includes(awards.igem.title) && awardsHtml.includes(awards.igem.team));
+  /* SSR 会把 href 里的 & 转义成 &amp;，直接比原始 URL 会误报 */
+  expect('竞赛页链到 iGEM 官方项目站',
+    awards.igem.links.every((l) => awardsHtml.includes(l.href.replaceAll('&', '&amp;'))));
+  expect('竞赛页渲染全部校内荣誉',
+    awards.honors.every((h) => awardsHtml.includes(h.title) && awardsHtml.includes(h.detail)));
+  expect('竞赛页渲染全部团队活动',
+    awards.activities.every((a) => awardsHtml.includes(a.title) && awardsHtml.includes(a.text)));
 
   const contact = html['/contact'];
   expect('联系页有邮箱与电话', contact.includes(profile.email) && contact.includes(profile.phone));

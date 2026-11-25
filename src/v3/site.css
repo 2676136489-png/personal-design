@@ -596,6 +596,44 @@
 .v3-fr-project ul { margin-top: 12px; }
 .v3-fr-preview { width: 100%; max-width: 620px; margin: 22px auto 0; border-radius: 14px; border: 1px solid var(--v3-line); }
 
+/* ---------- 竞赛与活动 ---------- */
+.v3-awards { max-width: 1100px; margin: 0 auto; padding: 120px clamp(20px, 4vw, 40px) 120px; }
+.v3-awards-title { margin-top: 40px; font-size: clamp(2.4rem, 8vw, 6rem); font-weight: 900; line-height: 1; letter-spacing: -0.04em; }
+.v3-awards .v3-section-lede { margin-top: 24px; max-width: 720px; }
+.v3-awards-section { margin-top: 76px; }
+.v3-awards-section-head { margin-bottom: 28px; padding-bottom: 14px; border-bottom: 1px solid var(--v3-line); }
+.v3-awards-kicker { display: block; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(215, 226, 234, 0.42); }
+.v3-awards-section-head h2 { margin-top: 8px; font-size: clamp(1.4rem, 3vw, 2.2rem); }
+.v3-awards-feature, .v3-awards-cert { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
+.v3-awards-cert { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); align-items: center; }
+.v3-awards-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.v3-awards-tags span { padding: 5px 12px; border: 1px solid var(--v3-line); border-radius: 999px; font-size: 0.78rem; color: var(--v3-muted); }
+.v3-awards-tag--warm { color: #d2a06f; border-color: #d2a06f; }
+.v3-awards-copy h3 { margin-top: 10px; font-size: clamp(1.25rem, 2.5vw, 1.9rem); line-height: 1.35; }
+.v3-awards-highlight { margin-top: 16px; font-size: 1.05rem; }
+.v3-awards-muted { margin-top: 8px; font-size: 0.84rem; color: var(--v3-muted); }
+.v3-awards-summary { margin-top: 18px; font-size: 0.92rem; line-height: 1.85; color: var(--v3-muted); }
+.v3-awards-award { margin-top: 18px; color: #bbccd7; font-weight: 600; }
+.v3-awards-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.v3-awards-links a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border: 1px solid var(--v3-line); border-radius: 999px; font-size: 0.82rem; transition: border-color 0.25s ease; }
+.v3-awards-links a:hover { border-color: var(--v3-ink); }
+.v3-awards-figure { padding: 10px; border: 1px solid var(--v3-line); border-radius: 20px; background: rgba(215, 226, 234, 0.04); }
+.v3-awards-figure img { width: 100%; border-radius: 12px; }
+.v3-awards-figure figcaption { padding: 10px 4px 2px; font-size: 0.76rem; color: var(--v3-muted); }
+.v3-awards-honor-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.v3-awards-honor { display: flex; flex-direction: column; padding: 12px; border: 1px solid var(--v3-line); border-radius: 20px; }
+.v3-awards-honor img { width: 100%; height: 320px; object-fit: contain; background: #fff; border-radius: 12px; }
+.v3-awards-honor div { display: flex; flex-direction: column; gap: 6px; padding: 14px 4px 4px; }
+.v3-awards-honor h3 { font-size: 0.98rem; }
+.v3-awards-honor p { font-size: 0.78rem; color: var(--v3-muted); }
+.v3-awards-activities li { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 20px; padding: 20px 0; border-top: 1px solid var(--v3-line); }
+.v3-awards-activities li:last-child { border-bottom: 1px solid var(--v3-line); }
+.v3-awards-activities span { font-size: 0.8rem; color: var(--v3-muted); font-variant-numeric: tabular-nums; }
+.v3-awards-activities h3 { font-size: 1rem; }
+.v3-awards-activities p { margin-top: 8px; font-size: 0.86rem; line-height: 1.7; color: var(--v3-muted); }
+.v3-awards-note { margin-top: 28px; font-size: 0.82rem; color: var(--v3-muted); }
+.v3-awards-note a { margin: 0 3px; color: #bbccd7; text-decoration: underline; text-underline-offset: 3px; }
+
 /* ---------- 响应式 ---------- */
 @media (min-width: 640px) {
   .v3-light { border-radius: 50px 50px 0 0; }
@@ -644,6 +682,10 @@
   .v3-footer-grid { grid-template-columns: 1fr; gap: 32px; }
   .v3-fr-edu { grid-template-columns: 1fr; }
   .v3-fr-edu-meta { flex-direction: row; align-items: baseline; text-align: left; gap: 12px; }
+  .v3-awards { padding-top: 96px; }
+  .v3-awards-feature, .v3-awards-cert, .v3-awards-honor-grid { grid-template-columns: 1fr; }
+  .v3-awards-honor img { height: 300px; }
+  .v3-awards-activities li { grid-template-columns: 1fr; gap: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .v3 * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }

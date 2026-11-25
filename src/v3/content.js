@@ -10,13 +10,14 @@ import {
   resume,
   capabilities,
   achievements,
+  awards,
   timeline,
   media,
   asset,
   imgAttrs,
 } from '../data.js';
 
-export { categories, profile, heroFacts, resume, capabilities, achievements, timeline, media, imgAttrs };
+export { categories, profile, heroFacts, resume, capabilities, achievements, awards, timeline, media, imgAttrs };
 
 export const HERO_AVATAR = asset('/media/avatar-memoji-v2.webp');
 
@@ -66,6 +67,7 @@ export const NAV_ITEMS = [
   { label: '作品', href: '#/works' },
   { label: '能力', href: '#/skills' },
   { label: '关于', href: '#/about' },
+  { label: '竞赛与活动', href: '#/awards' },
   { label: '简历', href: '#/resume' },
   { label: '联系', href: '#/contact' },
 ];
@@ -78,6 +80,7 @@ export function parseRoute(hash) {
   if (path === '/' || path === '') return { kind: 'home' };
   if (path === '/works') return { kind: 'works' };
   if (path === '/resume') return { kind: 'resume' };
+  if (path === '/awards') return { kind: 'awards' };
   if (path === '/campus-circle') return { kind: 'detail', slug: 'campus' };
   if (path.startsWith('/category/')) return { kind: 'category', slug: path.slice(10) };
   const anchor = path.slice(1);

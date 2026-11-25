@@ -3733,3 +3733,207 @@ section {
     background: var(--page);
   }
 }
+
+/* ============================================================
+   竞赛与活动页
+   证书是竖图，卡片里用 contain 完整展示；hover 只改边框。
+   ============================================================ */
+
+.awards-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.awards-tag {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.awards-tag--warm {
+  color: var(--accent-warm);
+  border-color: var(--accent-warm);
+}
+
+.awards-role,
+.awards-award {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.awards-award {
+  color: var(--accent-2);
+  font-weight: 600;
+}
+
+.awards-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.awards-feature {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(28px, 5vw, 72px);
+  align-items: start;
+  margin-top: 28px;
+}
+
+.awards-figure-btn {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-ds);
+  background: var(--panel-col-hover);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: zoom-in;
+  transition: border-color 0.3s var(--ease);
+}
+
+.awards-figure-btn:hover {
+  border-color: var(--line-strong);
+}
+
+.awards-figure-btn img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.awards-figure-caption {
+  display: block;
+  padding: 10px 4px 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.awards-figure-btn--paper img {
+  background: #fff;
+  object-fit: contain;
+}
+
+.awards-cert {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(28px, 5vw, 64px);
+  align-items: center;
+  margin-top: 28px;
+}
+
+.awards-honor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.awards-honor-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-ds);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: zoom-in;
+  transition: border-color 0.3s var(--ease);
+}
+
+.awards-honor-card:hover {
+  border-color: var(--line-strong);
+}
+
+.awards-honor-card img {
+  display: block;
+  width: 100%;
+  height: 320px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.awards-honor-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 4px 4px;
+}
+
+.awards-honor-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.awards-honor-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.awards-activity-list {
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.awards-activity-list li {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 20px;
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+}
+
+.awards-activity-list li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.awards-activity-year {
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.awards-inline-link {
+  margin: 0 3px;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .awards-feature,
+  .awards-cert {
+    grid-template-columns: 1fr;
+  }
+
+  .awards-feature .awards-figure-btn,
+  .awards-cert .awards-figure-btn {
+    max-width: 620px;
+  }
+}
+
+@media (max-width: 600px) {
+  .awards-honor-card img {
+    height: 300px;
+  }
+
+  .awards-activity-list li {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

@@ -599,6 +599,7 @@ export function Contact() {
           <p className="v3-footer-heading">更多</p>
           <a href="#/about">关于</a>
           <a href="#/skills">能力</a>
+          <a href="#/awards">竞赛与活动</a>
           <a href="#/resume">在线简历</a>
           <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
           <a href="https://github.com/2676136489-png/personal-design" target="_blank" rel="noreferrer">本站源码</a>

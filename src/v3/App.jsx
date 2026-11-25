@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { parseRoute, profile, PROJECT_BY_SLUG, categories } from './content.js';
 import { Landing, SiteNav } from './sections.jsx';
 import { FullResume, ProjectDetail, Works } from './Detail.jsx';
+import AwardsPage from './Awards.jsx';
 
 const TITLE_BASE = `卢柯宇 | 个人作品集`;
 const ANCHOR_TITLES = { about: '关于', skills: '能力', contact: '联系' };
@@ -33,6 +34,8 @@ export default function App() {
     let title = TITLE_BASE;
     if (route.kind === 'works') {
       title = `全部作品 | ${profile.name}`;
+    } else if (route.kind === 'awards') {
+      title = `竞赛与活动 | ${profile.name}`;
     } else if (route.kind === 'resume') {
       title = `简历 | ${profile.name}`;
     } else if (route.kind === 'detail') {
@@ -74,6 +77,8 @@ export default function App() {
         return <Works categorySlug={route.slug} />;
       case 'resume':
         return <FullResume />;
+      case 'awards':
+        return <AwardsPage />;
       default:
         return <Landing />;
     }

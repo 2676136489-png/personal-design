@@ -11,10 +11,11 @@ import { profile } from '../data.js';
 
 const NAV = [
   { to: '/', label: '首页', match: (p) => p === '/' },
-  { to: '/works', label: '作品', match: (p) => p === '/works' || p.startsWith('/category') || (!['/campus-circle', '/about', '/skills', '/contact', '/resume'].includes(p) && p !== '/') },
+  { to: '/works', label: '作品', match: (p) => p === '/works' || p.startsWith('/category') || (!['/campus-circle', '/about', '/skills', '/awards', '/contact', '/resume'].includes(p) && p !== '/') },
   { to: '/campus-circle', label: '校园圈子', match: (p) => p === '/campus-circle' },
   { to: '/about', label: '关于', match: (p) => p === '/about' },
   { to: '/skills', label: '能力', match: (p) => p === '/skills' },
+  { to: '/awards', label: '竞赛与活动', match: (p) => p === '/awards' },
   { to: '/contact', label: '联系', match: (p) => p === '/contact' },
 ];
 
