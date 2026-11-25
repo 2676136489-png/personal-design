@@ -294,6 +294,7 @@ const awardsPage = await evaluate(`(() => {
   };
 })()`);
 expect('竞赛与活动页渲染金牌、证书与活动', awardsPage.h1 === '竞赛与活动' && awardsPage.honors === 5 && awardsPage.activities === 3 && awardsPage.igemLink && !awardsPage.broken && !awardsPage.overflow, JSON.stringify(awardsPage));
+await shot('awards');
 
 await goHash('#/resume');
 const fullResume = await evaluate(`({ sections: document.querySelectorAll('.v3-fr-section').length, projects: document.querySelectorAll('.v3-fr-project').length, pdf: !!document.querySelector('.v3-fr-preview'), text: document.body.innerText.includes('256 项 pytest') })`);
